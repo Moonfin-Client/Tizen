@@ -1,0 +1,158 @@
+/* Update Modal Styles */
+.update-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.update-modal-content {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 800px;
+    width: 80%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.update-modal-title {
+    font-size: 36px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+.update-modal-version {
+    font-size: 24px;
+    color: #e0e0e0;
+    text-align: center;
+    margin: 0 0 30px 0;
+    line-height: 1.5;
+}
+
+.update-modal-current {
+    font-size: 20px;
+    color: #999;
+}
+
+.update-modal-notes {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 0 0 30px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.update-modal-notes::-webkit-scrollbar {
+    width: 8px;
+}
+
+.update-modal-notes::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.update-modal-notes::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.update-modal-notes::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.update-modal-notes strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.update-modal-notes em {
+    color: #bbb;
+    font-style: italic;
+}
+
+.update-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.update-modal-button {
+    background: linear-gradient(135deg, #00a4dc 0%, #008bb8 100%);
+    color: #ffffff;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 12px 40px;
+    font-size: 22px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.update-modal-button:hover,
+.update-modal-button:focus,
+.update-modal-button-focused {
+    background: linear-gradient(135deg, #00b8f0 0%, #009fd0 100%);
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(0, 164, 220, 0.5);
+    transform: scale(1.05);
+}
+
+.update-modal-button:active {
+    transform: scale(0.98);
+}
+
+/* Accessibility */
+.update-modal[aria-modal="true"] {
+    outline: none;
+}
+
+/* Animation for TV focus ring */
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(0, 164, 220, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(0, 164, 220, 0.8);
+    }
+}
+
+.update-modal-button:focus {
+    animation: pulseGlow 2s ease-in-out infinite;
+}

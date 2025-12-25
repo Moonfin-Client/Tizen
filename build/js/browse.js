@@ -2892,6 +2892,11 @@ console.log('[BROWSE] BrowseController defined, adding load listener');
 window.addEventListener('load', function() {
     console.log('[BROWSE] Window load event fired, calling init');
     BrowseController.init();
+    
+    // Initialize version checker after page loads
+    if (typeof VersionChecker !== 'undefined') {
+        VersionChecker.init();
+    }
 });
 
 window.addEventListener('visibilitychange', function() {

@@ -11,16 +11,44 @@
             if (!logDiv) {
                 logDiv = document.createElement('div');
                 logDiv.id = 'screenLog';
-                logDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;font-family:monospace;font-size:14px;padding:10px;z-index:999999;max-height:50%;overflow-y:auto;white-space:pre-wrap;';
-                document.body ? document.body.appendChild(logDiv) : document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(logDiv); });
+                logDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#000;color:#0f0;font-family:monospace;font-size:24px;padding:20px;z-index:999999;overflow-y:auto;white-space:pre-wrap;';
+                if (document.body) {
+                    document.body.innerHTML = '';
+                    document.body.appendChild(logDiv);
+                }
             }
-            logDiv.innerHTML += msg + '<br>';
+            logDiv.innerHTML += msg + '\n';
         };
         window.onerror = function(msg, url, line) {
             window.logToScreen('ERROR: ' + msg + ' at line ' + line);
             return false;
         };
-        window.logToScreen('Page starting...');
+        document.addEventListener('DOMContentLoaded', function() {
+            var logDiv = document.createElement('div');
+            logDiv.id = 'screenLog';
+            logDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#000;color:#0f0;font-family:monospace;font-size:24px;padding:20px;z-index:999999;overflow-y:auto;white-space:pre-wrap;';
+            document.body.innerHTML = '';
+            document.body.appendChild(logDiv);
+            window.logToScreen('=== DISCOVER PAGE DEBUG ===');
+            window.logToScreen('DOM is ready');
+            window.logToScreen('storage: ' + (typeof storage));
+            window.logToScreen('JellyfinAPI: ' + (typeof JellyfinAPI));
+            window.logToScreen('JellyseerrAPI: ' + (typeof JellyseerrAPI));
+            window.logToScreen('DiscoverController: ' + (typeof DiscoverController));
+            if (typeof storage !== 'undefined') {
+                var settings = storage.get('jellyfin_settings');
+                window.logToScreen('settings: ' + (settings ? 'found' : 'null'));
+                if (settings) {
+                    try {
+                        var p = JSON.parse(settings);
+                        window.logToScreen('jellyseerrUrl: ' + (p.jellyseerrUrl || 'NOT SET'));
+                        window.logToScreen('jellyseerrApiKey: ' + (p.jellyseerrApiKey ? 'SET (' + p.jellyseerrApiKey.length + ' chars)' : 'NOT SET'));
+                    } catch(e) {
+                        window.logToScreen('settings parse error: ' + e);
+                    }
+                }
+            }
+        });
     </script>
     <style>
         #debugPanel {
