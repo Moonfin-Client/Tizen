@@ -2100,7 +2100,16 @@ var SettingsController = (function() {
                 saveSettings();
                 updateSettingValues();
                 
-                // Also save to Jellyseerr user settings for the API to use
+                // Save to JellyseerrPreferences (per-user storage)
+                if (typeof JellyseerrPreferences !== 'undefined') {
+                    JellyseerrPreferences.set('apiKey', newApiKey);
+                    // Set auth method to API key when using manual API key entry
+                    if (newApiKey) {
+                        JellyseerrPreferences.set('authMethod', 'jellyfin-apikey');
+                    }
+                }
+                
+                // Also update the API client directly
                 if (typeof JellyseerrAPI !== 'undefined') {
                     JellyseerrAPI.setApiKey(newApiKey);
                 }

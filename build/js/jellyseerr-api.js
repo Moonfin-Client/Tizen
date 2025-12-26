@@ -1250,11 +1250,12 @@ var JellyseerrAPI = (function() {
             var auth = JellyfinAPI.getStoredAuth();
             var userId = auth && auth.userId ? auth.userId : null;
             
-            // Get stored API key if available
-            var apiKey = storage.getJellyseerrSetting('apiKey', null);
+            // Get stored API key from preferences (per-user storage)
+            var storedApiKey = JellyseerrPreferences.get('apiKey', userId);
+            Logger.debug('Retrieved API key from preferences:', storedApiKey ? ('present(' + storedApiKey.length + ')') : 'missing');
             
             // Initialize
-            return this.initialize(serverUrl, apiKey, userId)
+            return this.initialize(serverUrl, storedApiKey, userId)
                 .then(function() {
                     Logger.success('Jellyseerr initialized successfully from preferences');
                     
