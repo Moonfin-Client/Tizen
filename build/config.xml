@@ -14,6 +14,6 @@
     <tizen:privilege name="http://tizen.org/privilege/network.public"/>
     <tizen:privilege name="http://tizen.org/privilege/internet"/>
     <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
-    <tizen:profile name="tizen"/>
+    <tizen:profile name="tv"/>
     <tizen:setting screen-orientation="landscape" context-menu="enable" background-support="enable" encryption="disable" install-location="auto" hwkey-event="enable"/>
 </widget>
