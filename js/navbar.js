@@ -312,8 +312,14 @@
         var clockElement = document.getElementById('navClock');
         if (!clockElement) return;
         
-        var settings = storage.get('jellyfin_settings');
-        var use24Hour = settings && JSON.parse(settings).clockDisplay === '24-hour';
+        var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+        var use24Hour = false;
+        if (settingsStr) {
+            try {
+                var settings = JSON.parse(settingsStr);
+                use24Hour = settings.clockDisplay === '24-hour';
+            } catch (e) {}
+        }
         
         var now = new Date();
         var hours = now.getHours();

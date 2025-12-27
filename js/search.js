@@ -86,7 +86,65 @@ var SearchController = (function() {
      * @private
      */
     function initializeJellyseerr() {
-        // Try initializeFromPreferences first (for existing auth)
+        // Check if running on Tizen - use API key auth
+        if (typeof tizen !== 'undefined') {
+            console.log('[Search] Tizen detected - checking for API key auth...');
+            var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+            console.log('[Search] Settings string:', settingsStr);
+            var settings = null;
+            var hasApiKey = false;
+            var hasUrl = false;
+            
+            if (settingsStr) {
+                try {
+                    settings = JSON.parse(settingsStr);
+                    console.log('[Search] Settings - jellyseerrApiKey:', settings.jellyseerrApiKey ? 'SET' : 'NOT SET');
+                    console.log('[Search] Settings - jellyseerrUrl:', settings.jellyseerrUrl || 'NOT SET');
+                    hasApiKey = settings.jellyseerrApiKey && settings.jellyseerrApiKey.length > 0;
+                    hasUrl = settings.jellyseerrUrl && settings.jellyseerrUrl.length > 0;
+                } catch (e) {
+                    console.log('[Search] Error parsing settings:', e);
+                }
+            }
+            
+            if (!hasApiKey || !hasUrl) {
+                console.log('[Search] No Jellyseerr configuration found');
+                jellyseerrEnabled = false;
+                return Promise.resolve(false);
+            }
+            
+            // On Tizen with API key, initialize directly
+            console.log('[Search] Tizen with API key - initializing directly...');
+            
+            var jellyseerrUrl = settings.jellyseerrUrl;
+            var jellyseerrApiKey = settings.jellyseerrApiKey;
+            
+            console.log('[Search] Jellyseerr URL:', jellyseerrUrl);
+            console.log('[Search] API Key length:', jellyseerrApiKey ? jellyseerrApiKey.length : 0);
+            
+            // Get user ID
+            var auth = JellyfinAPI.getStoredAuth();
+            var userId = auth ? auth.userId : null;
+            
+            // Set API key first
+            JellyseerrAPI.setApiKey(jellyseerrApiKey);
+            
+            // Initialize with URL
+            return JellyseerrAPI.initialize(jellyseerrUrl, jellyseerrApiKey, userId)
+                .then(function() {
+                    console.log('[Search] JellyseerrAPI.initialize() succeeded');
+                    console.log('[Search] isInitialized:', JellyseerrAPI.isInitialized());
+                    jellyseerrEnabled = true;
+                    return true;
+                })
+                .catch(function(error) {
+                    console.error('[Search] Error during initialization:', error);
+                    jellyseerrEnabled = false;
+                    return false;
+                });
+        }
+        
+        // Non-Tizen: Try initializeFromPreferences first (for existing auth)
         return JellyseerrAPI.initializeFromPreferences()
             .then(function(success) {
                 if (success) {
@@ -98,14 +156,14 @@ var SearchController = (function() {
                 // If initializeFromPreferences returns false, it means no auth yet
                 // But we still need to initialize the API with the server URL for searches to work
                 console.log('[Search] initializeFromPreferences returned false, trying direct initialization');
-                var settings = storage.get('jellyfin_settings');
-                if (!settings) {
+                var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+                if (!settingsStr) {
                     jellyseerrEnabled = false;
                     return false;
                 }
                 
                 try {
-                    var parsedSettings = JSON.parse(settings);
+                    var parsedSettings = JSON.parse(settingsStr);
                     if (!parsedSettings.jellyseerrUrl) {
                         jellyseerrEnabled = false;
                         return false;

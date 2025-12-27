@@ -1,0 +1,30 @@
+{
+  "esversion": 6,
+  "browser": true,
+  "globals": {
+    "storage": false,
+    "JellyfinAPI": false,
+    "MultiServerManager": false,
+    "KeyCodes": false,
+    "ConnectionPool": false,
+    "JellyseerrAPI": false,
+    "JellyseerrPreferences": false,
+    "ImageHelper": false,
+    "ajax": false,
+    "Logger": false,
+    "TizenAdapter": false,
+    "shaka": false
+  },
+  "undef": true,
+  "unused": false,
+  "curly": false,
+  "eqeqeq": false,
+  "freeze": true,
+  "futurehostile": true,
+  "latedef": false,
+  "nocomma": false,
+  "nonbsp": true,
+  "nonew": false,
+  "plusplus": false,
+  "strict": false
+}

@@ -324,7 +324,13 @@ var LoginController = (function() {
         }
         
         // Check for auto-login setting
-        var settings = storage.get('jellyfin_settings');
+        var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+        var settings = null;
+        if (settingsStr) {
+            try {
+                settings = JSON.parse(settingsStr);
+            } catch (e) {}
+        }
         if (settings && settings.autoLogin) {
             var lastLogin = storage.get('last_login');
             if (lastLogin && lastLogin.serverAddress && lastLogin.username) {
@@ -759,34 +765,64 @@ var LoginController = (function() {
             elements.serverUrlInput.value = normalizedUrl;
             tryConnect(normalizedUrl);
         } else {
-            // Try multiple ports: 443 (HTTPS) first, then 8096 (HTTP)
-            var baseUrl = hasProtocol ? serverUrl : serverUrl;
-            var urlsToTry = [
-                'https://' + baseUrl.replace(/^https?:\/\//i, '') + ':443',
-                'http://' + baseUrl.replace(/^https?:\/\//i, '') + ':8096'
-            ];
+            // Try multiple ports and protocols
+            var baseUrl = serverUrl.replace(/^https?:\/\//i, '');
+            var urlsToTry = [];
             
+            if (hasProtocol) {
+                // User specified protocol, try both default and common ports
+                if (serverUrl.toLowerCase().startsWith('https://')) {
+                    urlsToTry = [
+                        'https://' + baseUrl,           // HTTPS default (443)
+                        'https://' + baseUrl + ':8920'  // HTTPS alternate
+                    ];
+                } else {
+                    urlsToTry = [
+                        'http://' + baseUrl,            // HTTP default (80)
+                        'http://' + baseUrl + ':8096'   // Standard Jellyfin
+                    ];
+                }
+            } else {
+                // No protocol specified, try all common combinations
+                urlsToTry = [
+                    'http://' + baseUrl + ':8096',      // Standard Jellyfin HTTP (try first!)
+                    'https://' + baseUrl,               // HTTPS default (443)
+                    'http://' + baseUrl                 // HTTP default (80)
+                ];
+            }
+            
+            showStatus('Testing connection (trying ' + urlsToTry.length + ' configurations)...', 'info');
             tryMultiplePorts(urlsToTry, 0);
         }
         
         function tryMultiplePorts(urls, index) {
+            console.log('[tryMultiplePorts] index:', index, 'of', urls.length);
             if (index >= urls.length) {
+                console.log('[tryMultiplePorts] All URLs exhausted, showing error');
                 if (elements.connectBtn) {
                     elements.connectBtn.disabled = false;
                     elements.connectBtn.textContent = 'Connect';
                 }
-                showError('Unable to connect to server on ports 443 or 8096. Check the address and try again.');
+                showError('Unable to connect to server. Tried ' + urls.length + ' configurations. Check the address or specify a port (e.g., http://192.168.1.1:8096)');
                 return;
             }
             
             var currentUrl = urls[index];
+            console.log('[tryMultiplePorts] Testing URL:', currentUrl);
+            var triesRemaining = urls.length - index - 1;
+            if (triesRemaining > 0) {
+                showStatus('Testing ' + currentUrl + ' (' + triesRemaining + ' more to try)...', 'info');
+            }
             
             JellyfinAPI.testServer(currentUrl, function(err, serverInfo) {
+                console.log('[tryMultiplePorts] Callback received - err:', err, 'serverInfo:', serverInfo);
                 if (err) {
+                    console.log('[tryMultiplePorts] Error, trying next URL');
                     // Try next port
                     tryMultiplePorts(urls, index + 1);
                 } else {
                     // Success!
+                    console.log('[tryMultiplePorts] SUCCESS! Server found:', serverInfo.name);
                     if (elements.connectBtn) {
                         elements.connectBtn.disabled = false;
                         elements.connectBtn.textContent = 'Connect';
@@ -797,6 +833,7 @@ var LoginController = (function() {
                     connectedServer = serverInfo;
                     
                     // Store the server info for returning after logout
+                    console.log('[tryMultiplePorts] Storing server info...');
                     storage.set('last_server', {
                         name: serverInfo.name,
                         address: serverInfo.address,
@@ -804,7 +841,9 @@ var LoginController = (function() {
                         version: serverInfo.version
                     }, true);
                     
+                    console.log('[tryMultiplePorts] Calling loadPublicUsers...');
                     loadPublicUsers(serverInfo.address);
+                    console.log('[tryMultiplePorts] loadPublicUsers called');
                 }
             });
         }

@@ -44,10 +44,13 @@ function AJAX() {}
  * @returns {XMLHttpRequest} The XMLHttpRequest object
  */
 AJAX.prototype.request = function(url, settings) {
+	console.log('[AJAX] request() called - URL:', url, 'method:', settings.method || 'GET');
 	var method = (settings.method) ? settings.method : "GET";
 	var xhr = new XMLHttpRequest();
+	console.log('[AJAX] XMLHttpRequest created - type:', typeof xhr, 'constructor:', xhr.constructor.name);
 	
 	xhr.open(method, url);
+	console.log('[AJAX] xhr.open() called');
 	
 	if (settings.headers) {
 		for (var h in settings.headers) {
@@ -68,6 +71,7 @@ AJAX.prototype.request = function(url, settings) {
 	}
 
 	xhr.onerror = function (event) {
+		console.error('[AJAX] xhr.onerror triggered - status:', event.target.status, 'readyState:', event.target.readyState, 'responseText:', event.target.responseText);
 		if (settings.error) {
 			settings.error({error: event.target.status});
 		}			
@@ -80,13 +84,20 @@ AJAX.prototype.request = function(url, settings) {
 	}
 	
 	xhr.onreadystatechange = function () {
-		if (xhr.readyState == XMLHttpRequest.DONE) {
+		console.log('[AJAX] onreadystatechange fired - readyState:', xhr.readyState, 'status:', xhr.status, 'XMLHttpRequest.DONE:', XMLHttpRequest.DONE);
+		if (xhr.readyState == 4) {  // Use 4 directly instead of XMLHttpRequest.DONE
+			console.log('[AJAX] Request complete - status:', xhr.status, 'responseText length:', xhr.responseText ? xhr.responseText.length : 0);
+			console.log('[AJAX] responseText:', xhr.responseText ? xhr.responseText.substring(0, 200) : 'null');
 			if (xhr.status == 200) {
 				if (settings.success) {
 					try {
+						console.log('[AJAX] Parsing JSON...');
 						var jsonData = JSON.parse(xhr.responseText);
+						console.log('[AJAX] JSON parsed successfully, calling success callback');
 						settings.success(jsonData);
+						console.log('[AJAX] Success callback returned');
 					} catch (error) {
+						console.error('[AJAX] Error in success handler:', error);
 						if (typeof JellyfinAPI !== 'undefined') {
 							JellyfinAPI.Logger.error(error);
 						}
@@ -100,6 +111,8 @@ AJAX.prototype.request = function(url, settings) {
 							}
 						}
 					}
+				} else {
+					console.log('[AJAX] No success callback defined');
 				}
 			} else if (xhr.status == 204) {
 				if (settings.success) {
@@ -120,10 +133,12 @@ AJAX.prototype.request = function(url, settings) {
 		}
 	};
 	
+	console.log('[AJAX] About to call xhr.send()');
 	if (settings.data) {
 		xhr.send(JSON.stringify(settings.data));
 	} else {
 		xhr.send();
-	} 
+	}
+	console.log('[AJAX] xhr.send() called, returning xhr');
 	return xhr;
 };

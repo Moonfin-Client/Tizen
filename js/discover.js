@@ -119,17 +119,18 @@ var DiscoverController = (function() {
         // that isn't available on Tizen web apps
         if (typeof tizen !== 'undefined') {
             console.log('[Discover] Tizen detected - checking for API key auth...');
-            var settings = storage.get('jellyfin_settings');
-            console.log('[Discover] Settings:', settings);
+            var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+            console.log('[Discover] Settings string:', settingsStr);
+            var settings = null;
             var hasApiKey = false;
             var hasUrl = false;
-            if (settings) {
+            if (settingsStr) {
                 try {
-                    var parsed = JSON.parse(settings);
-                    console.log('[Discover] Parsed settings - jellyseerrApiKey:', parsed.jellyseerrApiKey ? 'SET' : 'NOT SET');
-                    console.log('[Discover] Parsed settings - jellyseerrUrl:', parsed.jellyseerrUrl || 'NOT SET');
-                    hasApiKey = parsed.jellyseerrApiKey && parsed.jellyseerrApiKey.length > 0;
-                    hasUrl = parsed.jellyseerrUrl && parsed.jellyseerrUrl.length > 0;
+                    settings = JSON.parse(settingsStr);
+                    console.log('[Discover] Settings - jellyseerrApiKey:', settings.jellyseerrApiKey ? 'SET' : 'NOT SET');
+                    console.log('[Discover] Settings - jellyseerrUrl:', settings.jellyseerrUrl || 'NOT SET');
+                    hasApiKey = settings.jellyseerrApiKey && settings.jellyseerrApiKey.length > 0;
+                    hasUrl = settings.jellyseerrUrl && settings.jellyseerrUrl.length > 0;
                 } catch (e) {
                     console.log('[Discover] Error parsing settings:', e);
                 }
@@ -151,13 +152,8 @@ var DiscoverController = (function() {
             console.log('[Discover] Tizen with API key - initializing directly...');
             
             // Initialize JellyseerrAPI directly with URL and API key
-            var jellyseerrUrl = null;
-            var jellyseerrApiKey = null;
-            try {
-                var parsed = JSON.parse(settings);
-                jellyseerrUrl = parsed.jellyseerrUrl;
-                jellyseerrApiKey = parsed.jellyseerrApiKey;
-            } catch (e) {}
+            var jellyseerrUrl = settings.jellyseerrUrl;
+            var jellyseerrApiKey = settings.jellyseerrApiKey;
             
             console.log('[Discover] Jellyseerr URL:', jellyseerrUrl);
             console.log('[Discover] API Key length:', jellyseerrApiKey ? jellyseerrApiKey.length : 0);
@@ -180,6 +176,28 @@ var DiscoverController = (function() {
                     console.error('[Discover] Error during initialization:', error);
                     showConnectionRequired();
                 });
+            
+            loadAllRows();
+            
+            // Restore scroll position if returning from details
+            var savedPosition = sessionStorage.getItem('discover_scroll_position');
+            if (savedPosition) {
+                try {
+                    var position = JSON.parse(savedPosition);
+                    console.log('[Discover] Restoring position:', position);
+                    // Set position after content loads
+                    setTimeout(function() {
+                        if (position.rowIndex !== undefined && position.itemIndex !== undefined) {
+                            focusManager.currentRowIndex = position.rowIndex;
+                            focusManager.currentItemIndex = position.itemIndex;
+                            updateFocus(position.rowIndex, position.itemIndex);
+                        }
+                        sessionStorage.removeItem('discover_scroll_position');
+                    }, 500);
+                } catch (e) {
+                    console.error('[Discover] Error restoring position:', e);
+                }
+            }
             
             // Initialize navbar
             if (typeof NavbarController !== 'undefined') {
@@ -275,7 +293,7 @@ var DiscoverController = (function() {
      * Check if Jellyseerr is properly configured
      */
     function checkJellyseerrConnection() {
-        var settings = storage.get('jellyfin_settings');
+        var settings = storage.getUserPreference('jellyfin_settings', null);
         if (!settings) return false;
         
         try {
@@ -295,7 +313,7 @@ var DiscoverController = (function() {
      */
     function initializeJellyseerr() {
         // First, load and set the API key if available
-        var settings = storage.get('jellyfin_settings');
+        var settings = storage.getUserPreference('jellyfin_settings', null);
         if (settings) {
             try {
                 var parsedSettings = JSON.parse(settings);
@@ -317,10 +335,10 @@ var DiscoverController = (function() {
                 // If initializeFromPreferences returns false, it means no auth yet
                 // But we still need to initialize the API with the server URL for login to work
                 console.log('[Discover] initializeFromPreferences returned false, trying direct initialization');
-                var settings = storage.get('jellyfin_settings');
-                if (!settings) return false;
+                var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+                if (!settingsStr) return false;
                 
-                var parsedSettings = JSON.parse(settings);
+                var parsedSettings = JSON.parse(settingsStr);
                 if (!parsedSettings.jellyseerrUrl) return false;
                 
                 // Get user ID for cookie storage
@@ -358,34 +376,39 @@ var DiscoverController = (function() {
                     'You can ask your Jellyseerr admin to provide the API key, but note that it grants full admin access.<br><br>' +
                     '<em>Alternatively, use Jellyseerr through a web browser.</em>' +
                 '</p>' +
-                '<button class="settings-btn" id="tizenBackBtn" tabindex="0">Go Back</button>' +
+                '<button class="settings-btn" id="tizenBackBtn" style="cursor: pointer;">Go Back</button>' +
             '</div>';
         
         document.body.appendChild(modal);
         
         var backBtn = document.getElementById('tizenBackBtn');
-        backBtn.addEventListener('click', function() {
-            window.history.back();
-        });
+        
+        function goToBrowse(e) {
+            if (e) e.preventDefault();
+            window.location.href = 'browse.html';
+        }
+        
+        backBtn.addEventListener('click', goToBrowse);
         backBtn.addEventListener('keydown', function(e) {
-            if (e.keyCode === KeyCodes.ENTER) {
-                window.history.back();
-            } else if (e.keyCode === KeyCodes.BACK) {
-                e.preventDefault();
-                window.history.back();
+            if (e.keyCode === 13 || e.keyCode === 10009) { // Enter or Return
+                goToBrowse(e);
             }
         });
         
-        setTimeout(function() {
-            backBtn.focus();
-        }, 100);
-        
-        // Handle back button
-        document.addEventListener('keydown', function(e) {
-            if (e.keyCode === KeyCodes.BACK) {
+        // Handle back button globally
+        var backHandler = function(e) {
+            if (e.keyCode === 10009 || e.keyCode === 27) { // Back or Escape
                 e.preventDefault();
-                window.history.back();
+                e.stopPropagation();
+                goToBrowse(e);
             }
+        };
+        document.addEventListener('keydown', backHandler);
+        
+        // Focus the button after DOM settles
+        requestAnimationFrame(function() {
+            backBtn.focus();
+            console.log('[Discover] Modal button focused');
         });
     }
 
@@ -739,13 +762,15 @@ var DiscoverController = (function() {
      * Filter NSFW content based on settings
      */
     function filterNSFW(items) {
-        var settings = storage.get('jellyfin_settings');
+        var settingsStr = storage.getUserPreference('jellyfin_settings', null);
         var filterNSFW = true; // Default to filtering
         
         try {
-            var parsedSettings = JSON.parse(settings);
-            if (parsedSettings.jellyseerrFilterNSFW !== undefined) {
-                filterNSFW = parsedSettings.jellyseerrFilterNSFW;
+            if (settingsStr) {
+                var parsedSettings = JSON.parse(settingsStr);
+                if (parsedSettings.jellyseerrFilterNSFW !== undefined) {
+                    filterNSFW = parsedSettings.jellyseerrFilterNSFW;
+                }
             }
         } catch (e) {
             // Use default
@@ -1255,6 +1280,11 @@ var DiscoverController = (function() {
     function showJellyseerrDetails(item) {
         var mediaType = item.mediaType || 'movie';
         var mediaId = item.id;
+        // Save current scroll position
+        sessionStorage.setItem('discover_scroll_position', JSON.stringify({
+            rowIndex: focusManager.currentRowIndex,
+            itemIndex: focusManager.currentItemIndex
+        }));
         // Navigate to Jellyseerr details page
         window.location.href = 'jellyseerr-details.html?type=' + mediaType + '&id=' + mediaId;
     }
@@ -1565,9 +1595,53 @@ var DiscoverController = (function() {
     }
 
     /**
+     * Handle modal keyboard navigation
+     */
+    function handleModalNavigation(evt) {
+        var activeElement = document.activeElement;
+        
+        switch (evt.keyCode) {
+            case KeyCodes.LEFT:
+                evt.preventDefault();
+                if (activeElement === elements.goBackBtn && elements.goToSettingsBtn) {
+                    elements.goToSettingsBtn.focus();
+                }
+                break;
+                
+            case KeyCodes.RIGHT:
+                evt.preventDefault();
+                if (activeElement === elements.goToSettingsBtn && elements.goBackBtn) {
+                    elements.goBackBtn.focus();
+                }
+                break;
+                
+            case KeyCodes.ENTER:
+            case KeyCodes.OK:
+                evt.preventDefault();
+                if (activeElement === elements.goToSettingsBtn) {
+                    window.location.href = 'settings.html';
+                } else if (activeElement === elements.goBackBtn) {
+                    window.location.href = 'browse.html';
+                }
+                break;
+                
+            case KeyCodes.BACK:
+                evt.preventDefault();
+                window.location.href = 'browse.html';
+                break;
+        }
+    }
+
+    /**
      * Handle keyboard navigation
      */
     function handleKeyPress(evt) {
+        // If connection modal is visible, handle modal navigation only
+        if (elements.connectionRequired && elements.connectionRequired.style.display !== 'none') {
+            handleModalNavigation(evt);
+            return;
+        }
+        
         if (evt.keyCode === KeyCodes.BACK) {
             evt.preventDefault();
             if (focusManager.inRows) {

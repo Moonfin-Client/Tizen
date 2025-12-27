@@ -1003,7 +1003,7 @@ var BrowseController = (function() {
             clearRows();
             
             // Load featured banner if enabled
-            var storedSettings = storage.get('jellyfin_settings');
+            var storedSettings = storage.getUserPreference('jellyfin_settings', null);
             var showFeaturedBanner = true;
             if (storedSettings) {
                 try {
@@ -1052,7 +1052,7 @@ var BrowseController = (function() {
                 return setting ? setting.enabled : true;
             }
             
-            var storedSettings = storage.get('jellyfin_settings');
+            var storedSettings = storage.getUserPreference('jellyfin_settings', null);
             var mergeContinueWatching = false;
             if (storedSettings) {
                 try {
@@ -2026,9 +2026,9 @@ var BrowseController = (function() {
         // Get featured media filter setting
         var featuredMediaFilter = 'both'; // default
         try {
-            var settings = storage.get('jellyfin_settings');
-            if (settings) {
-                var parsedSettings = JSON.parse(settings);
+            var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+            if (settingsStr) {
+                var parsedSettings = JSON.parse(settingsStr);
                 featuredMediaFilter = parsedSettings.featuredMediaFilter || 'both';
             }
         } catch (e) {}
@@ -2223,7 +2223,7 @@ var BrowseController = (function() {
         
         // Get carousel speed from settings
         var carouselSpeed = 8000; // default
-        var stored = storage.get('jellyfin_settings');
+        var stored = storage.getUserPreference('jellyfin_settings', null);
         if (stored) {
             try {
                 var settings = JSON.parse(stored);

@@ -165,18 +165,89 @@
         
         console.log('[Jellyseerr Person] JellyseerrAPI exists, checking initialization...');
         
-        // Check if Jellyseerr is configured via jellyfin_settings
-        var settings = storage.get('jellyfin_settings');
-        console.log('[Jellyseerr Person] Settings:', settings);
+        elements.loadingIndicator.style.display = 'flex';
+        elements.mainContent.style.display = 'none';
+
+        console.log('[Jellyseerr Person] Initializing JellyseerrAPI...');
         
-        if (!settings) {
+        // Check if running on Tizen - use API key auth
+        if (typeof tizen !== 'undefined') {
+            console.log('[Jellyseerr Person] Tizen detected - checking for API key auth...');
+            var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+            console.log('[Jellyseerr Person] Settings string:', settingsStr);
+            var settings = null;
+            var hasApiKey = false;
+            var hasUrl = false;
+            
+            if (settingsStr) {
+                try {
+                    settings = JSON.parse(settingsStr);
+                    console.log('[Jellyseerr Person] Settings - jellyseerrApiKey:', settings.jellyseerrApiKey ? 'SET' : 'NOT SET');
+                    console.log('[Jellyseerr Person] Settings - jellyseerrUrl:', settings.jellyseerrUrl || 'NOT SET');
+                    hasApiKey = settings.jellyseerrApiKey && settings.jellyseerrApiKey.length > 0;
+                    hasUrl = settings.jellyseerrUrl && settings.jellyseerrUrl.length > 0;
+                } catch (e) {
+                    console.log('[Jellyseerr Person] Error parsing settings:', e);
+                }
+            }
+            
+            if (!hasApiKey || !hasUrl) {
+                console.log('[Jellyseerr Person] No Jellyseerr configuration found');
+                alert('Jellyseerr is not configured. Please configure it in settings.');
+                history.back();
+                return;
+            }
+            
+            // On Tizen with API key, initialize directly
+            console.log('[Jellyseerr Person] Tizen with API key - initializing directly...');
+            
+            var jellyseerrUrl = settings.jellyseerrUrl;
+            var jellyseerrApiKey = settings.jellyseerrApiKey;
+            
+            console.log('[Jellyseerr Person] Jellyseerr URL:', jellyseerrUrl);
+            console.log('[Jellyseerr Person] API Key length:', jellyseerrApiKey ? jellyseerrApiKey.length : 0);
+            
+            // Get user ID
+            var auth = JellyfinAPI.getStoredAuth();
+            var userId = auth ? auth.userId : null;
+            
+            // Set API key first
+            JellyseerrAPI.setApiKey(jellyseerrApiKey);
+            
+            // Initialize with URL and make API calls
+            JellyseerrAPI.initialize(jellyseerrUrl, jellyseerrApiKey, userId)
+                .then(function() {
+                    console.log('[Jellyseerr Person] API initialized, making calls...');
+                    return Promise.all([
+                        JellyseerrAPI.getPersonDetails(personId),
+                        JellyseerrAPI.getPersonCombinedCredits(personId)
+                    ]);
+                })
+                .then(function(results) {
+                    console.log('[Jellyseerr Person] API calls successful:', results);
+                    renderPersonDetails(results[0], results[1]);
+                })
+                .catch(function(error) {
+                    console.error('[Jellyseerr Person] Error:', error);
+                    elements.loadingIndicator.style.display = 'none';
+                    alert('Failed to load person details: ' + (error.message || 'Unknown error'));
+                    history.back();
+                });
+            return;
+        }
+        
+        // Non-Tizen: Check if Jellyseerr is configured via jellyfin_settings
+        var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+        console.log('[Jellyseerr Person] Settings:', settingsStr);
+        
+        if (!settingsStr) {
             console.error('[Jellyseerr Person] No settings found');
             alert('Jellyseerr is not configured. Please configure it in settings.');
             history.back();
             return;
         }
         
-        var parsedSettings = JSON.parse(settings);
+        var parsedSettings = JSON.parse(settingsStr);
         console.log('[Jellyseerr Person] Parsed settings:', parsedSettings);
         
         if (!parsedSettings.jellyseerrUrl) {
@@ -185,11 +256,6 @@
             history.back();
             return;
         }
-        
-        elements.loadingIndicator.style.display = 'flex';
-        elements.mainContent.style.display = 'none';
-
-        console.log('[Jellyseerr Person] Initializing JellyseerrAPI...');
         
         // Initialize JellyseerrAPI first
         JellyseerrAPI.initializeFromPreferences()

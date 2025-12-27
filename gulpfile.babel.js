@@ -22,7 +22,7 @@ function copyFiles() {
     return gulp.src([
         '*.html',
         '*.xml',
-        '*.js',
+        'shaka-player.js',  // Only include specific JS files, not gulpfile
         'css/**/*',
         'js/**/*',
         'assets/**/*',
@@ -33,11 +33,26 @@ function copyFiles() {
 
 // Package the build into a versioned .wgt file
 async function packageWgt() {
-    const wgtName = `Moonfin-${version}.wgt`;
-    await del([wgtName]);
+    const versionedWgtName = `Moonfin-${version}.wgt`;
+    const wgtName = 'Moonfin.wgt';
+    await del([versionedWgtName, wgtName]);
+    
+    // Copy signature files to build directory if they exist
+    try {
+        await execAsync('cp -f .sign/author-signature.xml .sign/signature1.xml build/ 2>/dev/null || true');
+        console.info('Added signature files to build directory');
+    } catch (e) {
+        console.warn('Warning: No signature files found - package may not install on device');
+    }
+    
+    // Create both versioned and non-versioned packages
     console.info(`Creating ${wgtName}...`);
-    await execAsync(`cd build && zip -r ../${wgtName} . -x "*.git*"`);
+    await execAsync(`cd build && zip -r ../${wgtName} . -x "*.git*" -x "gulpfile.babel.js"`);
     console.info(`Package created: ${wgtName}`);
+    
+    console.info(`Creating ${versionedWgtName}...`);
+    await execAsync(`cd build && zip -r ../${versionedWgtName} . -x "*.git*" -x "gulpfile.babel.js"`);
+    console.info(`Package created: ${versionedWgtName}`);
 }
 
 // Default build task

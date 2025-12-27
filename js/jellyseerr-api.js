@@ -619,7 +619,7 @@ var JellyseerrAPI = (function() {
 
             // Response handler
             xhr.onreadystatechange = function() {
-                if (xhr.readyState !== XMLHttpRequest.DONE) {
+                if (xhr.readyState !== 4) {  // XMLHttpRequest.DONE is undefined in Tizen simulator
                     return;
                 }
 
@@ -1004,7 +1004,7 @@ var JellyseerrAPI = (function() {
 
             // Response handler
             xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.readyState === 4) {  // XMLHttpRequest.DONE is undefined in Tizen simulator
                     // Handle response
                     if (xhr.status === 0) {
                         Logger.error('No response (status 0). Server unreachable or CORS). URL:', url);

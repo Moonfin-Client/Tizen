@@ -274,6 +274,7 @@ var JellyfinAPI = (function() {
             return;
         }
         
+        console.log('[testServer] Testing address:', address);
         ajax.request(address + '/System/Info/Public', {
             method: 'GET',
             timeout: LAN_SCAN_TIMEOUT_MS,
@@ -281,6 +282,7 @@ var JellyfinAPI = (function() {
                 'X-Emby-Authorization': getAuthHeader()
             },
             success: function(response) {
+                console.log('[testServer] SUCCESS! Response:', JSON.stringify(response));
                 // Use ServerName if available, otherwise extract hostname from URL
                 var serverName = response.serverName;
                 if (!serverName || serverName.trim() === '') {
@@ -292,6 +294,7 @@ var JellyfinAPI = (function() {
                     }
                 }
                 
+                console.log('[testServer] Calling callback with server info');
                 if (callback) callback(null, {
                     address: address,
                     name: serverName,
@@ -299,8 +302,10 @@ var JellyfinAPI = (function() {
                     version: response.Version,
                     operatingSystem: response.OperatingSystem
                 });
+                console.log('[testServer] Callback returned');
             },
             error: function(err) {
+                console.log('[testServer] ERROR:', err);
                 if (callback) callback(err, null);
             }
         });

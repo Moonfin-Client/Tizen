@@ -6,7 +6,7 @@
 var VersionChecker = (function() {
     'use strict';
 
-    const GITHUB_API_URL = 'https://api.github.com/repos/Moonfin-Client/jellyfin-tizen/releases/latest';
+    const GITHUB_API_URL = 'https://api.github.com/repos/Moonfin-Client/Tizen/releases/latest';
     const CHECK_COOLDOWN_HOURS = 24;
     const STORAGE_KEY_LAST_CHECK = 'version_last_check';
     const STORAGE_KEY_DISMISSED_VERSION = 'version_dismissed';

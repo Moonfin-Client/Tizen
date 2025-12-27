@@ -61,13 +61,20 @@ var JellyseerrDetailsController = (function() {
         
         // Initialize Jellyseerr API before loading details
         initializeJellyseerr()
-            .then(function() {
-                return JellyseerrAPI.attemptAutoLogin();
+            .then(function(initialized) {
+                console.log('[Jellyseerr Details] Initialized:', initialized);
+                // On Tizen with API key, we're already authenticated
+                // For non-Tizen or when no API key, attempt auto-login
+                if (typeof tizen === 'undefined' && !initialized) {
+                    return JellyseerrAPI.attemptAutoLogin();
+                }
+                return initialized;
             })
             .then(function() {
                 loadMediaDetails();
             })
             .catch(function(error) {
+                console.error('[Jellyseerr Details] Initialization error:', error);
                 showError('Failed to initialize Jellyseerr');
             });
         
@@ -105,7 +112,64 @@ var JellyseerrDetailsController = (function() {
      * @private
      */
     function initializeJellyseerr() {
-        // Try initializeFromPreferences first (for existing auth)
+        console.log('[Jellyseerr Details] Initializing Jellyseerr API...');
+        
+        // Check if running on Tizen - use API key auth
+        if (typeof tizen !== 'undefined') {
+            console.log('[Jellyseerr Details] Tizen detected - checking for API key auth...');
+            var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+            console.log('[Jellyseerr Details] Settings string:', settingsStr);
+            var settings = null;
+            var hasApiKey = false;
+            var hasUrl = false;
+            
+            if (settingsStr) {
+                try {
+                    settings = JSON.parse(settingsStr);
+                    console.log('[Jellyseerr Details] Settings - jellyseerrApiKey:', settings.jellyseerrApiKey ? 'SET' : 'NOT SET');
+                    console.log('[Jellyseerr Details] Settings - jellyseerrUrl:', settings.jellyseerrUrl || 'NOT SET');
+                    hasApiKey = settings.jellyseerrApiKey && settings.jellyseerrApiKey.length > 0;
+                    hasUrl = settings.jellyseerrUrl && settings.jellyseerrUrl.length > 0;
+                } catch (e) {
+                    console.log('[Jellyseerr Details] Error parsing settings:', e);
+                }
+            }
+            
+            if (!hasApiKey || !hasUrl) {
+                console.log('[Jellyseerr Details] No Jellyseerr configuration found');
+                return Promise.resolve(false);
+            }
+            
+            // On Tizen with API key, initialize directly
+            console.log('[Jellyseerr Details] Tizen with API key - initializing directly...');
+            
+            var jellyseerrUrl = settings.jellyseerrUrl;
+            var jellyseerrApiKey = settings.jellyseerrApiKey;
+            
+            console.log('[Jellyseerr Details] Jellyseerr URL:', jellyseerrUrl);
+            console.log('[Jellyseerr Details] API Key length:', jellyseerrApiKey ? jellyseerrApiKey.length : 0);
+            
+            // Get user ID
+            var auth = JellyfinAPI.getStoredAuth();
+            var userId = auth ? auth.userId : null;
+            
+            // Set API key first
+            JellyseerrAPI.setApiKey(jellyseerrApiKey);
+            
+            // Initialize with URL
+            return JellyseerrAPI.initialize(jellyseerrUrl, jellyseerrApiKey, userId)
+                .then(function() {
+                    console.log('[Jellyseerr Details] JellyseerrAPI.initialize() succeeded');
+                    console.log('[Jellyseerr Details] isInitialized:', JellyseerrAPI.isInitialized());
+                    return true;
+                })
+                .catch(function(error) {
+                    console.error('[Jellyseerr Details] Error during initialization:', error);
+                    return false;
+                });
+        }
+        
+        // Non-Tizen: Try initializeFromPreferences first (for existing cookie auth)
         return JellyseerrAPI.initializeFromPreferences()
             .then(function(success) {
                 if (success) {
@@ -116,10 +180,10 @@ var JellyseerrDetailsController = (function() {
                 // If initializeFromPreferences returns false, it means no auth yet
                 // But we still need to initialize the API with the server URL
                 console.log('[Jellyseerr Details] initializeFromPreferences returned false, trying direct initialization');
-                var settings = storage.get('jellyfin_settings');
-                if (!settings) return false;
+                var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+                if (!settingsStr) return false;
                 
-                var parsedSettings = JSON.parse(settings);
+                var parsedSettings = JSON.parse(settingsStr);
                 if (!parsedSettings.jellyseerrUrl) return false;
                 
                 // Get user ID for cookie storage
@@ -1222,6 +1286,16 @@ var JellyseerrDetailsController = (function() {
         if (buttons.length === 0) return;
         
         switch (evt.keyCode) {
+            case KeyCodes.ENTER:
+            case KeyCodes.OK:
+                evt.preventDefault();
+                // Trigger click on the currently focused button
+                if (buttons[focusManager.currentIndex]) {
+                    console.log('[Jellyseerr Details] ENTER pressed on button:', buttons[focusManager.currentIndex].id);
+                    buttons[focusManager.currentIndex].click();
+                }
+                break;
+                
             case KeyCodes.UP:
                 evt.preventDefault();
                 // Navigate to navbar

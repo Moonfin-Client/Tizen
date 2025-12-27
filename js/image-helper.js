@@ -180,7 +180,7 @@ var ImageHelper = (function() {
     function loadSettingsFromStorage() {
         if (typeof storage === 'undefined') return;
         
-        var stored = storage.get('jellyfin_settings');
+        var stored = storage.getUserPreference('jellyfin_settings', null);
         if (stored) {
             try {
                 var settings = JSON.parse(stored);

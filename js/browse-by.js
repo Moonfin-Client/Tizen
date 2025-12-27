@@ -91,7 +91,32 @@ var BrowseByController = (function() {
         initializeJellyseerr()
             .then(function() {
                 console.log('[BrowseBy] Initialization complete, loading content');
-                loadContent();
+                return loadContent();
+            })
+            .then(function() {
+                // Restore scroll position if returning from details
+                var savedPosition = sessionStorage.getItem('browse_by_scroll_position');
+                if (savedPosition) {
+                    try {
+                        var position = JSON.parse(savedPosition);
+                        console.log('[BrowseBy] Restoring position:', position);
+                        // Verify we're on the same browse page
+                        if (position.browseType === browseType && position.browseId === browseId) {
+                            setTimeout(function() {
+                                if (position.gridIndex !== undefined) {
+                                    focusManager.currentGridIndex = position.gridIndex;
+                                    var cards = getCards();
+                                    if (cards[position.gridIndex]) {
+                                        cards[position.gridIndex].focus();
+                                    }
+                                }
+                                sessionStorage.removeItem('browse_by_scroll_position');
+                            }, 500);
+                        }
+                    } catch (e) {
+                        console.error('[BrowseBy] Error restoring position:', e);
+                    }
+                }
             })
             .catch(function(error) {
                 console.error('[BrowseBy] Initialization error:', error);
@@ -169,7 +194,64 @@ var BrowseByController = (function() {
      * @returns {Promise<void>} Resolves when API is initialized
      */
     function initializeJellyseerr() {
-        // Try to initialize from stored preferences first
+        console.log('[BrowseBy] Initializing Jellyseerr API...');
+        
+        // Check if running on Tizen - use API key auth
+        if (typeof tizen !== 'undefined') {
+            console.log('[BrowseBy] Tizen detected - checking for API key auth...');
+            var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+            console.log('[BrowseBy] Settings string:', settingsStr);
+            var settings = null;
+            var hasApiKey = false;
+            var hasUrl = false;
+            
+            if (settingsStr) {
+                try {
+                    settings = JSON.parse(settingsStr);
+                    console.log('[BrowseBy] Settings - jellyseerrApiKey:', settings.jellyseerrApiKey ? 'SET' : 'NOT SET');
+                    console.log('[BrowseBy] Settings - jellyseerrUrl:', settings.jellyseerrUrl || 'NOT SET');
+                    hasApiKey = settings.jellyseerrApiKey && settings.jellyseerrApiKey.length > 0;
+                    hasUrl = settings.jellyseerrUrl && settings.jellyseerrUrl.length > 0;
+                } catch (e) {
+                    console.log('[BrowseBy] Error parsing settings:', e);
+                }
+            }
+            
+            if (!hasApiKey || !hasUrl) {
+                console.log('[BrowseBy] No Jellyseerr configuration found');
+                return Promise.reject(new Error('Jellyseerr not configured'));
+            }
+            
+            // On Tizen with API key, initialize directly
+            console.log('[BrowseBy] Tizen with API key - initializing directly...');
+            
+            var jellyseerrUrl = settings.jellyseerrUrl;
+            var jellyseerrApiKey = settings.jellyseerrApiKey;
+            
+            console.log('[BrowseBy] Jellyseerr URL:', jellyseerrUrl);
+            console.log('[BrowseBy] API Key length:', jellyseerrApiKey ? jellyseerrApiKey.length : 0);
+            
+            // Get user ID
+            var auth = JellyfinAPI.getStoredAuth();
+            var userId = auth ? auth.userId : null;
+            
+            // Set API key first
+            JellyseerrAPI.setApiKey(jellyseerrApiKey);
+            
+            // Initialize with URL
+            return JellyseerrAPI.initialize(jellyseerrUrl, jellyseerrApiKey, userId)
+                .then(function() {
+                    console.log('[BrowseBy] JellyseerrAPI.initialize() succeeded');
+                    console.log('[BrowseBy] isInitialized:', JellyseerrAPI.isInitialized());
+                    return Promise.resolve();
+                })
+                .catch(function(error) {
+                    console.error('[BrowseBy] Error during initialization:', error);
+                    return Promise.reject(error);
+                });
+        }
+        
+        // Non-Tizen: Try to initialize from stored preferences first
         return JellyseerrAPI.initializeFromPreferences()
             .then(function(success) {
                 if (success) {
@@ -179,12 +261,12 @@ var BrowseByController = (function() {
                 
                 // If no stored session, initialize with server URL and attempt auto-login
                 console.log('[BrowseBy] No stored session, initializing with server URL');
-                var settings = storage.get('jellyfin_settings');
-                if (!settings) {
+                var settingsStr = storage.getUserPreference('jellyfin_settings', null);
+                if (!settingsStr) {
                     return Promise.reject(new Error('No Jellyfin settings found'));
                 }
                 
-                var parsedSettings = JSON.parse(settings);
+                var parsedSettings = JSON.parse(settingsStr);
                 if (!parsedSettings.jellyseerrUrl) {
                     return Promise.reject(new Error('No Jellyseerr URL configured'));
                 }
@@ -585,6 +667,14 @@ var BrowseByController = (function() {
      * @param {string} type - Media type ('movie' or 'tv')
      */
     function navigateToDetails(id, type) {
+        // Save current scroll position
+        sessionStorage.setItem('browse_by_scroll_position', JSON.stringify({
+            gridIndex: focusManager.currentGridIndex,
+            browseType: browseType,
+            browseId: browseId,
+            browseName: browseName,
+            mediaType: mediaType
+        }));
         window.location.href = 'jellyseerr-details.html?type=' + type + '&id=' + id;
     }
 
