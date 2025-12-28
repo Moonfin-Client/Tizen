@@ -1,99 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moonfin for Tizen</title>
-    <link rel="stylesheet" href="css/legacy-compat.css">
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/browse.css">
-    <link rel="stylesheet" href="css/update-modal.css">
-    <script src="js/tizen-adapter.js" charset="utf-8"></script>
-    <script src="js/polyfills.js" charset="utf-8"></script>
-    <script src="js/storage.js" charset="utf-8"></script>
-    <script src="js/multi-server.js" charset="utf-8"></script>
-    <script src="js/accent-color.js" charset="utf-8"></script>
-    <script src="js/ajax.js" charset="utf-8"></script>
-    <script src="js/keycodes.js" charset="utf-8"></script>
-    <script src="js/image-helper.js" charset="utf-8"></script>
-    <script src="js/jellyfin-api.js" charset="utf-8"></script>
-    <script src="js/connection-pool.js" charset="utf-8"></script>
-    <script src="js/multi-server-rows.js" charset="utf-8"></script>
-    <script src="js/navbar.js" charset="utf-8"></script>
-    <script src="js/theme-music-player.js"></script>
-    <script src="js/version-checker.js" charset="utf-8"></script>
-    <script src="js/browse.js" charset="utf-8"></script>
-</head>
-<body>
-    <!-- Global backdrop for page background -->
-    <div id="globalBackdrop" class="global-backdrop">
-        <img id="globalBackdropImage" class="global-backdrop-image" src="" alt="" style="display: none;">
-        <div class="global-backdrop-overlay"></div>
-    </div>
-    
-    <!-- Navbar will be loaded navbar.js -->
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Moonfin for Tizen</title>
+      <link rel="stylesheet" href="css/legacy-compat.css" />
+      <link rel="stylesheet" href="css/navbar.css" />
+      <link rel="stylesheet" href="css/browse.css" />
+      <link rel="stylesheet" href="css/update-modal.css" />
+      <script src="js/app-version.js" charset="utf-8"></script>
+      <script src="js/tizen-adapter.js" charset="utf-8"></script>
+      <script src="js/polyfills.js" charset="utf-8"></script>
+      <script src="js/storage.js" charset="utf-8"></script>
+      <script src="js/multi-server.js" charset="utf-8"></script>
+      <script src="js/accent-color.js" charset="utf-8"></script>
+      <script src="js/ajax.js" charset="utf-8"></script>
+      <script src="js/keycodes.js" charset="utf-8"></script>
+      <script src="js/image-helper.js" charset="utf-8"></script>
+      <script src="js/jellyfin-api.js" charset="utf-8"></script>
+      <script src="js/connection-pool.js" charset="utf-8"></script>
+      <script src="js/multi-server-rows.js" charset="utf-8"></script>
+      <script src="js/navbar.js" charset="utf-8"></script>
+      <script src="js/theme-music-player.js"></script>
+      <script src="js/version-checker.js" charset="utf-8"></script>
+      <script src="js/browse.js" charset="utf-8"></script>
+   </head>
+   <body>
+      <!-- Global backdrop for page background -->
+      <div id="globalBackdrop" class="global-backdrop">
+         <img
+            id="globalBackdropImage"
+            class="global-backdrop-image"
+            src=""
+            alt=""
+            style="display: none"
+         />
+         <div class="global-backdrop-overlay"></div>
+      </div>
 
-    <!-- Main Content Area -->
-    <div class="main-content">
-        <!-- Featured Banner -->
-        <div id="featuredBanner" class="featured-banner" style="opacity: 0; pointer-events: none;">
+      <!-- Navbar will be loaded navbar.js -->
+
+      <!-- Main Content Area -->
+      <div class="main-content">
+         <!-- Featured Banner -->
+         <div
+            id="featuredBanner"
+            class="featured-banner"
+            style="opacity: 0; pointer-events: none"
+         >
             <div class="featured-backdrop" id="featuredBackdropContainer">
-                <img id="featuredBackdrop" src="" alt="">
+               <img id="featuredBackdrop" src="" alt="" />
             </div>
-            <img id="featuredLogo" class="featured-logo" src="" alt="" style="display: none;">
-            <h1 id="featuredTitle" class="featured-title" style="display: none;"></h1>
+            <img
+               id="featuredLogo"
+               class="featured-logo"
+               src=""
+               alt=""
+               style="display: none"
+            />
+            <h1
+               id="featuredTitle"
+               class="featured-title"
+               style="display: none"
+            ></h1>
             <div class="featured-content">
-                <div class="featured-info-box">
-                    <div class="featured-meta">
-                        <span id="featuredYear" class="meta-item"></span>
-                        <span id="featuredRating" class="meta-item"></span>
-                        <span id="featuredRuntime" class="meta-item"></span>
-                        <span id="featuredGenres" class="meta-item"></span>
-                    </div>
-                    <p id="featuredOverview" class="featured-overview"></p>
-                </div>
+               <div class="featured-info-box">
+                  <div class="featured-meta">
+                     <span id="featuredYear" class="meta-item"></span>
+                     <span id="featuredRating" class="meta-item"></span>
+                     <span id="featuredRuntime" class="meta-item"></span>
+                     <span id="featuredGenres" class="meta-item"></span>
+                  </div>
+                  <p id="featuredOverview" class="featured-overview"></p>
+               </div>
             </div>
-            <button class="carousel-nav carousel-nav-left" id="carouselPrev" style="visibility: hidden;">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                </svg>
+            <button
+               class="carousel-nav carousel-nav-left"
+               id="carouselPrev"
+               style="visibility: hidden"
+            >
+               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+               </svg>
             </button>
-            <button class="carousel-nav carousel-nav-right" id="carouselNext" style="visibility: hidden;">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                </svg>
+            <button
+               class="carousel-nav carousel-nav-right"
+               id="carouselNext"
+               style="visibility: hidden"
+            >
+               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+               </svg>
             </button>
             <div class="featured-indicators" id="featuredIndicators">
-                <!-- Dots will be added dynamically -->
+               <!-- Dots will be added dynamically -->
             </div>
-        </div>
+         </div>
 
-        <!-- Split View Detail Section -->
-        <div id="detailSection" class="detail-section" style="display: none;">
+         <!-- Split View Detail Section -->
+         <div id="detailSection" class="detail-section" style="display: none">
             <div class="detail-content-wrapper">
-                <h2 id="detailTitle" class="detail-title"></h2>
-                <div id="detailInfoRow" class="detail-info-row"></div>
-                <p id="detailSummary" class="detail-summary"></p>
+               <h2 id="detailTitle" class="detail-title"></h2>
+               <div id="detailInfoRow" class="detail-info-row"></div>
+               <p id="detailSummary" class="detail-summary"></p>
             </div>
-        </div>
+         </div>
 
-        <!-- Content Rows -->
-        <div id="contentRows" class="content-rows">
-        </div>
+         <!-- Content Rows -->
+         <div id="contentRows" class="content-rows"></div>
 
-        <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="loading-indicator">
+         <!-- Loading Indicator -->
+         <div id="loadingIndicator" class="loading-indicator">
             <div class="spinner"></div>
             <p>Loading content...</p>
-        </div>
+         </div>
 
-        <!-- Error Message -->
-        <div id="errorDisplay" class="error-display" style="display: none;">
+         <!-- Error Message -->
+         <div id="errorDisplay" class="error-display" style="display: none">
             <h2>Unable to load content</h2>
             <p id="errorText"></p>
-            <button id="retryBtn" class="btn-primary" tabindex="0">Retry</button>
-            <button id="logoutBtn" class="btn-secondary" tabindex="0">Logout</button>
-        </div>
-    </div>
-</body>
+            <button id="retryBtn" class="btn-primary" tabindex="0">
+               Retry
+            </button>
+            <button id="logoutBtn" class="btn-secondary" tabindex="0">
+               Logout
+            </button>
+         </div>
+      </div>
+   </body>
 </html>

@@ -1,63 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jellyseerr - Person Details</title>
-    <link rel="stylesheet" href="css/legacy-compat.css">
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/jellyseerr-person.css">
-    <script src="js/tizen-adapter.js" charset="utf-8"></script>
-    <script src="js/polyfills.js" charset="utf-8"></script>
-    <script src="js/storage.js" charset="utf-8"></script>
-    <script src="js/accent-color.js" charset="utf-8"></script>
-    <script src="js/ajax.js" charset="utf-8"></script>
-    <script src="js/keycodes.js" charset="utf-8"></script>
-    <script src="js/jellyfin-api.js" charset="utf-8"></script>
-    <script src="js/image-helper.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-models.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-api.js" charset="utf-8"></script>
-    <script src="js/navbar.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-person.js" charset="utf-8"></script>
-</head>
-<body>
-    <!-- Navbar will be loaded by navbar.js -->
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Jellyseerr - Person Details</title>
+      <link rel="stylesheet" href="css/legacy-compat.css" />
+      <link rel="stylesheet" href="css/navbar.css" />
+      <link rel="stylesheet" href="css/jellyseerr-person.css" />
+      <script src="js/app-version.js" charset="utf-8"></script>
+      <script src="js/tizen-adapter.js" charset="utf-8"></script>
+      <script src="js/polyfills.js" charset="utf-8"></script>
+      <script src="js/storage.js" charset="utf-8"></script>
+      <script src="js/accent-color.js" charset="utf-8"></script>
+      <script src="js/ajax.js" charset="utf-8"></script>
+      <script src="js/keycodes.js" charset="utf-8"></script>
+      <script src="js/jellyfin-api.js" charset="utf-8"></script>
+      <script src="js/image-helper.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-models.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-api.js" charset="utf-8"></script>
+      <script src="js/navbar.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-person.js" charset="utf-8"></script>
+   </head>
+   <body>
+      <!-- Navbar will be loaded by navbar.js -->
 
-    <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading-indicator">
-        <div class="loading-spinner"></div>
-        <p>Loading person details...</p>
-    </div>
+      <!-- Loading Indicator -->
+      <div id="loadingIndicator" class="loading-indicator">
+         <div class="loading-spinner"></div>
+         <p>Loading person details...</p>
+      </div>
 
-    <!-- Main Content -->
-    <div id="mainContent" class="main-content" style="display: none;">
-        <!-- Header Section -->
-        <div class="header-section">
+      <!-- Main Content -->
+      <div id="mainContent" class="main-content" style="display: none">
+         <!-- Header Section -->
+         <div class="header-section">
             <div class="profile-container">
-                <img id="profileImage" class="profile-image" src="" alt="">
+               <img id="profileImage" class="profile-image" src="" alt="" />
             </div>
             <div class="info-container">
-                <h1 id="personName" class="person-name"></h1>
-                <p id="birthInfo" class="birth-info"></p>
-                <p id="knownFor" class="known-for"></p>
+               <h1 id="personName" class="person-name"></h1>
+               <p id="birthInfo" class="birth-info"></p>
+               <p id="knownFor" class="known-for"></p>
             </div>
-        </div>
+         </div>
 
-        <!-- Biography Section -->
-        <div id="biographySection" class="biography-section" style="display: none;">
+         <!-- Biography Section -->
+         <div
+            id="biographySection"
+            class="biography-section"
+            style="display: none"
+         >
             <h3 class="section-title">Biography</h3>
             <p id="biographyText" class="biography-text"></p>
-            <button id="biographyToggle" class="biography-toggle" style="display: none;">Show More</button>
-        </div>
+            <button
+               id="biographyToggle"
+               class="biography-toggle"
+               style="display: none"
+            >
+               Show More
+            </button>
+         </div>
 
-        <!-- Appearances Section -->
-        <div id="appearancesSection" class="appearances-section" style="display: none;">
+         <!-- Appearances Section -->
+         <div
+            id="appearancesSection"
+            class="appearances-section"
+            style="display: none"
+         >
             <h3 class="section-title">Appearances</h3>
             <div class="appearances-scroller">
-                <div id="appearancesList" class="appearances-list"></div>
+               <div id="appearancesList" class="appearances-list"></div>
             </div>
-        </div>
-    </div>
-</body>
+         </div>
+      </div>
+   </body>
 </html>

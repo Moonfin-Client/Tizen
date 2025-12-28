@@ -1,110 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse - Jellyseerr</title>
-    <link rel="stylesheet" href="css/legacy-compat.css">
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/browse-by.css">
-    <script src="js/tizen-adapter.js" charset="utf-8"></script>
-    <script src="js/polyfills.js" charset="utf-8"></script>
-    <script src="js/storage.js" charset="utf-8"></script>
-    <script src="js/accent-color.js" charset="utf-8"></script>
-    <script src="js/ajax.js" charset="utf-8"></script>
-    <script src="js/keycodes.js" charset="utf-8"></script>
-    <script src="js/jellyfin-api.js" charset="utf-8"></script>
-    <script src="js/image-helper.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-models.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-api.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
-    <script src="js/navbar.js" charset="utf-8"></script>
-    <script src="js/browse-by.js" charset="utf-8"></script>
-</head>
-<body>
-    <!-- Global backdrop -->
-    <div id="globalBackdrop" class="global-backdrop">
-        <img id="globalBackdropImage" class="global-backdrop-image" src="" alt="" style="display: none;">
-        <div class="global-backdrop-overlay"></div>
-    </div>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Browse - Jellyseerr</title>
+      <link rel="stylesheet" href="css/legacy-compat.css" />
+      <link rel="stylesheet" href="css/navbar.css" />
+      <link rel="stylesheet" href="css/browse-by.css" />
+      <script src="js/app-version.js" charset="utf-8"></script>
+      <script src="js/tizen-adapter.js" charset="utf-8"></script>
+      <script src="js/polyfills.js" charset="utf-8"></script>
+      <script src="js/storage.js" charset="utf-8"></script>
+      <script src="js/accent-color.js" charset="utf-8"></script>
+      <script src="js/ajax.js" charset="utf-8"></script>
+      <script src="js/keycodes.js" charset="utf-8"></script>
+      <script src="js/jellyfin-api.js" charset="utf-8"></script>
+      <script src="js/image-helper.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-models.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-api.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
+      <script src="js/navbar.js" charset="utf-8"></script>
+      <script src="js/browse-by.js" charset="utf-8"></script>
+   </head>
+   <body>
+      <!-- Global backdrop -->
+      <div id="globalBackdrop" class="global-backdrop">
+         <img
+            id="globalBackdropImage"
+            class="global-backdrop-image"
+            src=""
+            alt=""
+            style="display: none"
+         />
+         <div class="global-backdrop-overlay"></div>
+      </div>
 
-    <!-- Navbar will be loaded by navbar.js -->
+      <!-- Navbar will be loaded by navbar.js -->
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Header Section -->
-        <div class="browse-header">
+      <!-- Main Content -->
+      <div class="main-content">
+         <!-- Header Section -->
+         <div class="browse-header">
             <div id="headerTitle" class="header-title"></div>
-            <div id="headerImage" class="header-image" style="display: none;">
-                <img id="headerLogo" src="" alt="">
+            <div id="headerImage" class="header-image" style="display: none">
+               <img id="headerLogo" src="" alt="" />
             </div>
-        </div>
+         </div>
 
-        <!-- Controls Bar -->
-        <div class="controls-bar">
+         <!-- Controls Bar -->
+         <div class="controls-bar">
             <div class="controls-left">
-                <button id="sortBtn" class="control-btn" tabindex="0">
-                    <span class="control-label">Sort</span>
-                </button>
-                <button id="filterBtn" class="control-btn" tabindex="0">
-                    <span class="control-label">Filter</span>
-                </button>
+               <button id="sortBtn" class="control-btn" tabindex="0">
+                  <span class="control-label">Sort</span>
+               </button>
+               <button id="filterBtn" class="control-btn" tabindex="0">
+                  <span class="control-label">Filter</span>
+               </button>
             </div>
-            <div id="activeFiltersDisplay" class="active-filters" style="display: none;"></div>
-        </div>
+            <div
+               id="activeFiltersDisplay"
+               class="active-filters"
+               style="display: none"
+            ></div>
+         </div>
 
-        <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="loading-indicator" style="display: flex;">
+         <!-- Loading Indicator -->
+         <div
+            id="loadingIndicator"
+            class="loading-indicator"
+            style="display: flex"
+         >
             <div class="loading-spinner"></div>
             <p>Loading content...</p>
-        </div>
+         </div>
 
-        <!-- Error Message -->
-        <div id="errorMessage" class="error-message" style="display: none;">
+         <!-- Error Message -->
+         <div id="errorMessage" class="error-message" style="display: none">
             <p id="errorText"></p>
-            <button class="btn-secondary" id="retryBtn" tabindex="0">Retry</button>
-        </div>
+            <button class="btn-secondary" id="retryBtn" tabindex="0">
+               Retry
+            </button>
+         </div>
 
-        <!-- Content Grid -->
-        <div id="contentGrid" class="content-grid" style="display: none;">
+         <!-- Content Grid -->
+         <div id="contentGrid" class="content-grid" style="display: none">
             <!-- Items will be loaded here -->
-        </div>
+         </div>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="empty-state" style="display: none;">
+         <!-- Empty State -->
+         <div id="emptyState" class="empty-state" style="display: none">
             <p>No content found</p>
-        </div>
-    </div>
+         </div>
+      </div>
 
-    <!-- Sort Modal -->
-    <div id="sortModal" class="modal" style="display: none;">
-        <div class="modal-content">
+      <!-- Sort Modal -->
+      <div id="sortModal" class="modal" style="display: none">
+         <div class="modal-content">
             <h2>Sort By</h2>
             <div class="modal-options">
-                <button class="modal-option" data-sort="popularity.desc" tabindex="0">Popularity ↓</button>
-                <button class="modal-option" data-sort="popularity.asc" tabindex="0">Popularity ↑</button>
-                <button class="modal-option" data-sort="vote_average.desc" tabindex="0">Rating ↓</button>
-                <button class="modal-option" data-sort="vote_average.asc" tabindex="0">Rating ↑</button>
-                <button class="modal-option" data-sort="primary_release_date.desc" tabindex="0">Release Date ↓</button>
-                <button class="modal-option" data-sort="primary_release_date.asc" tabindex="0">Release Date ↑</button>
-                <button class="modal-option" data-sort="title.asc" tabindex="0">Title A-Z</button>
-                <button class="modal-option" data-sort="title.desc" tabindex="0">Title Z-A</button>
+               <button
+                  class="modal-option"
+                  data-sort="popularity.desc"
+                  tabindex="0"
+               >
+                  Popularity ↓
+               </button>
+               <button
+                  class="modal-option"
+                  data-sort="popularity.asc"
+                  tabindex="0"
+               >
+                  Popularity ↑
+               </button>
+               <button
+                  class="modal-option"
+                  data-sort="vote_average.desc"
+                  tabindex="0"
+               >
+                  Rating ↓
+               </button>
+               <button
+                  class="modal-option"
+                  data-sort="vote_average.asc"
+                  tabindex="0"
+               >
+                  Rating ↑
+               </button>
+               <button
+                  class="modal-option"
+                  data-sort="primary_release_date.desc"
+                  tabindex="0"
+               >
+                  Release Date ↓
+               </button>
+               <button
+                  class="modal-option"
+                  data-sort="primary_release_date.asc"
+                  tabindex="0"
+               >
+                  Release Date ↑
+               </button>
+               <button class="modal-option" data-sort="title.asc" tabindex="0">
+                  Title A-Z
+               </button>
+               <button class="modal-option" data-sort="title.desc" tabindex="0">
+                  Title Z-A
+               </button>
             </div>
-            <button class="btn-secondary modal-close" id="sortModalClose" tabindex="0">Close</button>
-        </div>
-    </div>
+            <button
+               class="btn-secondary modal-close"
+               id="sortModalClose"
+               tabindex="0"
+            >
+               Close
+            </button>
+         </div>
+      </div>
 
-    <!-- Filter Modal -->
-    <div id="filterModal" class="modal" style="display: none;">
-        <div class="modal-content">
+      <!-- Filter Modal -->
+      <div id="filterModal" class="modal" style="display: none">
+         <div class="modal-content">
             <h2>Filter</h2>
             <div class="modal-options">
-                <button class="modal-option" data-filter="all" tabindex="0">All</button>
-                <button class="modal-option active" data-filter="available" tabindex="0">Available</button>
-                <button class="modal-option" data-filter="requested" tabindex="0">Requested</button>
+               <button class="modal-option" data-filter="all" tabindex="0">
+                  All
+               </button>
+               <button
+                  class="modal-option active"
+                  data-filter="available"
+                  tabindex="0"
+               >
+                  Available
+               </button>
+               <button
+                  class="modal-option"
+                  data-filter="requested"
+                  tabindex="0"
+               >
+                  Requested
+               </button>
             </div>
-            <button class="btn-secondary modal-close" id="filterModalClose" tabindex="0">Close</button>
-        </div>
-    </div>
-</body>
+            <button
+               class="btn-secondary modal-close"
+               id="filterModalClose"
+               tabindex="0"
+            >
+               Close
+            </button>
+         </div>
+      </div>
+   </body>
 </html>

@@ -1,162 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jellyseerr - Media Details</title>
-    <link rel="stylesheet" href="css/legacy-compat.css">
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/jellyseerr-details.css">
-    <script src="js/tizen-adapter.js" charset="utf-8"></script>
-    <script src="js/polyfills.js" charset="utf-8"></script>
-    <script src="js/storage.js" charset="utf-8"></script>
-    <script src="js/accent-color.js" charset="utf-8"></script>
-    <script src="js/ajax.js" charset="utf-8"></script>
-    <script src="js/keycodes.js" charset="utf-8"></script>
-    <script src="js/jellyfin-api.js" charset="utf-8"></script>
-    <script src="js/image-helper.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-models.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-api.js" charset="utf-8"></script>
-    <script src="js/navbar.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-details.js" charset="utf-8"></script>
-</head>
-<body>
-    <!-- Navbar will be loaded by navbar.js -->
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Jellyseerr - Media Details</title>
+      <link rel="stylesheet" href="css/legacy-compat.css" />
+      <link rel="stylesheet" href="css/navbar.css" />
+      <link rel="stylesheet" href="css/jellyseerr-details.css" />
+      <script src="js/app-version.js" charset="utf-8"></script>
+      <script src="js/tizen-adapter.js" charset="utf-8"></script>
+      <script src="js/polyfills.js" charset="utf-8"></script>
+      <script src="js/storage.js" charset="utf-8"></script>
+      <script src="js/accent-color.js" charset="utf-8"></script>
+      <script src="js/ajax.js" charset="utf-8"></script>
+      <script src="js/keycodes.js" charset="utf-8"></script>
+      <script src="js/jellyfin-api.js" charset="utf-8"></script>
+      <script src="js/image-helper.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-models.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-api.js" charset="utf-8"></script>
+      <script src="js/navbar.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-details.js" charset="utf-8"></script>
+   </head>
+   <body>
+      <!-- Navbar will be loaded by navbar.js -->
 
-    <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading-indicator">
-        <div class="loading-spinner"></div>
-        <p>Loading details...</p>
-    </div>
+      <!-- Loading Indicator -->
+      <div id="loadingIndicator" class="loading-indicator">
+         <div class="loading-spinner"></div>
+         <p>Loading details...</p>
+      </div>
 
-    <!-- Main Content -->
-    <div id="mainContent" class="main-content" style="display: none;">
-        <!-- Backdrop Section -->
-        <div class="backdrop-section">
-            <img id="backdropImage" class="backdrop-image" src="" alt="">
+      <!-- Main Content -->
+      <div id="mainContent" class="main-content" style="display: none">
+         <!-- Backdrop Section -->
+         <div class="backdrop-section">
+            <img id="backdropImage" class="backdrop-image" src="" alt="" />
             <div class="backdrop-overlay"></div>
-        </div>
+         </div>
 
-        <!-- Content Container -->
-        <div class="content-container">
+         <!-- Content Container -->
+         <div class="content-container">
             <!-- Poster -->
             <div class="poster-container">
-                <img id="posterImage" class="poster-image" src="" alt="">
+               <img id="posterImage" class="poster-image" src="" alt="" />
             </div>
 
             <!-- Header Info -->
             <div class="header-container">
-                <!-- Title -->
-                <h1 id="mediaTitle" class="media-title"></h1>
+               <!-- Title -->
+               <h1 id="mediaTitle" class="media-title"></h1>
 
-                <!-- Metadata Row -->
-                <div class="metadata-row">
-                    <span id="mediaYear" class="metadata-item"></span>
-                    <span id="mediaRating" class="metadata-item"></span>
-                    <span id="mediaRuntime" class="metadata-item"></span>
-                    <span id="mediaGenres" class="metadata-item"></span>
-                </div>
+               <!-- Metadata Row -->
+               <div class="metadata-row">
+                  <span id="mediaYear" class="metadata-item"></span>
+                  <span id="mediaRating" class="metadata-item"></span>
+                  <span id="mediaRuntime" class="metadata-item"></span>
+                  <span id="mediaGenres" class="metadata-item"></span>
+               </div>
 
-                <!-- Status Badge -->
-                <div id="statusBadge" class="status-badge" style="display: none;"></div>
+               <!-- Status Badge -->
+               <div
+                  id="statusBadge"
+                  class="status-badge"
+                  style="display: none"
+               ></div>
 
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <div class="btn-wrapper" id="requestBtnWrapper">
-                        <button id="requestBtn" class="btn-action btn-request" tabindex="0">
-                            <img src="assets/request_hd.png" alt="Request HD">
-                        </button>
-                        <span class="btn-label">Request HD</span>
-                    </div>
-                    <div class="btn-wrapper" id="request4kBtnWrapper">
-                        <button id="request4kBtn" class="btn-action btn-request" tabindex="0">
-                            <img src="assets/request_4k.png" alt="Request 4K">
-                        </button>
-                        <span class="btn-label">Request 4K</span>
-                    </div>
-                    <div class="btn-wrapper" id="trailerBtnWrapper">
-                        <button id="trailerBtn" class="btn-action btn-secondary" tabindex="0">
-                            <img src="assets/trailer.png" alt="Trailer">
-                        </button>
-                        <span class="btn-label">Trailer</span>
-                    </div>
-                    <div class="btn-wrapper" id="playBtnWrapper" style="display: none;">
-                        <button id="playBtn" class="btn-action btn-play" tabindex="0">
-                            <img src="assets/play.png" alt="Play">
-                        </button>
-                        <span class="btn-label">Play in Moonfin</span>
-                    </div>
-                </div>
+               <!-- Action Buttons -->
+               <div class="action-buttons">
+                  <div class="btn-wrapper" id="requestBtnWrapper">
+                     <button
+                        id="requestBtn"
+                        class="btn-action btn-request"
+                        tabindex="0"
+                     >
+                        <img src="assets/request_hd.png" alt="Request HD" />
+                     </button>
+                     <span class="btn-label">Request HD</span>
+                  </div>
+                  <div class="btn-wrapper" id="request4kBtnWrapper">
+                     <button
+                        id="request4kBtn"
+                        class="btn-action btn-request"
+                        tabindex="0"
+                     >
+                        <img src="assets/request_4k.png" alt="Request 4K" />
+                     </button>
+                     <span class="btn-label">Request 4K</span>
+                  </div>
+                  <div class="btn-wrapper" id="trailerBtnWrapper">
+                     <button
+                        id="trailerBtn"
+                        class="btn-action btn-secondary"
+                        tabindex="0"
+                     >
+                        <img src="assets/trailer.png" alt="Trailer" />
+                     </button>
+                     <span class="btn-label">Trailer</span>
+                  </div>
+                  <div
+                     class="btn-wrapper"
+                     id="playBtnWrapper"
+                     style="display: none"
+                  >
+                     <button
+                        id="playBtn"
+                        class="btn-action btn-play"
+                        tabindex="0"
+                     >
+                        <img src="assets/play.png" alt="Play" />
+                     </button>
+                     <span class="btn-label">Play in Moonfin</span>
+                  </div>
+               </div>
 
-                <!-- Tagline -->
-                <p id="tagline" class="tagline" style="display: none;"></p>
+               <!-- Tagline -->
+               <p id="tagline" class="tagline" style="display: none"></p>
 
-                <!-- Overview -->
-                <div class="overview-section">
-                    <h3 class="section-title">Overview</h3>
-                    <p id="overview" class="overview-text"></p>
-                </div>
+               <!-- Overview -->
+               <div class="overview-section">
+                  <h3 class="section-title">Overview</h3>
+                  <p id="overview" class="overview-text"></p>
+               </div>
             </div>
-        </div>
+         </div>
 
-        <!-- Cast Section -->
-        <div id="castSection" class="cast-section" style="display: none;">
+         <!-- Cast Section -->
+         <div id="castSection" class="cast-section" style="display: none">
             <h3 class="section-title">Cast</h3>
             <div class="cast-scroller">
-                <div id="castList" class="cast-list"></div>
+               <div id="castList" class="cast-list"></div>
             </div>
-        </div>
+         </div>
 
-        <!-- Recommendations Section -->
-        <div id="recommendationsSection" class="recommendations-section" style="display: none;">
+         <!-- Recommendations Section -->
+         <div
+            id="recommendationsSection"
+            class="recommendations-section"
+            style="display: none"
+         >
             <h3 class="section-title">Recommendations</h3>
             <div class="recommendations-scroller">
-                <div id="recommendationsList" class="recommendations-list"></div>
+               <div id="recommendationsList" class="recommendations-list"></div>
             </div>
-        </div>
+         </div>
 
-        <!-- Similar Content Section -->
-        <div id="similarSection" class="similar-section" style="display: none;">
+         <!-- Similar Content Section -->
+         <div id="similarSection" class="similar-section" style="display: none">
             <h3 id="similarTitle" class="section-title">Similar Content</h3>
             <div class="similar-scroller">
-                <div id="similarList" class="similar-list"></div>
+               <div id="similarList" class="similar-list"></div>
             </div>
-        </div>
+         </div>
 
-        <!-- Keywords Section -->
-        <div id="keywordsSection" class="keywords-section" style="display: none;">
+         <!-- Keywords Section -->
+         <div
+            id="keywordsSection"
+            class="keywords-section"
+            style="display: none"
+         >
             <h3 class="section-title">Keywords</h3>
             <div class="keywords-container">
-                <div id="keywordsList" class="keywords-list"></div>
+               <div id="keywordsList" class="keywords-list"></div>
             </div>
-        </div>
-    </div>
+         </div>
+      </div>
 
-    <!-- Season Selection Modal (for TV shows) -->
-    <div id="seasonModal" class="modal" style="display: none;">
-        <div class="modal-content">
+      <!-- Season Selection Modal (for TV shows) -->
+      <div id="seasonModal" class="modal" style="display: none">
+         <div class="modal-content">
             <h2 class="modal-title">Select Seasons to Request</h2>
             <div class="modal-buttons">
-                <button id="allSeasonsBtn" class="modal-btn" tabindex="0">All Seasons</button>
+               <button id="allSeasonsBtn" class="modal-btn" tabindex="0">
+                  All Seasons
+               </button>
             </div>
             <div id="seasonList" class="season-list"></div>
             <div class="modal-actions">
-                <button id="confirmRequestBtn" class="modal-action-btn primary" tabindex="0">Confirm Request</button>
-                <button id="cancelRequestBtn" class="modal-action-btn secondary" tabindex="0">Cancel</button>
+               <button
+                  id="confirmRequestBtn"
+                  class="modal-action-btn primary"
+                  tabindex="0"
+               >
+                  Confirm Request
+               </button>
+               <button
+                  id="cancelRequestBtn"
+                  class="modal-action-btn secondary"
+                  tabindex="0"
+               >
+                  Cancel
+               </button>
             </div>
-        </div>
-    </div>
+         </div>
+      </div>
 
-    <!-- Error Dialog -->
-    <div id="errorModal" class="modal" style="display: none;">
-        <div class="modal-content error-modal">
+      <!-- Error Dialog -->
+      <div id="errorModal" class="modal" style="display: none">
+         <div class="modal-content error-modal">
             <h2 class="modal-title">Error</h2>
             <p id="errorMessage" class="error-message"></p>
             <div class="modal-actions">
-                <button id="errorOkBtn" class="modal-action-btn primary" tabindex="0">OK</button>
+               <button
+                  id="errorOkBtn"
+                  class="modal-action-btn primary"
+                  tabindex="0"
+               >
+                  OK
+               </button>
             </div>
-        </div>
-    </div>
-</body>
+         </div>
+      </div>
+   </body>
 </html>

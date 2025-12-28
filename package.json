@@ -1,20 +1,24 @@
 {
-  "name": "Moonfin",
-  "version": "1.1.0",
-  "description": "Moonfin is a Jellyfin client for Samsung Smart TV (Tizen)",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Moonfin-Client/Tizen.git"
-  },
-  "scripts": {
-    "build": "gulp",
-    "package": "gulp buildPackage"
-  },
-  "devDependencies": {
-    "@babel/preset-env": "7.25.7",
-    "@babel/register": "7.25.7",
-    "del": "8.0.0",
-    "gulp": "5.0.0"
-  },
-  "type": "module"
+   "name": "Moonfin",
+   "version": "1.1.0",
+   "description": "Moonfin is a Jellyfin client for Samsung Smart TV (Tizen)",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Moonfin-Client/Tizen.git"
+   },
+   "scripts": {
+      "build": "gulp",
+      "build:es5": "gulp buildES5",
+      "package": "gulp buildPackage",
+      "package:es5": "gulp buildPackageES5"
+   },
+   "devDependencies": {
+      "@babel/core": "7.25.7",
+      "@babel/preset-env": "7.25.7",
+      "@babel/register": "7.25.7",
+      "del": "7.1.0",
+      "gulp": "5.0.0",
+      "gulp-babel": "8.0.0"
+   },
+   "type": "module"
 }

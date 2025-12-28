@@ -1,114 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moonfin for Tizen - Search</title>
-    <link rel="stylesheet" href="css/legacy-compat.css">
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/search.css">
-    <script src="js/tizen-adapter.js" charset="utf-8"></script>
-    <script src="js/polyfills.js" charset="utf-8"></script>
-    <script src="js/storage.js" charset="utf-8"></script>
-    <script src="js/accent-color.js" charset="utf-8"></script>
-    <script src="js/ajax.js" charset="utf-8"></script>
-    <script src="js/keycodes.js" charset="utf-8"></script>
-    <script src="js/image-helper.js" charset="utf-8"></script>
-    <script src="js/jellyfin-api.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-models.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-api.js" charset="utf-8"></script>
-    <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
-    <script src="js/multi-server.js" charset="utf-8"></script>
-    <script src="js/connection-pool.js" charset="utf-8"></script>
-    <script src="js/navbar.js" charset="utf-8"></script>
-    <script src="js/search.js" charset="utf-8"></script>
-</head>
-<body>
-    <!-- Navbar -->
-    <div id="navbar-placeholder"></div>
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Moonfin for Tizen - Search</title>
+      <link rel="stylesheet" href="css/legacy-compat.css" />
+      <link rel="stylesheet" href="css/navbar.css" />
+      <link rel="stylesheet" href="css/search.css" />
+      <script src="js/app-version.js" charset="utf-8"></script>
+      <script src="js/tizen-adapter.js" charset="utf-8"></script>
+      <script src="js/polyfills.js" charset="utf-8"></script>
+      <script src="js/storage.js" charset="utf-8"></script>
+      <script src="js/accent-color.js" charset="utf-8"></script>
+      <script src="js/ajax.js" charset="utf-8"></script>
+      <script src="js/keycodes.js" charset="utf-8"></script>
+      <script src="js/image-helper.js" charset="utf-8"></script>
+      <script src="js/jellyfin-api.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-models.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-api.js" charset="utf-8"></script>
+      <script src="js/jellyseerr-preferences.js" charset="utf-8"></script>
+      <script src="js/multi-server.js" charset="utf-8"></script>
+      <script src="js/connection-pool.js" charset="utf-8"></script>
+      <script src="js/navbar.js" charset="utf-8"></script>
+      <script src="js/search.js" charset="utf-8"></script>
+   </head>
+   <body>
+      <!-- Navbar -->
+      <div id="navbar-placeholder"></div>
 
-    <!-- Search Container -->
-    <div class="search-container">
-        <!-- Search Input Section -->
-        <div class="search-input-section">
+      <!-- Search Container -->
+      <div class="search-container">
+         <!-- Search Input Section -->
+         <div class="search-input-section">
             <div class="search-input-wrapper">
-                <svg class="search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search movies, shows, episodes, and people..." autocomplete="off">
-                <button id="clearBtn" class="clear-btn" style="display: none;">×</button>
+               <svg
+                  class="search-icon"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+               >
+                  <path
+                     fill="currentColor"
+                     d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                  />
+               </svg>
+               <input
+                  type="text"
+                  id="searchInput"
+                  class="search-input"
+                  placeholder="Search movies, shows, episodes, and people..."
+                  autocomplete="off"
+               />
+               <button id="clearBtn" class="clear-btn" style="display: none">
+                  ×
+               </button>
             </div>
-        </div>
+         </div>
 
-        <!-- Search Results -->
-        <div class="search-results" id="searchResults">
+         <!-- Search Results -->
+         <div class="search-results" id="searchResults">
             <!-- Empty State -->
             <div id="emptyState" class="empty-state">
-                <svg class="empty-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-                <h2>Search for content</h2>
-                <p>Find movies, TV shows, episodes, and cast members</p>
+               <svg
+                  class="empty-icon"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+               >
+                  <path
+                     fill="currentColor"
+                     d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                  />
+               </svg>
+               <h2>Search for content</h2>
+               <p>Find movies, TV shows, episodes, and cast members</p>
             </div>
 
             <!-- Loading Indicator -->
-            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
-                <div class="spinner"></div>
-                <p>Searching...</p>
+            <div
+               id="loadingIndicator"
+               class="loading-indicator"
+               style="display: none"
+            >
+               <div class="spinner"></div>
+               <p>Searching...</p>
             </div>
 
             <!-- Results Container -->
-            <div id="resultsContainer" class="results-container" style="display: none;">
-                <!-- Movies Row -->
-                <div id="moviesRow" class="result-row" style="display: none;">
-                    <h2 class="row-title">Movies</h2>
-                    <div class="row-scroller">
-                        <div id="moviesList" class="result-items"></div>
-                    </div>
-                </div>
+            <div
+               id="resultsContainer"
+               class="results-container"
+               style="display: none"
+            >
+               <!-- Movies Row -->
+               <div id="moviesRow" class="result-row" style="display: none">
+                  <h2 class="row-title">Movies</h2>
+                  <div class="row-scroller">
+                     <div id="moviesList" class="result-items"></div>
+                  </div>
+               </div>
 
-                <!-- TV Shows Row -->
-                <div id="showsRow" class="result-row" style="display: none;">
-                    <h2 class="row-title">TV Shows</h2>
-                    <div class="row-scroller">
-                        <div id="showsList" class="result-items"></div>
-                    </div>
-                </div>
+               <!-- TV Shows Row -->
+               <div id="showsRow" class="result-row" style="display: none">
+                  <h2 class="row-title">TV Shows</h2>
+                  <div class="row-scroller">
+                     <div id="showsList" class="result-items"></div>
+                  </div>
+               </div>
 
-                <!-- Episodes Row -->
-                <div id="episodesRow" class="result-row" style="display: none;">
-                    <h2 class="row-title">Episodes</h2>
-                    <div class="row-scroller">
-                        <div id="episodesList" class="result-items"></div>
-                    </div>
-                </div>
+               <!-- Episodes Row -->
+               <div id="episodesRow" class="result-row" style="display: none">
+                  <h2 class="row-title">Episodes</h2>
+                  <div class="row-scroller">
+                     <div id="episodesList" class="result-items"></div>
+                  </div>
+               </div>
 
-                <!-- Cast Row -->
-                <div id="castRow" class="result-row" style="display: none;">
-                    <h2 class="row-title">People</h2>
-                    <div class="row-scroller">
-                        <div id="castList" class="result-items"></div>
-                    </div>
-                </div>
+               <!-- Cast Row -->
+               <div id="castRow" class="result-row" style="display: none">
+                  <h2 class="row-title">People</h2>
+                  <div class="row-scroller">
+                     <div id="castList" class="result-items"></div>
+                  </div>
+               </div>
 
-                <!-- Jellyseerr Search Results Row -->
-                <div id="jellyseerrRow" class="result-row" style="display: none;">
-                    <h2 class="row-title">Jellyseerr</h2>
-                    <div class="row-scroller">
-                        <div id="jellyseerrList" class="result-items"></div>
-                    </div>
-                </div>
+               <!-- Jellyseerr Search Results Row -->
+               <div id="jellyseerrRow" class="result-row" style="display: none">
+                  <h2 class="row-title">Jellyseerr</h2>
+                  <div class="row-scroller">
+                     <div id="jellyseerrList" class="result-items"></div>
+                  </div>
+               </div>
             </div>
 
             <!-- No Results -->
-            <div id="noResults" class="no-results" style="display: none;">
-                <svg class="empty-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                </svg>
-                <h2>No results found</h2>
-                <p id="noResultsQuery"></p>
+            <div id="noResults" class="no-results" style="display: none">
+               <svg
+                  class="empty-icon"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+               >
+                  <path
+                     fill="currentColor"
+                     d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                  />
+               </svg>
+               <h2>No results found</h2>
+               <p id="noResultsQuery"></p>
             </div>
-        </div>
-    </div>
-</body>
+         </div>
+      </div>
+   </body>
 </html>

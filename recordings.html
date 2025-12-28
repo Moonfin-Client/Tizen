@@ -1,143 +1,186 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recordings - Jellyfin</title>
-    <link rel="stylesheet" href="css/legacy-compat.css">
-    <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/recordings.css">
-    <script src="js/tizen-adapter.js"></script>
-    <script src="js/polyfills.js"></script>
-    <script src="js/keycodes.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/accent-color.js"></script>
-    <script src="js/ajax.js"></script>
-    <script src="js/image-helper.js"></script>
-    <script src="js/jellyfin-api.js"></script>
-    <script src="js/navbar.js"></script>
-</head>
-<body>
-    <!-- Navbar will be loaded here by navbar.js -->
+   <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Recordings - Jellyfin</title>
+      <link rel="stylesheet" href="css/legacy-compat.css" />
+      <link rel="stylesheet" href="css/navbar.css" />
+      <link rel="stylesheet" href="css/recordings.css" />
+      <script src="js/app-version.js"></script>
+      <script src="js/tizen-adapter.js"></script>
+      <script src="js/polyfills.js"></script>
+      <script src="js/keycodes.js"></script>
+      <script src="js/storage.js"></script>
+      <script src="js/accent-color.js"></script>
+      <script src="js/ajax.js"></script>
+      <script src="js/image-helper.js"></script>
+      <script src="js/jellyfin-api.js"></script>
+      <script src="js/navbar.js"></script>
+   </head>
+   <body>
+      <!-- Navbar will be loaded here by navbar.js -->
 
-    <!-- Recordings Content -->
-    <div class="recordings-container">
-        <!-- Tab Navigation -->
-        <div class="recordings-tabs">
+      <!-- Recordings Content -->
+      <div class="recordings-container">
+         <!-- Tab Navigation -->
+         <div class="recordings-tabs">
             <div class="tab active" data-tab="recordings" tabindex="0">
-                <span>Recordings</span>
+               <span>Recordings</span>
             </div>
             <div class="tab" data-tab="scheduled" tabindex="0">
-                <span>Scheduled</span>
+               <span>Scheduled</span>
             </div>
             <div class="tab" data-tab="series" tabindex="0">
-                <span>Series</span>
+               <span>Series</span>
             </div>
-        </div>
+         </div>
 
-        <!-- Recordings Tab -->
-        <div class="tab-content active" id="recordingsTab">
+         <!-- Recordings Tab -->
+         <div class="tab-content active" id="recordingsTab">
             <div class="section-header">
-                <h2>Recorded Programs</h2>
-                <div class="sort-options">
-                    <span>Sort by:</span>
-                    <select id="recordingsSort" class="sort-select">
-                        <option value="date">Date</option>
-                        <option value="name">Name</option>
-                        <option value="channel">Channel</option>
-                    </select>
-                </div>
+               <h2>Recorded Programs</h2>
+               <div class="sort-options">
+                  <span>Sort by:</span>
+                  <select id="recordingsSort" class="sort-select">
+                     <option value="date">Date</option>
+                     <option value="name">Name</option>
+                     <option value="channel">Channel</option>
+                  </select>
+               </div>
             </div>
             <div class="recordings-grid" id="recordingsGrid">
-                <!-- Recordings will be dynamically populated -->
+               <!-- Recordings will be dynamically populated -->
             </div>
-        </div>
+         </div>
 
-        <!-- Scheduled Tab -->
-        <div class="tab-content" id="scheduledTab">
+         <!-- Scheduled Tab -->
+         <div class="tab-content" id="scheduledTab">
             <div class="section-header">
-                <h2>Scheduled Recordings</h2>
+               <h2>Scheduled Recordings</h2>
             </div>
             <div class="scheduled-list" id="scheduledList">
-                <!-- Scheduled recordings will be dynamically populated -->
+               <!-- Scheduled recordings will be dynamically populated -->
             </div>
-        </div>
+         </div>
 
-        <!-- Series Tab -->
-        <div class="tab-content" id="seriesTab">
+         <!-- Series Tab -->
+         <div class="tab-content" id="seriesTab">
             <div class="section-header">
-                <h2>Series Recordings</h2>
+               <h2>Series Recordings</h2>
             </div>
             <div class="series-list" id="seriesList">
-                <!-- Series recordings will be dynamically populated -->
+               <!-- Series recordings will be dynamically populated -->
             </div>
-        </div>
+         </div>
 
-        <!-- Loading Indicator -->
-        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+         <!-- Loading Indicator -->
+         <div
+            class="loading-indicator"
+            id="loadingIndicator"
+            style="display: none"
+         >
             <div class="spinner"></div>
             <div>Loading...</div>
-        </div>
-    </div>
+         </div>
+      </div>
 
-    <!-- Recording Detail Popup -->
-    <div class="recording-detail-popup" id="recordingDetailPopup" style="display: none;">
-        <div class="popup-content">
+      <!-- Recording Detail Popup -->
+      <div
+         class="recording-detail-popup"
+         id="recordingDetailPopup"
+         style="display: none"
+      >
+         <div class="popup-content">
             <div class="popup-header">
-                <div class="popup-title" id="popupTitle"></div>
-                <div class="popup-subtitle" id="popupSubtitle" style="display: none;"></div>
-                <div class="popup-time" id="popupTime"></div>
+               <div class="popup-title" id="popupTitle"></div>
+               <div
+                  class="popup-subtitle"
+                  id="popupSubtitle"
+                  style="display: none"
+               ></div>
+               <div class="popup-time" id="popupTime"></div>
             </div>
             <div class="popup-body">
-                <div class="popup-image-container">
-                    <img id="popupImage" src="" alt="">
-                </div>
-                <div class="popup-info">
-                    <div class="popup-overview" id="popupOverview"></div>
-                    <div class="popup-metadata">
-                        <div class="metadata-item">
-                            <span class="metadata-label">Channel:</span>
-                            <span class="metadata-value" id="popupChannel"></span>
-                        </div>
-                        <div class="metadata-item" id="popupDateContainer">
-                            <span class="metadata-label">Recorded:</span>
-                            <span class="metadata-value" id="popupDate"></span>
-                        </div>
-                        <div class="metadata-item" id="popupYearContainer" style="display: none;">
-                            <span class="metadata-label">Year:</span>
-                            <span class="metadata-value" id="popupYear"></span>
-                        </div>
-                        <div class="metadata-item" id="popupRatingContainer" style="display: none;">
-                            <span class="metadata-label">Rating:</span>
-                            <span class="metadata-value" id="popupRating"></span>
-                        </div>
-                        <div class="metadata-item" id="popupGenresContainer" style="display: none;">
-                            <span class="metadata-label">Genres:</span>
-                            <span class="metadata-value" id="popupGenres"></span>
-                        </div>
-                    </div>
-                </div>
+               <div class="popup-image-container">
+                  <img id="popupImage" src="" alt="" />
+               </div>
+               <div class="popup-info">
+                  <div class="popup-overview" id="popupOverview"></div>
+                  <div class="popup-metadata">
+                     <div class="metadata-item">
+                        <span class="metadata-label">Channel:</span>
+                        <span class="metadata-value" id="popupChannel"></span>
+                     </div>
+                     <div class="metadata-item" id="popupDateContainer">
+                        <span class="metadata-label">Recorded:</span>
+                        <span class="metadata-value" id="popupDate"></span>
+                     </div>
+                     <div
+                        class="metadata-item"
+                        id="popupYearContainer"
+                        style="display: none"
+                     >
+                        <span class="metadata-label">Year:</span>
+                        <span class="metadata-value" id="popupYear"></span>
+                     </div>
+                     <div
+                        class="metadata-item"
+                        id="popupRatingContainer"
+                        style="display: none"
+                     >
+                        <span class="metadata-label">Rating:</span>
+                        <span class="metadata-value" id="popupRating"></span>
+                     </div>
+                     <div
+                        class="metadata-item"
+                        id="popupGenresContainer"
+                        style="display: none"
+                     >
+                        <span class="metadata-label">Genres:</span>
+                        <span class="metadata-value" id="popupGenres"></span>
+                     </div>
+                  </div>
+               </div>
             </div>
             <div class="popup-actions">
-                <button class="popup-btn primary" id="popupPlayBtn" tabindex="0">Play</button>
-                <button class="popup-btn danger" id="popupDeleteBtn" tabindex="0">Delete</button>
-                <button class="popup-btn secondary" id="popupCloseBtn" tabindex="0">Close</button>
+               <button class="popup-btn primary" id="popupPlayBtn" tabindex="0">
+                  Play
+               </button>
+               <button
+                  class="popup-btn danger"
+                  id="popupDeleteBtn"
+                  tabindex="0"
+               >
+                  Delete
+               </button>
+               <button
+                  class="popup-btn secondary"
+                  id="popupCloseBtn"
+                  tabindex="0"
+               >
+                  Close
+               </button>
             </div>
-        </div>
-    </div>
+         </div>
+      </div>
 
-    <!-- Confirmation Modal -->
-    <div class="modal" id="confirmModal" style="display: none;">
-        <div class="modal-content">
+      <!-- Confirmation Modal -->
+      <div class="modal" id="confirmModal" style="display: none">
+         <div class="modal-content">
             <h2 id="confirmTitle">Confirm</h2>
             <p id="confirmMessage" class="modal-description"></p>
             <div class="modal-actions">
-                <button class="btn-secondary" id="confirmCancelBtn" tabindex="0">Cancel</button>
-                <button class="btn-primary" id="confirmOkBtn" tabindex="0">Confirm</button>
+               <button class="btn-secondary" id="confirmCancelBtn" tabindex="0">
+                  Cancel
+               </button>
+               <button class="btn-primary" id="confirmOkBtn" tabindex="0">
+                  Confirm
+               </button>
             </div>
-        </div>
-    </div>
+         </div>
+      </div>
 
-    <script src="js/recordings.js"></script>
-</body>
+      <script src="js/recordings.js"></script>
+   </body>
 </html>
