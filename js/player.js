@@ -101,7 +101,7 @@ var PlayerController = (function () {
          ServerLogger.logPlaybackWarning("Falling back to transcoding", {
             reason: reason,
             itemId: itemId,
-            itemName: currentItem ? currentItem.Name : "Unknown",
+            itemName: itemData ? itemData.Name : "Unknown",
             mediaSource: mediaSource
                ? {
                     id: mediaSource.Id,
@@ -974,12 +974,13 @@ var PlayerController = (function () {
       var streamUrl;
       var mimeType;
       var useDirectPlay = false;
-      var params = new URLSearchParams({
-         mediaSourceId: mediaSource.Id,
-         deviceId: JellyfinAPI.init(),
-         api_key: auth.accessToken,
-         PlaySessionId: playSessionId,
-      });
+      // URLSearchParams in Chrome 53 (webOS 4) / older Tizen doesn't support object constructor
+      // Must append parameters one by one
+      var params = new URLSearchParams();
+      params.append('mediaSourceId', mediaSource.Id);
+      params.append('deviceId', JellyfinAPI.init());
+      params.append('api_key', auth.accessToken);
+      params.append('PlaySessionId', playSessionId);
 
       var videoStream = mediaSource.MediaStreams
          ? mediaSource.MediaStreams.find(function (s) {
@@ -2737,21 +2738,21 @@ var PlayerController = (function () {
 
       // Build stream URL with track-specific parameters
       var streamUrl = auth.serverAddress + "/Videos/" + itemId + "/master.m3u8";
-      var params = new URLSearchParams({
-         mediaSourceId: currentMediaSource.Id,
-         deviceId: JellyfinAPI.init(),
-         api_key: auth.accessToken,
-         PlaySessionId: newPlaySessionId, // New session ID
-         VideoCodec: "h264",
-         AudioCodec: "aac",
-         VideoBitrate: "20000000", // Increased for better quality
-         AudioBitrate: "256000",
-         MaxWidth: "3840", // Support 4K transcoding
-         MaxHeight: "2160",
-         SegmentLength: "6",
-         MinSegments: "3",
-         BreakOnNonKeyFrames: "false",
-      });
+      // URLSearchParams in Chrome 53 (webOS 4) / older Tizen doesn't support object constructor
+      var params = new URLSearchParams();
+      params.append('mediaSourceId', currentMediaSource.Id);
+      params.append('deviceId', JellyfinAPI.init());
+      params.append('api_key', auth.accessToken);
+      params.append('PlaySessionId', newPlaySessionId); // New session ID
+      params.append('VideoCodec', 'h264');
+      params.append('AudioCodec', 'aac');
+      params.append('VideoBitrate', '20000000'); // Increased for better quality
+      params.append('AudioBitrate', '256000');
+      params.append('MaxWidth', '3840'); // Support 4K transcoding
+      params.append('MaxHeight', '2160');
+      params.append('SegmentLength', '6');
+      params.append('MinSegments', '3');
+      params.append('BreakOnNonKeyFrames', 'false');
 
       // Set the specific track indices - these tell Jellyfin which tracks to transcode
       if (trackType === "audio") {
