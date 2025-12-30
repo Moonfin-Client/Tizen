@@ -3419,7 +3419,7 @@ var SettingsController = (function () {
             if (MultiServerManager.setActiveServer(serverId, userId)) {
                // Update global auth to point to new server/user
                auth = MultiServerManager.getServerAuth(serverId, userId);
-               storage.set("jellyfin_auth", JSON.stringify(auth));
+               storage.set("jellyfin_auth", auth);
 
                // Refresh the server list
                renderServerList();
@@ -3501,7 +3501,7 @@ var SettingsController = (function () {
                   } else {
                      // Switch to another server/user
                      auth = newAuth;
-                     storage.set("jellyfin_auth", JSON.stringify(auth));
+                     storage.set("jellyfin_auth", auth);
                      displayUserInfo();
                      showAlert(
                         "User Removed",

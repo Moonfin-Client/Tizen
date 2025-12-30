@@ -110,7 +110,7 @@
         }
         
         // Update stored auth so JellyfinAPI calls use correct server
-        storage.set('jellyfin_auth', JSON.stringify(pageAuth));
+        storage.set('jellyfin_auth', pageAuth);
         
         initializeDateDisplay();
         setupEventListeners();
