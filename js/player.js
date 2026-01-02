@@ -748,8 +748,8 @@ var PlayerController = (function () {
 
       var requestData = {
          UserId: auth.userId,
+         // Must include DeviceProfile so server knows what we can play
          DeviceProfile: getDeviceProfile(),
-         // For Live TV, we need to auto-open the live stream
          AutoOpenLiveStream: isLiveTV,
       };
 
@@ -891,60 +891,18 @@ var PlayerController = (function () {
    }
 
    /**
-    * Get device profile for PlaybackInfo request
-    * Uses BrowserDeviceProfile for accurate capability detection
+    * Get device profile for PlaybackInfo API request
+    * Uses NativeShell.AppHost.getDeviceProfile() which handles both
+    * jellyfin-web integration and custom player scenarios
     */
    function getDeviceProfile() {
-      // Use the new comprehensive device profile if available
-      if (typeof BrowserDeviceProfile !== "undefined") {
-         var profile = BrowserDeviceProfile.getDeviceProfile();
-         console.log("[Player] Using BrowserDeviceProfile:", {
-            directPlayProfiles: profile.DirectPlayProfiles.length,
-            transcodingProfiles: profile.TranscodingProfiles.length,
-            codecProfiles: profile.CodecProfiles.length,
-            isTizen: BrowserDeviceProfile.isTizen(),
-            tizenVersion: BrowserDeviceProfile.getTizenVersion(),
-            canPlayHevc: BrowserDeviceProfile.canPlayHevc(),
-            supportsHdr10: BrowserDeviceProfile.supportsHdr10()
-         });
-         return profile;
+      if (typeof NativeShell !== 'undefined' && NativeShell.AppHost && NativeShell.AppHost.getDeviceProfile) {
+         // Call without profileBuilder since this is custom player
+         return NativeShell.AppHost.getDeviceProfile();
       }
       
-      // Fallback to basic profile if BrowserDeviceProfile not loaded
-      console.warn("[Player] BrowserDeviceProfile not available, using fallback");
-      return {
-         MaxStreamingBitrate: 120000000,
-         MaxStaticBitrate: 100000000,
-         MusicStreamingTranscodingBitrate: 384000,
-         DirectPlayProfiles: [
-            {
-               Container: "mp4,mkv",
-               Type: "Video",
-               VideoCodec: "h264,hevc",
-               AudioCodec: "aac,mp3,ac3,eac3",
-            },
-         ],
-         TranscodingProfiles: [
-            {
-               Container: "ts",
-               Type: "Video",
-               AudioCodec: "aac,mp3,ac3",
-               VideoCodec: "h264",
-               Protocol: "hls",
-               Context: "Streaming",
-               MaxAudioChannels: "6",
-            },
-         ],
-         ContainerProfiles: [],
-         CodecProfiles: [],
-         SubtitleProfiles: [
-            { Format: "vtt", Method: "External" },
-            { Format: "srt", Method: "Encode" },
-            { Format: "ass", Method: "Encode" },
-            { Format: "ssa", Method: "Encode" },
-         ],
-         ResponseProfiles: [],
-      };
+      console.error('[Player] NativeShell.AppHost.getDeviceProfile not available!');
+      return null;
    }
 
    async function startPlayback(mediaSource) {
