@@ -1289,18 +1289,33 @@ var PlayerController = (function () {
          videoStream.Codec &&
          (videoStream.Codec.toLowerCase().startsWith("dvhe") ||
             videoStream.Codec.toLowerCase().startsWith("dvh1"));
-      var isHEVC10bit =
-         videoStream &&
+      var isHEVC = videoStream &&
          videoStream.Codec &&
          (videoStream.Codec.toLowerCase() === "hevc" ||
             videoStream.Codec.toLowerCase().startsWith("hev1") ||
-            videoStream.Codec.toLowerCase().startsWith("hvc1")) &&
-         videoStream.BitDepth === 10;
+            videoStream.Codec.toLowerCase().startsWith("hvc1"));
+      // Detect 10-bit HEVC by BitDepth OR by Main 10 profile (some sources don't report BitDepth)
+      var isHEVC10bit = isHEVC && (
+         videoStream.BitDepth === 10 ||
+         (videoStream.Profile && videoStream.Profile.toLowerCase().indexOf("main 10") !== -1)
+      );
       var isHDR = videoStream && 
          (videoStream.VideoRangeType === "HDR10" || 
           videoStream.VideoRangeType === "HDR10Plus" ||
           videoStream.VideoRangeType === "HLG" ||
           videoStream.VideoRangeType === "DOVIWithHDR10");
+
+      // Log video stream details for debugging playback issues
+      console.log("[Player] Video stream analysis:", {
+         codec: videoStream ? videoStream.Codec : "none",
+         profile: videoStream ? videoStream.Profile : "none",
+         bitDepth: videoStream ? videoStream.BitDepth : "none",
+         videoRangeType: videoStream ? videoStream.VideoRangeType : "none",
+         isHEVC: isHEVC,
+         isHEVC10bit: isHEVC10bit,
+         isDolbyVision: isDolbyVision,
+         isHDR: isHDR
+      });
 
       // Trust the server's decision based on our device profile
       // The server already evaluated our capabilities via the device profile we sent
@@ -1489,13 +1504,19 @@ var PlayerController = (function () {
       var containerLower = mediaSource.Container ? mediaSource.Container.toLowerCase() : '';
       var isHtml5Compatible = html5SupportedContainers.indexOf(containerLower) !== -1;
       
-      if (isDolbyVision) {
+      // Check if content requires hardware decoder (HEVC 10-bit needs AVPlay, HTML5 can't decode it)
+      var requiresHardwareDecoder = isHEVC10bit || isDolbyVision;
+      
+      if (requiresHardwareDecoder) {
+         // HEVC 10-bit and Dolby Vision require Tizen AVPlay hardware decoder
+         // HTML5 video element cannot decode these formats
+         console.log("[Player] Content requires hardware decoder (HEVC 10-bit or DV), using Tizen AVPlay");
          creationOptions.preferTizen = true;
       } else if (useDirectPlay && isHtml5Compatible) {
-         // Only use HTML5 for containers it supports (mp4, webm, etc.)
+         // Only use HTML5 for containers it supports (mp4, webm, etc.) with 8-bit video
          creationOptions.preferHTML5 = true;
       } else if (useDirectPlay && !isHtml5Compatible) {
-         // For MKV and other non-HTML5 containers, use Tizen AVPlay (native support)
+         // For non-HTML5 containers, use Tizen AVPlay (native support)
          console.log("[Player] Container " + containerLower + " not HTML5 compatible, using Tizen AVPlay");
          creationOptions.preferTizen = true;
       } else if (isTranscoding) {
