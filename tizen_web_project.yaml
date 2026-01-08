@@ -270,7 +270,6 @@ files:
   - js/settings.js
   - js/storage.js
   - js/theme-music-player.js
-  - js/jellyfin-profile-builder.js
   - js/tizen-adapter.js
   - js/track-selector.js
   - js/video-player-adapter.js

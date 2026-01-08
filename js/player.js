@@ -1087,60 +1087,7 @@ var PlayerController = (function () {
             ) {
                var mediaSourceToPlay = playbackInfo.MediaSources[0];
                
-               // ============================================================================
-               // LEGACY WORKAROUND: MKV + EAC3 DirectPlay Issue
-               // NOTE: This workaround is only used when USE_PLAYBACK_MANAGER = false
-               // When PlaybackManager is enabled, this is unnecessary because the runtime
-               // device profile prevents EAC3 in TranscodingProfiles, so the server will
-               // automatically transcode or select a compatible audio track.
-               // 
-               // Problem: Tizen HTML5 video doesn't expose audioTracks for MKV DirectPlay,
-               // so we can't switch from EAC3 to another track at runtime.
-               // 
-               // Solution: Detect MKV + EAC3 and either:
-               // 1. Switch to an alternative compatible audio track, OR
-               // 2. Force transcoding if no alternative exists
-               // 
-               // @deprecated Remove after full migration to PlaybackManager
-               // ============================================================================
-               if (mediaSourceToPlay.Container === 'mkv' && mediaSourceToPlay.SupportsDirectPlay) {
-                  var defaultAudioIdx = mediaSourceToPlay.DefaultAudioStreamIndex;
-                  var audioStreams = mediaSourceToPlay.MediaStreams ? mediaSourceToPlay.MediaStreams.filter(function(s) {
-                     return s.Type === 'Audio';
-                  }) : [];
-                  
-                  var defaultAudio = audioStreams.find(function(s) { return s.Index === defaultAudioIdx; });
-                  
-                  if (defaultAudio && (defaultAudio.Codec || '').toLowerCase() === 'eac3') {
-                     // MKV with EAC3 DirectPlay workaround: Tizen can't play EAC3 in MKV via DirectPlay
-                     // Find alternative audio track or force transcoding
-                     var compatibleCodecs = ['aac', 'ac3', 'mp3', 'opus', 'vorbis', 'pcm_s16le', 'pcm_s24le', 'flac'];
-                     var alternativeAudio = null;
-                     
-                     for (var i = 0; i < audioStreams.length; i++) {
-                        var codec = (audioStreams[i].Codec || '').toLowerCase();
-                        if (codec === 'eac3') {
-                           continue;
-                        }
-                        for (var j = 0; j < compatibleCodecs.length; j++) {
-                           if (codec === compatibleCodecs[j]) {
-                              alternativeAudio = audioStreams[i];
-                              break;
-                           }
-                        }
-                        if (alternativeAudio) break;
-                     }
-                     
-                     if (alternativeAudio) {
-                        mediaSourceToPlay.DefaultAudioStreamIndex = alternativeAudio.Index;
-                        currentAudioIndex = alternativeAudio.Index;
-                     } else {
-                        mediaSourceToPlay.SupportsDirectPlay = false;
-                        mediaSourceToPlay.SupportsDirectStream = false;
-                        currentAudioIndex = defaultAudioIdx;
-                     }
-                  }
-               }
+               // Tizen AVPlay supports EAC3 in MKV containers
                
                startPlayback(mediaSourceToPlay).catch(onError);
             } else {
@@ -1751,6 +1698,23 @@ var PlayerController = (function () {
                return;
             }
             
+            // Initialize progress reporting on first successful health check
+            if (checkCount === 1 && currentTime >= 0 && !progressInterval) {
+               console.log("[Player] First health check passed - initializing progress reporting");
+               console.log("[Player] Starting progress reporting for session:", playSessionId);
+               reportPlaybackStart();
+               startProgressReporting();
+               
+               // Send immediate progress report to establish position
+               setTimeout(function() {
+                  console.log("[Player] Sending immediate progress report");
+                  reportPlaybackProgress();
+               }, 1000);
+               
+               detectCurrentAudioTrack();
+               initializeAudioNormalization();
+            }
+            
             // Playback is fine, schedule next check
             lastTime = currentTime;
             playbackHealthCheckTimer = setTimeout(checkHealth, 2000);
@@ -2087,18 +2051,41 @@ var PlayerController = (function () {
     */
    function buildPlaybackData() {
       var currentTimeTicks = Math.floor(getCurrentTime() * 10000000);
-      var isPausedState = USE_PLAYBACK_MANAGER && playbackManagerReady 
-         ? PlaybackManagerAdapter.paused() 
-         : (videoPlayer ? videoPlayer.paused : true);
       
-      return {
+      // Determine paused state - prioritize adapter over HTML5 video element
+      var isPausedState;
+      if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
+         isPausedState = PlaybackManagerAdapter.paused();
+      } else if (playerAdapter && typeof playerAdapter.isPaused === 'function') {
+         isPausedState = playerAdapter.isPaused();
+      } else {
+         isPausedState = videoPlayer ? videoPlayer.paused : true;
+      }
+      
+      var playMethod = "DirectPlay";
+      if (isTranscoding) {
+         playMethod = "Transcode";
+      } else if (currentMediaSource && !currentMediaSource.SupportsDirectPlay && currentMediaSource.SupportsDirectStream) {
+         playMethod = "DirectStream";
+      }
+      
+      var data = {
          ItemId: itemId,
          PlaySessionId: playSessionId,
          PositionTicks: currentTimeTicks,
          IsPaused: isPausedState,
          IsMuted: videoPlayer ? videoPlayer.muted : false,
          VolumeLevel: videoPlayer ? Math.floor(videoPlayer.volume * 100) : 100,
+         CanSeek: true,
+         PlayMethod: playMethod
       };
+      
+      // Add MediaSourceId - required for Jellyfin to save position correctly
+      if (currentMediaSource && currentMediaSource.Id) {
+         data.MediaSourceId = currentMediaSource.Id;
+      }
+      
+      return data;
    }
 
    /**
@@ -2141,12 +2128,25 @@ var PlayerController = (function () {
     * Report playback progress to Jellyfin server
     */
    function reportPlaybackProgress() {
-      if (!playSessionId) return;
+      console.log("[Player] reportPlaybackProgress() called - playSessionId:", playSessionId, "itemId:", itemId);
+      if (!playSessionId) {
+         console.warn("[Player] Skipping progress report - no playSessionId");
+         return;
+      }
 
-      console.log("[Player] Reporting progress to:", auth.serverAddress);
+      var playbackData = buildPlaybackData();
+      console.log("[Player] Reporting progress:", {
+         serverAddress: auth.serverAddress,
+         positionTicks: playbackData.PositionTicks,
+         positionSeconds: playbackData.PositionTicks / 10000000,
+         isPaused: playbackData.IsPaused,
+         mediaSourceId: playbackData.MediaSourceId,
+         playMethod: playbackData.PlayMethod
+      });
+      
       makePlaybackRequest(
          auth.serverAddress + "/Sessions/Playing/Progress",
-         buildPlaybackData(),
+         playbackData,
          function () {
             console.log("[Player] Progress reported successfully");
          },
@@ -2179,11 +2179,14 @@ var PlayerController = (function () {
     * Start periodic progress reporting to server
     */
    function startProgressReporting() {
+      console.log("[Player] startProgressReporting() called - current interval:", progressInterval);
       if (progressInterval) clearInterval(progressInterval);
 
       progressInterval = setInterval(function () {
          reportPlaybackProgress();
       }, PROGRESS_REPORT_INTERVAL_MS);
+      
+      console.log("[Player] Progress reporting started - interval set to", PROGRESS_REPORT_INTERVAL_MS, "ms");
    }
 
    /**
@@ -2660,9 +2663,16 @@ var PlayerController = (function () {
       setLoadingState(LoadingState.READY);
 
       if (!progressInterval) {
-         console.log("[Player] Starting progress reporting");
+         console.log("[Player] Starting progress reporting for session:", playSessionId);
          reportPlaybackStart();
          startProgressReporting();
+         
+         // Send immediate progress report to establish position
+         setTimeout(function() {
+            console.log("[Player] Sending immediate progress report");
+            reportPlaybackProgress();
+         }, 1000);
+         
          detectCurrentAudioTrack();
          
          // Initialize audio normalization after playback starts

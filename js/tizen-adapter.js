@@ -248,13 +248,24 @@
       return platformInfo;
    }
 
-   /**
-    * Get comprehensive device profile for Tizen TVs
-    * This profile defines what codecs/formats the TV can play directly
-    * @returns {Object} Device profile for Jellyfin PlaybackInfo API
-    */
-   function getTizenDeviceProfile() {
-      // Base max video dimensions
+   var SupportedFeatures = [
+      'exit',
+      'exitmenu',
+      'externallinkdisplay',
+      'htmlaudioautoplay',
+      'htmlvideoautoplay',
+      'physicalvolumecontrol',
+      'displaylanguage',
+      'otherapppromotions',
+      'targetblank',
+      'screensaver',
+      'multiserver',
+      'subtitleappearancesettings',
+      'subtitleburnsettings'
+   ];
+
+   // Static device profile fallback
+   function getStaticDeviceProfile() {
       var maxVideoWidth = 3840;
       var maxVideoHeight = 2160;
 
@@ -276,67 +287,43 @@
          MaxStaticBitrate: 100000000,
          MusicStreamingTranscodingBitrate: 384000,
          DirectPlayProfiles: [
-            // Video profiles - MKV container
             {
                Container: 'mkv,webm',
                Type: 'Video',
                VideoCodec: 'h264,hevc,vp8,vp9,av1',
                AudioCodec: 'aac,ac3,eac3,mp3,opus,flac,vorbis,pcm,truehd,dts'
             },
-            // Video profiles - MP4 container
             {
                Container: 'mp4,m4v',
                Type: 'Video',
                VideoCodec: 'h264,hevc,vp9,av1',
                AudioCodec: 'aac,ac3,eac3,mp3,opus,flac,alac'
             },
-            // Video profiles - TS/M2TS container (broadcast/Blu-ray)
             {
                Container: 'ts,m2ts,mpegts',
                Type: 'Video',
                VideoCodec: 'h264,hevc,mpeg2video',
                AudioCodec: 'aac,ac3,eac3,mp3,dts,truehd,pcm'
             },
-            // Video profiles - AVI container
             {
                Container: 'avi',
                Type: 'Video',
                VideoCodec: 'h264,mpeg4,msmpeg4v3,vc1',
                AudioCodec: 'aac,ac3,mp3,pcm'
             },
-            // Video profiles - MOV container
             {
                Container: 'mov',
                Type: 'Video',
                VideoCodec: 'h264,hevc',
                AudioCodec: 'aac,ac3,eac3,alac,pcm'
             },
-            // Audio profiles
-            {
-               Container: 'mp3',
-               Type: 'Audio'
-            },
-            {
-               Container: 'aac,m4a,m4b',
-               Type: 'Audio',
-               AudioCodec: 'aac'
-            },
-            {
-               Container: 'flac',
-               Type: 'Audio'
-            },
-            {
-               Container: 'wav',
-               Type: 'Audio'
-            },
-            {
-               Container: 'ogg',
-               Type: 'Audio',
-               AudioCodec: 'opus,vorbis'
-            }
+            { Container: 'mp3', Type: 'Audio' },
+            { Container: 'aac,m4a,m4b', Type: 'Audio', AudioCodec: 'aac' },
+            { Container: 'flac', Type: 'Audio' },
+            { Container: 'wav', Type: 'Audio' },
+            { Container: 'ogg', Type: 'Audio', AudioCodec: 'opus,vorbis' }
          ],
          TranscodingProfiles: [
-            // Video transcoding - prefer TS for live
             {
                Container: 'ts',
                Type: 'Video',
@@ -348,7 +335,6 @@
                MinSegments: 2,
                BreakOnNonKeyFrames: true
             },
-            // Video transcoding - MP4 for VOD
             {
                Container: 'mp4',
                Type: 'Video',
@@ -357,7 +343,6 @@
                Context: 'Static',
                Protocol: 'http'
             },
-            // Audio transcoding
             {
                Container: 'mp3',
                Type: 'Audio',
@@ -377,103 +362,33 @@
          ],
          ContainerProfiles: [],
          CodecProfiles: [
-            // H.264 constraints
             {
                Type: 'Video',
                Codec: 'h264',
                Conditions: [
-                  {
-                     Condition: 'NotEquals',
-                     Property: 'IsAnamorphic',
-                     Value: 'true',
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'EqualsAny',
-                     Property: 'VideoProfile',
-                     Value: 'high|main|baseline|constrained baseline',
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'VideoLevel',
-                     Value: '52',
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'Width',
-                     Value: String(maxVideoWidth),
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'Height',
-                     Value: String(maxVideoHeight),
-                     IsRequired: false
-                  }
+                  { Condition: 'NotEquals', Property: 'IsAnamorphic', Value: 'true', IsRequired: false },
+                  { Condition: 'EqualsAny', Property: 'VideoProfile', Value: 'high|main|baseline|constrained baseline', IsRequired: false },
+                  { Condition: 'LessThanEqual', Property: 'VideoLevel', Value: '52', IsRequired: false },
+                  { Condition: 'LessThanEqual', Property: 'Width', Value: String(maxVideoWidth), IsRequired: false },
+                  { Condition: 'LessThanEqual', Property: 'Height', Value: String(maxVideoHeight), IsRequired: false }
                ]
             },
-            // HEVC constraints
             {
                Type: 'Video',
                Codec: 'hevc',
                Conditions: [
-                  {
-                     Condition: 'NotEquals',
-                     Property: 'IsAnamorphic',
-                     Value: 'true',
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'EqualsAny',
-                     Property: 'VideoProfile',
-                     Value: 'main|main 10',
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'VideoLevel',
-                     Value: '183',
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'Width',
-                     Value: String(maxVideoWidth),
-                     IsRequired: false
-                  },
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'Height',
-                     Value: String(maxVideoHeight),
-                     IsRequired: false
-                  }
-               ]
-            },
-            // Audio bitrate limits
-            {
-               Type: 'VideoAudio',
-               Codec: 'aac',
-               Conditions: [
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'AudioChannels',
-                     Value: '8',
-                     IsRequired: false
-                  }
+                  { Condition: 'NotEquals', Property: 'IsAnamorphic', Value: 'true', IsRequired: false },
+                  { Condition: 'EqualsAny', Property: 'VideoProfile', Value: 'main|main 10', IsRequired: false },
+                  { Condition: 'LessThanEqual', Property: 'VideoLevel', Value: '183', IsRequired: false },
+                  { Condition: 'LessThanEqual', Property: 'Width', Value: String(maxVideoWidth), IsRequired: false },
+                  { Condition: 'LessThanEqual', Property: 'Height', Value: String(maxVideoHeight), IsRequired: false }
                ]
             },
             {
                Type: 'VideoAudio',
-               Codec: 'ac3,eac3',
+               Codec: 'aac,ac3,eac3',
                Conditions: [
-                  {
-                     Condition: 'LessThanEqual',
-                     Property: 'AudioChannels',
-                     Value: '8',
-                     IsRequired: false
-                  }
+                  { Condition: 'LessThanEqual', Property: 'AudioChannels', Value: '8', IsRequired: false }
                ]
             }
          ],
@@ -496,26 +411,6 @@
          ResponseProfiles: []
       };
    }
-
-   // Supported features list
-   var SupportedFeatures = [
-      'exit',
-      'exitmenu',
-      'externallinkdisplay',
-      'htmlaudioautoplay',
-      'htmlvideoautoplay',
-      'physicalvolumecontrol',
-      'displaylanguage',
-      'otherapppromotions',
-      'targetblank',
-      'screensaver',
-      'multiserver',
-      'subtitleappearancesettings',
-      'subtitleburnsettings'
-   ];
-
-   // Device profile generation is now delegated to jellyfin-web's runtime profileBuilder
-   // This ensures full parity with the official client's codec/container detection
 
    // Create NativeShell interface for jellyfin-web integration
    window.NativeShell = {
@@ -553,26 +448,34 @@
          },
 
          getDeviceProfile: function (profileBuilder) {
-                        console.log('[Tizen] NativeShell.AppHost.getDeviceProfile called');
+            console.log('[Tizen] NativeShell.AppHost.getDeviceProfile called');
+            
             if (typeof profileBuilder === 'function') {
+               console.log('[Tizen] Using profileBuilder from argument');
                return profileBuilder({
                   enableMkvProgressive: false,
                   enableSsaRender: true
                });
-            } else if (typeof window.JellyfinProfileBuilder === 'function') {
-               console.log('[Tizen] Using JellyfinProfileBuilder (extracted from jellyfin-web)');
-               return window.JellyfinProfileBuilder();
-            } else {
-               return getTizenDeviceProfile();
             }
-            console.log('[Tizen] Using static Tizen device profile fallback');
+            
+            if (typeof window.jellyfinProfileBuilder === 'function') {
+               console.log('[Tizen] Using jellyfinProfileBuilder from shim');
+               return window.jellyfinProfileBuilder({
+                  enableMkvProgressive: false,
+                  enableSsaRender: true
+               });
+            }
+            
+            console.warn('[Tizen] Falling back to static device profile');
+            return getStaticDeviceProfile();
          },
 
          getSyncProfile: function (profileBuilder) {
+            console.log('[Tizen] NativeShell.AppHost.getSyncProfile called');
             if (typeof profileBuilder === 'function') {
                return profileBuilder({ enableMkvProgressive: false });
             }
-            console.warn('[Tizen] profileBuilder not provided; returning empty sync profile');
+            console.log('[Tizen] Using empty sync profile');
             return {};
          },
 

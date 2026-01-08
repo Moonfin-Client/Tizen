@@ -38,14 +38,11 @@ var PlaybackManagerAdapter = (function() {
 
       uiCallbacks = callbacks || {};
 
-      // Get jellyfin-web's playbackManager singleton
-      // This assumes jellyfin-web bundle (tizen-jellyfin-web.js) is loaded
       if (typeof window !== 'undefined' && window.playbackManager) {
          playbackManager = window.playbackManager;
          console.log('[PM-Adapter] Found playbackManager:', !!playbackManager);
       } else {
-         console.error('[PM-Adapter] jellyfin-web playbackManager not found!');
-         console.error('[PM-Adapter] Make sure tizen-jellyfin-web.js is loaded before this adapter');
+         console.log('[PM-Adapter] playbackManager not available, using legacy mode');
          return false;
       }
 
