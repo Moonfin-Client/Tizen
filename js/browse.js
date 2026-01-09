@@ -1824,6 +1824,7 @@ var BrowseController = (function () {
       showLoading();
 
       clearRows();
+      elements.featuredBanner.style.display = "none";
       elements.featuredBanner.style.opacity = "0";
       elements.featuredBanner.style.pointerEvents = "none";
 
@@ -1840,6 +1841,7 @@ var BrowseController = (function () {
       showLoading();
 
       clearRows();
+      elements.featuredBanner.style.display = "none";
       elements.featuredBanner.style.opacity = "0";
       elements.featuredBanner.style.pointerEvents = "none";
 
@@ -2638,6 +2640,7 @@ var BrowseController = (function () {
          return;
       }
 
+      elements.featuredBanner.style.display = "block";
       elements.featuredBanner.style.opacity = "1";
       elements.featuredBanner.style.pointerEvents = "auto";
 
