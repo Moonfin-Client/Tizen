@@ -1458,7 +1458,7 @@ var DetailsController = (function () {
    function loadSeasons() {
       var params = {
          userId: auth.userId,
-         fields: "Overview,PrimaryImageAspectRatio",
+         fields: "Overview,PrimaryImageAspectRatio,ItemCounts,ChildCount",
       };
 
       var endpoint = "/Shows/" + itemData.Id + "/Seasons";
@@ -1863,7 +1863,7 @@ var DetailsController = (function () {
                // Local trailer found, play it
                alert(
                   "Local trailer playback not yet implemented. Trailer ID: " +
-                     localTrailers[0].Id
+                  localTrailers[0].Id
                );
                return;
             }
@@ -2237,7 +2237,7 @@ var DetailsController = (function () {
             jellyseerrData = data;
             updateRequestUI();
          })
-         .catch(function (error) {});
+         .catch(function (error) { });
    }
 
    /**
@@ -2253,7 +2253,7 @@ var DetailsController = (function () {
                loadJellyseerrData();
             }, 500);
          })
-         .catch(function (error) {});
+         .catch(function (error) { });
    }
 
    /**
@@ -2270,7 +2270,7 @@ var DetailsController = (function () {
                loadJellyseerrData();
             }, 500);
          })
-         .catch(function (error) {});
+         .catch(function (error) { });
    }
 
    /**
