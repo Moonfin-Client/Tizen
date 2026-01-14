@@ -641,11 +641,8 @@ var PlayerController = (function () {
                document.activeElement &&
                focusableButtons.includes(document.activeElement)
             ) {
-               // If on the bottom buttons (chaptersBtn or videoInfoBtn), move to seekbar
-               if (
-                  currentFocusIndex === focusableButtons.length - 1 ||
-                  currentFocusIndex === focusableButtons.length - 2
-               ) {
+               // If on the bottom buttons (index >= 6), move to seekbar
+               if (currentFocusIndex >= 6) {
                   if (elements.progressBar) {
                      elements.progressBar.focus();
                   }
@@ -661,16 +658,20 @@ var PlayerController = (function () {
                document.activeElement &&
                focusableButtons.includes(document.activeElement)
             ) {
-               // If on any of the top buttons, move to seekbar
-               if (currentFocusIndex < focusableButtons.length - 2) {
+               // If on any of the top buttons (index < 6), move to seekbar
+               if (currentFocusIndex < 6) {
                   if (elements.progressBar) {
                      elements.progressBar.focus();
                   }
                }
             } else if (isSeekbarFocused) {
-               // Move from seekbar to first bottom button (chaptersBtn)
-               if (focusableButtons.length > 1) {
-                  currentFocusIndex = focusableButtons.length - 2;
+               // Move from seekbar to first bottom button (chaptersBtn at index 6)
+               if (focusableButtons.length > 6) {
+                  currentFocusIndex = 6;
+                  focusableButtons[currentFocusIndex].focus();
+               } else if (focusableButtons.length > 0) {
+                  // Fallback if fewer buttons
+                  currentFocusIndex = focusableButtons.length - 1;
                   focusableButtons[currentFocusIndex].focus();
                }
             } else if (focusableButtons.length > 0) {
