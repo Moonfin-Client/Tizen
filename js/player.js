@@ -4324,8 +4324,9 @@ var PlayerController = (function () {
          modalOpenerButton &&
          focusableButtons.indexOf(modalOpenerButton) !== -1
       ) {
+         var targetButton = modalOpenerButton;
          setTimeout(function () {
-            modalOpenerButton.focus();
+            targetButton.focus();
          }, 100);
       }
       modalOpenerButton = null; // Clear the reference
