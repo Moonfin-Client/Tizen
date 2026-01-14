@@ -735,7 +735,7 @@ body {
     bottom: 300px;
     right: 60px;
     z-index: 200;
-    pointer-events: all;
+    pointer-events: none;
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -744,6 +744,7 @@ body {
 .skip-overlay.visible {
     opacity: 1;
     transform: translateY(0);
+    pointer-events: all;
 }
 
 .skip-button-container {

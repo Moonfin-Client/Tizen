@@ -42,10 +42,10 @@ var PlayerController = (function () {
    let isDolbyVisionMedia = false; // Track if current media is Dolby Vision
    let playbackHealthCheckTimer = null; // Timer for checking playback health
    let forcePlayMode = null; // User override for playback mode ('direct' or 'transcode')
-   
+
    const USE_PLAYBACK_MANAGER = true;
    let playbackManagerReady = false;
-   
+
    // Load persisted play mode on init
    function loadForcePlayMode() {
       if (typeof storage !== "undefined" && itemId) {
@@ -55,7 +55,7 @@ var PlayerController = (function () {
          }
       }
    }
-   
+
    // Save play mode to persist across reloads
    function saveForcePlayMode(mode) {
       if (typeof storage !== "undefined" && itemId) {
@@ -167,86 +167,88 @@ var PlayerController = (function () {
          );
          return;
       }
-      
+
       loadForcePlayMode();
 
       cacheElements();
       setupEventListeners();
-      
+
       if (USE_PLAYBACK_MANAGER) {
          initPlaybackManagerAdapter();
       }
-      
+
       // Initialize playback flow (adapter will be created once playback method is known)
       loadItemAndPlay();
    }
-   
+
    function initPlaybackManagerAdapter() {
       console.log('[Player] Initializing PlaybackManager adapter...');
-      
+
       if (typeof PlaybackManagerAdapter === 'undefined') {
          console.error('[Player] PlaybackManagerAdapter not found! Make sure playback-manager-adapter.js is loaded');
          return;
       }
-      
+
       // Define UI callbacks for PlaybackManager events
       var callbacks = {
-         onTimeUpdate: function(currentTicks, durationTicks) {
+         onTimeUpdate: function (currentTicks, durationTicks) {
             updateTimeDisplay();
             checkMediaSegments(currentTicks);
          },
-         
-         onPause: function() {
+
+         onPause: function () {
             updatePlayPauseButton();
+            showControls();
          },
-         
-         onUnpause: function() {
+
+         onUnpause: function () {
             updatePlayPauseButton();
+            showControls();
          },
-         
-         onPlaybackStart: function(state) {
+
+         onPlaybackStart: function (state) {
             console.log('[Player] PlaybackManager playback started', state);
             showControls();
-            
+
             // Update our internal state from PlaybackManager
             if (state && state.NowPlayingItem) {
                itemData = state.NowPlayingItem;
                itemId = itemData.Id;
             }
-            
+
             // PlaybackManager handles server reporting automatically
             // No need to call reportPlaybackStart()
-            
+
             // Load tracks from PlaybackManager
             loadAudioTracksFromPlaybackManager();
             loadSubtitleTracksFromPlaybackManager();
-            
+
             // Start UI updates
             if (!progressInterval) {
                startProgressReporting(); // Keep our interval for UI updates
             }
          },
-         
-         onPlaybackStop: function(stopInfo) {
+
+         onPlaybackStop: function (stopInfo) {
             console.log('[Player] PlaybackManager playback stopped', stopInfo);
             cleanup();
          },
-         
-         onMediaStreamsChange: function() {
+
+         onMediaStreamsChange: function () {
             console.log('[Player] Media streams changed, reloading tracks');
             loadAudioTracksFromPlaybackManager();
             loadSubtitleTracksFromPlaybackManager();
          },
-         
-         onError: function(error) {
+
+         onError: function (error) {
             console.error('[Player] PlaybackManager error:', error);
             showErrorDialog('Playback Error', error.message || 'An error occurred during playback');
          }
       };
-      
+
       // Initialize adapter with callbacks
       playbackManagerReady = PlaybackManagerAdapter.init(callbacks);
-      
+
       if (playbackManagerReady) {
          console.log('[Player] PlaybackManager adapter initialized successfully');
       } else {
@@ -337,7 +339,7 @@ var PlayerController = (function () {
       };
 
       videoPlayer = elements.videoPlayer;
-      
+
       // Set initial volume to maximum and ensure not muted
       if (videoPlayer) {
          videoPlayer.volume = 1.0;
@@ -521,7 +523,7 @@ var PlayerController = (function () {
             hideLoading();
          });
 
-         playerAdapter.on("qualitychange", function (data) {});
+         playerAdapter.on("qualitychange", function (data) { });
 
          playerAdapter.on("audiotrackchange", function (data) {
             detectCurrentAudioTrack();
@@ -573,8 +575,14 @@ var PlayerController = (function () {
                // If seekbar is focused, toggle play/pause
                togglePlayPause();
             } else {
-               // Otherwise toggle play/pause
+               // Otherwise toggle play/pause and ensure focus
                togglePlayPause();
+
+               // Ensure controls are visible and focus is on play button
+               showControls();
+               if (elements.playPauseBtn) {
+                  elements.playPauseBtn.focus();
+               }
             }
             break;
 
@@ -824,7 +832,7 @@ var PlayerController = (function () {
 
             loadMediaSegments();
             loadAdjacentEpisodes();
-            
+
             if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
                startPlaybackViaPlaybackManager();
             } else {
@@ -833,23 +841,23 @@ var PlayerController = (function () {
          }
       );
    }
-   
+
    /**
     * This replaces the manual getPlaybackInfo() → startPlayback() flow
     */
    function startPlaybackViaPlaybackManager() {
       console.log('[Player] Starting playback via PlaybackManager');
-      
+
       if (!itemData) {
          console.error('[Player] No item data available');
          showErrorDialog('Playback Error', 'Item data not loaded');
          return;
       }
-      
+
       // Get start position from URL or resume point
       var startPositionSeconds = getStartPositionFromUrl();
       var startPositionTicks = 0;
-      
+
       if (startPositionSeconds !== null) {
          startPositionTicks = startPositionSeconds * 10000000; // Convert to ticks
          console.log('[Player] Starting at position:', startPositionSeconds, 'seconds');
@@ -857,43 +865,43 @@ var PlayerController = (function () {
          startPositionTicks = itemData.UserData.PlaybackPositionTicks;
          console.log('[Player] Resuming from position:', startPositionTicks / 10000000, 'seconds');
       }
-      
+
       // Build playback options for PlaybackManager
       var playOptions = {
          items: [itemData],
          startPositionTicks: startPositionTicks,
          fullscreen: true
       };
-      
+
       // Add track preferences if available (from details page or previous selection)
       var preferredAudioIndex = localStorage.getItem('preferredAudioTrack_' + itemId);
       var preferredSubtitleIndex = localStorage.getItem('preferredSubtitleTrack_' + itemId);
-      
+
       if (preferredAudioIndex !== null) {
          playOptions.audioStreamIndex = parseInt(preferredAudioIndex, 10);
          console.log('[Player] Preferred audio track:', preferredAudioIndex);
       }
-      
+
       if (preferredSubtitleIndex !== null) {
          playOptions.subtitleStreamIndex = parseInt(preferredSubtitleIndex, 10);
          console.log('[Player] Preferred subtitle track:', preferredSubtitleIndex);
       }
-      
+
       // Get max bitrate setting (in bps)
       var currentMaxBitrate = storage.get("maxBitrate", false) || "120000000";
       playOptions.maxBitrate = parseInt(currentMaxBitrate, 10);
-            console.log('[Player] PlaybackManager play options:', playOptions);
-      
+      console.log('[Player] PlaybackManager play options:', playOptions);
+
       // Start playback via PlaybackManager
       PlaybackManagerAdapter.play(playOptions)
-         .then(function() {
+         .then(function () {
             console.log('[Player] PlaybackManager playback started successfully');
             hideLoading();
-            
+
             // Generate session ID for our own tracking (PlaybackManager has its own)
             playSessionId = generateUUID();
          })
-         .catch(function(error) {
+         .catch(function (error) {
             console.error('[Player] PlaybackManager play failed:', error);
             hideLoading();
             showErrorDialog(
@@ -911,15 +919,15 @@ var PlayerController = (function () {
       if (!USE_PLAYBACK_MANAGER || !playbackManagerReady) {
          return;
       }
-      
+
       try {
          var tracks = PlaybackManagerAdapter.audioTracks();
          console.log('[Player] Loaded audio tracks from PlaybackManager:', tracks);
-         
+
          // Update UI with tracks (implementation depends on your track selector UI)
          // For now, just log the available tracks
          if (tracks && tracks.length > 0) {
-            tracks.forEach(function(track, index) {
+            tracks.forEach(function (track, index) {
                console.log('[Player] Audio track ' + index + ':', {
                   index: track.index,
                   language: track.language,
@@ -941,14 +949,14 @@ var PlayerController = (function () {
       if (!USE_PLAYBACK_MANAGER || !playbackManagerReady) {
          return;
       }
-      
+
       try {
          var tracks = PlaybackManagerAdapter.subtitleTracks();
          console.log('[Player] Loaded subtitle tracks from PlaybackManager:', tracks);
-         
+
          // Update UI with tracks
          if (tracks && tracks.length > 0) {
-            tracks.forEach(function(track, index) {
+            tracks.forEach(function (track, index) {
                console.log('[Player] Subtitle track ' + index + ':', {
                   index: track.index,
                   language: track.language,
@@ -980,7 +988,7 @@ var PlayerController = (function () {
       var isLiveTV = itemData && itemData.Type === "TvChannel";
 
       var deviceProfile = getDeviceProfile();
-      
+
       // Check MKV support with ES5 loop for Tizen 4 compatibility
       var mkvSupported = false;
       var mkvProfile = null;
@@ -1002,7 +1010,7 @@ var PlayerController = (function () {
          DeviceProfile: deviceProfile,
          AutoOpenLiveStream: isLiveTV,
       };
-      
+
       if (typeof ServerLogger !== "undefined") {
          ServerLogger.logPlaybackInfo("Requesting playback info", {
             itemId: itemId,
@@ -1011,7 +1019,7 @@ var PlayerController = (function () {
             serverAddress: auth.serverAddress
          });
       }
-      
+
       ajax.request(playbackUrl, {
          method: "POST",
          headers: {
@@ -1032,13 +1040,13 @@ var PlayerController = (function () {
                var mediaSource = playbackInfo.MediaSources[0];
                var videoStream = mediaSource.MediaStreams
                   ? mediaSource.MediaStreams.find(function (s) {
-                       return s.Type === "Video";
-                    })
+                     return s.Type === "Video";
+                  })
                   : null;
                var audioStream = mediaSource.MediaStreams
                   ? mediaSource.MediaStreams.find(function (s) {
-                       return s.Type === "Audio";
-                    })
+                     return s.Type === "Audio";
+                  })
                   : null;
 
                if (typeof ServerLogger !== "undefined") {
@@ -1055,7 +1063,7 @@ var PlayerController = (function () {
                      directStreamUrl: mediaSource.DirectStreamUrl || "none"
                   });
                }
-               
+
                // Additional debug logging for codec troubleshooting
                console.log("[Player] Server playback decision:", {
                   container: mediaSource.Container,
@@ -1086,9 +1094,9 @@ var PlayerController = (function () {
                playbackInfo.MediaSources.length > 0
             ) {
                var mediaSourceToPlay = playbackInfo.MediaSources[0];
-               
+
                // Tizen AVPlay supports EAC3 in MKV containers
-               
+
                startPlayback(mediaSourceToPlay).catch(onError);
             } else {
                showErrorDialog(
@@ -1100,7 +1108,7 @@ var PlayerController = (function () {
          },
          error: function (err) {
             console.error("[Player] PlaybackInfo request failed:", err);
-            
+
             var title = "Playback Error";
             var message = "Failed to get playback information from the server.";
             var details = "";
@@ -1181,13 +1189,13 @@ var PlayerController = (function () {
       // Populate audio/subtitle streams early so preferences can be applied
       audioStreams = mediaSource.MediaStreams
          ? mediaSource.MediaStreams.filter(function (s) {
-              return s.Type === "Audio";
-           })
+            return s.Type === "Audio";
+         })
          : [];
       subtitleStreams = mediaSource.MediaStreams
          ? mediaSource.MediaStreams.filter(function (s) {
-              return s.Type === "Subtitle";
-           })
+            return s.Type === "Subtitle";
+         })
          : [];
 
       currentAudioIndex = -1;
@@ -1222,13 +1230,13 @@ var PlayerController = (function () {
 
       var videoStream = mediaSource.MediaStreams
          ? mediaSource.MediaStreams.find(function (s) {
-              return s.Type === "Video";
-           })
+            return s.Type === "Video";
+         })
          : null;
       var audioStream = mediaSource.MediaStreams
          ? mediaSource.MediaStreams.find(function (s) {
-              return s.Type === "Audio";
-           })
+            return s.Type === "Audio";
+         })
          : null;
 
       var isDolbyVision =
@@ -1246,11 +1254,11 @@ var PlayerController = (function () {
          videoStream.BitDepth === 10 ||
          (videoStream.Profile && videoStream.Profile.toLowerCase().indexOf("main 10") !== -1)
       );
-      var isHDR = videoStream && 
-         (videoStream.VideoRangeType === "HDR10" || 
-          videoStream.VideoRangeType === "HDR10Plus" ||
-          videoStream.VideoRangeType === "HLG" ||
-          videoStream.VideoRangeType === "DOVIWithHDR10");
+      var isHDR = videoStream &&
+         (videoStream.VideoRangeType === "HDR10" ||
+            videoStream.VideoRangeType === "HDR10Plus" ||
+            videoStream.VideoRangeType === "HLG" ||
+            videoStream.VideoRangeType === "DOVIWithHDR10");
 
       // Log video stream details for debugging playback issues
       console.log("[Player] Video stream analysis:", {
@@ -1284,7 +1292,7 @@ var PlayerController = (function () {
       // Priority: DirectPlay > DirectStream > Transcode (unless user forces specific mode)
       var shouldUseDirectPlay = false;
       var shouldUseDirectStream = false;
-      
+
       if (forcePlayMode === "direct") {
          // User explicitly wants direct play - try it if server says we can
          shouldUseDirectPlay = canDirectPlay;
@@ -1315,7 +1323,7 @@ var PlayerController = (function () {
             console.log("[Player] Neither direct play nor direct stream available - will transcode");
          }
       }
-      
+
       var playbackMethod = shouldUseDirectPlay ? "DirectPlay" : (shouldUseDirectStream ? "DirectStream" : (canTranscode ? "Transcode" : "None"));
       console.log("[Player] Playback decision:", {
          method: playbackMethod,
@@ -1444,16 +1452,16 @@ var PlayerController = (function () {
 
       // Prepare the correct adapter based on playback method
       var creationOptions = {};
-      
+
       // Containers supported by HTML5 video element on Tizen
       // Tizen's HTML5 <video> element supports MKV natively
       var html5SupportedContainers = ['mp4', 'm4v', 'webm', 'ogg', 'ogv', 'mov', 'mkv'];
       var containerLower = mediaSource.Container ? mediaSource.Container.toLowerCase() : '';
       var isHtml5Compatible = html5SupportedContainers.indexOf(containerLower) !== -1;
-      
+
       // Check if content requires hardware decoder (HEVC 10-bit needs AVPlay, HTML5 can't decode it)
       var requiresHardwareDecoder = isHEVC10bit || isDolbyVision;
-      
+
       if (requiresHardwareDecoder) {
          // HEVC 10-bit and Dolby Vision require Tizen AVPlay hardware decoder
          // HTML5 video element cannot decode these formats
@@ -1540,18 +1548,18 @@ var PlayerController = (function () {
             clearLoadingTimeout();
             console.log(
                "[Player] Playback loaded successfully (" +
-                  (useDirectPlay ? "direct" : "stream") +
-                  ")"
+               (useDirectPlay ? "direct" : "stream") +
+               ")"
             );
-            
+
             // Try to start playback immediately (don't wait for canplay)
             // This helps detect codec issues faster
             // Use playerAdapter.play() to support both HTML5 and Tizen AVPlay
             console.log("[Player] Calling play() on adapter");
-            playerAdapter.play().catch(function(err) {
+            playerAdapter.play().catch(function (err) {
                console.log("[Player] play() failed (may be normal):", err.message);
             });
-            
+
             // Start health check for both direct play AND transcoding
             // This ensures playback actually starts regardless of method
             startPlaybackHealthCheck(mediaSource, useDirectPlay);
@@ -1567,12 +1575,12 @@ var PlayerController = (function () {
     */
    function fallbackToTranscoding() {
       console.log("[Player] Falling back to HLS transcoding...");
-      
+
       if (!currentMediaSource) {
          console.error("[Player] No media source available for fallback");
          return;
       }
-      
+
       // Stop current playback
       if (playerAdapter) {
          try {
@@ -1581,10 +1589,10 @@ var PlayerController = (function () {
             console.warn("[Player] Error stopping adapter:", e);
          }
       }
-      
+
       // Force transcode mode and reload
       forcePlayMode = "transcode";
-      
+
       // Re-request playback info which will now use transcoding
       console.log("[Player] Reloading with transcode mode...");
       getPlaybackInfo();
@@ -1607,7 +1615,7 @@ var PlayerController = (function () {
       var checkCount = 0;
       var lastTime = 0;
       var playbackEverStarted = false;
-      
+
       // Helper to get current time from adapter or video element
       function getCurrentTime() {
          if (playerAdapter && typeof playerAdapter.getCurrentTime === 'function') {
@@ -1615,23 +1623,23 @@ var PlayerController = (function () {
          }
          return videoPlayer.currentTime;
       }
-      
+
       // Helper to check if playback is paused
       function isPaused() {
          if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
             return PlaybackManagerAdapter.paused();
          }
-         
+
          // Legacy: Use adapter if available
          if (playerAdapter && typeof playerAdapter.isPaused === 'function') {
             return playerAdapter.isPaused();
          }
          return videoPlayer.paused;
       }
-      
+
       // Helper to check if adapter is a Tizen adapter (doesn't use HTML5 video element)
       function isNativeAdapter() {
-         return playerAdapter && playerAdapter.getName && 
+         return playerAdapter && playerAdapter.getName &&
             (playerAdapter.getName() === 'TizenAVPlay' || playerAdapter.getName() === 'Shaka');
       }
 
@@ -1645,9 +1653,9 @@ var PlayerController = (function () {
                playbackHealthCheckTimer = null;
                return;
             }
-            
+
             playbackHealthCheckTimer = null;
-            
+
             // Final check: if playback never started after all attempts
             var currentTime = getCurrentTime();
             if (!playbackEverStarted && currentTime === 0) {
@@ -1660,16 +1668,16 @@ var PlayerController = (function () {
                   error: videoPlayer.error ? videoPlayer.error.message : "none",
                   adapter: playerAdapter ? playerAdapter.getName() : "none"
                });
-               
+
                // Try one more play() call as last resort (only for HTML5)
                if (!isNativeAdapter() && isPaused()) {
                   console.log("[Player] Attempting final play() call...");
                   if (playerAdapter && typeof playerAdapter.play === 'function') {
-                     playerAdapter.play().catch(function(err) {
+                     playerAdapter.play().catch(function (err) {
                         console.error("[Player] Final play() attempt failed:", err);
                      });
                   } else {
-                     videoPlayer.play().catch(function(err) {
+                     videoPlayer.play().catch(function (err) {
                         console.error("[Player] Final play() attempt failed:", err);
                      });
                   }
@@ -1680,52 +1688,52 @@ var PlayerController = (function () {
 
          checkCount++;
          var currentTime = getCurrentTime();
-         
+
          // Track if playback ever progressed
          if (currentTime > 0) {
             playbackEverStarted = true;
          }
-         
+
          // For native adapters (Tizen AVPlay, Shaka), use simpler checks
          if (isNativeAdapter()) {
             var paused = isPaused();
             var isStuck = !paused && currentTime === lastTime && checkCount > 1;
-            
+
             console.log("[Player] Health check #" + checkCount + " (native adapter):", {
                currentTime: currentTime,
                paused: paused,
                adapter: playerAdapter.getName(),
                stuck: isStuck
             });
-            
+
             // For native adapters, only fail if stuck for multiple checks
             if (isStuck && checkCount >= 3) {
                console.log("[Player] Native adapter playback appears stuck");
                console.log("[Player] This may be a simulator without real AVPlay - falling back to HLS transcoding");
                playbackHealthCheckTimer = null;
-               
+
                // Fall back to HLS transcoding which works in simulators/browsers
                fallbackToTranscoding();
                return;
             }
-            
+
             // Initialize progress reporting on first successful health check
             if (checkCount === 1 && currentTime >= 0 && !progressInterval) {
                console.log("[Player] First health check passed - initializing progress reporting");
                console.log("[Player] Starting progress reporting for session:", playSessionId);
                reportPlaybackStart();
                startProgressReporting();
-               
+
                // Send immediate progress report to establish position
-               setTimeout(function() {
+               setTimeout(function () {
                   console.log("[Player] Sending immediate progress report");
                   reportPlaybackProgress();
                }, 1000);
-               
+
                detectCurrentAudioTrack();
                initializeAudioNormalization();
             }
-            
+
             // Playback is fine, schedule next check
             lastTime = currentTime;
             playbackHealthCheckTimer = setTimeout(checkHealth, 2000);
@@ -1735,16 +1743,16 @@ var PlayerController = (function () {
          // HTML5 video element checks (original logic)
          // Check 1: Is playback stuck? (time not advancing when it should)
          var isStuck = !videoPlayer.paused && currentTime === lastTime;
-         
+
          // Check 1b: Specifically detect stuck at 0:00 - common for unsupported codecs
          // This can happen when video is paused OR playing but codec failed to initialize
-         var stuckAtStart = currentTime === 0 && 
+         var stuckAtStart = currentTime === 0 &&
             videoPlayer.readyState < HTMLMediaElement.HAVE_FUTURE_DATA && checkCount >= 2;
-         
+
          // Check 1c: Video still paused after several checks - canplay never fired
          // For transcoding, be more lenient (check >= 4) as HLS needs time to buffer
          var pausedThreshold = isDirectPlay ? 3 : 4;
-         var stuckPaused = videoPlayer.paused && currentTime === 0 && 
+         var stuckPaused = videoPlayer.paused && currentTime === 0 &&
             videoPlayer.readyState < HTMLMediaElement.HAVE_METADATA && checkCount >= pausedThreshold;
 
          // Check 2: Video element in bad state?
@@ -1763,7 +1771,7 @@ var PlayerController = (function () {
                videoPlayer.videoTracks.length === 0 ||
                videoPlayer.audioTracks.length === 0;
          }
-         
+
          // Log current state for debugging
          console.log("[Player] Health check #" + checkCount + ":", {
             currentTime: currentTime,
@@ -1783,7 +1791,7 @@ var PlayerController = (function () {
                readyState: videoPlayer.readyState,
                networkState: videoPlayer.networkState,
             });
-            
+
             // Log to server for diagnostics
             if (typeof ServerLogger !== "undefined") {
                var logMessage = isDirectPlay ? "Direct play health check failed" : "Transcode playback health check failed";
@@ -1805,20 +1813,20 @@ var PlayerController = (function () {
             }
 
             playbackHealthCheckTimer = null;
-            
+
             // Log the issue but DON'T automatically switch to transcoding
             // This matches jellyfin-web behavior - let the user decide via play mode button
             console.error("[Player] Playback issue detected - video may not be playing");
-            
+
             // Try one more play() call as last resort
             if (isPaused()) {
                console.log("[Player] Attempting to restart playback...");
                if (playerAdapter && typeof playerAdapter.play === 'function') {
-                  playerAdapter.play().catch(function(err) {
+                  playerAdapter.play().catch(function (err) {
                      console.error("[Player] Failed to restart playback:", err);
                   });
                } else {
-                  videoPlayer.play().catch(function(err) {
+                  videoPlayer.play().catch(function (err) {
                      console.error("[Player] Failed to restart playback:", err);
                   });
                }
@@ -1846,15 +1854,15 @@ var PlayerController = (function () {
       // If Tizen AVPlay failed on direct play, try HTML5 fallback
       if (isDirectPlay && playerAdapter && playerAdapter.getName && playerAdapter.getName() === 'TizenAVPlay') {
          console.log("[Player] Tizen AVPlay failed, trying HTML5 fallback...");
-         
+
          fallbackToHTML5(mediaSource);
          return;
       }
-      
+
       // If HTML5 failed on direct play, try transcoding
       if (isDirectPlay && playerAdapter && playerAdapter.getName && playerAdapter.getName() === 'HTML5') {
          console.log("[Player] HTML5 direct play failed, trying transcode...");
-         
+
          fallbackToTranscoding();
          return;
       }
@@ -1873,12 +1881,12 @@ var PlayerController = (function () {
     */
    function fallbackToHTML5(mediaSource) {
       console.log("[Player] Falling back to HTML5 adapter...");
-      
+
       if (!mediaSource) {
          console.error("[Player] No media source for HTML5 fallback");
          return;
       }
-      
+
       // Stop current adapter
       if (playerAdapter) {
          try {
@@ -1887,16 +1895,16 @@ var PlayerController = (function () {
             console.warn("[Player] Error stopping Tizen adapter:", e);
          }
       }
-      
+
       // Retry with HTML5
-      ensurePlayerAdapter({ preferHTML5: true }).then(function() {
+      ensurePlayerAdapter({ preferHTML5: true }).then(function () {
          console.log("[Player] Retrying playback with HTML5 adapter");
-         startPlayback(mediaSource).catch(function(err) {
+         startPlayback(mediaSource).catch(function (err) {
             console.error("[Player] HTML5 fallback also failed:", err);
             // HTML5 failed too, try transcoding as last resort
             fallbackToTranscoding();
          });
-      }).catch(function(err) {
+      }).catch(function (err) {
          console.error("[Player] Failed to create HTML5 adapter:", err);
          fallbackToTranscoding();
       });
@@ -1953,8 +1961,8 @@ var PlayerController = (function () {
             ).toFixed(1);
             console.log(
                "[Player] Direct play timeout after " +
-                  elapsedSeconds +
-                  "s (no buffering progress)"
+               elapsedSeconds +
+               "s (no buffering progress)"
             );
             setLoadingState(LoadingState.ERROR);
             alert("Direct playback timed out. Try using the Play Mode option to switch playback methods.");
@@ -2032,7 +2040,7 @@ var PlayerController = (function () {
       if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
          return PlaybackManagerAdapter.currentTime();
       }
-      
+
       // Legacy: Use video element
       if (playerAdapter && typeof playerAdapter.getCurrentTime === 'function') {
          return playerAdapter.getCurrentTime();
@@ -2048,7 +2056,7 @@ var PlayerController = (function () {
       if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
          return PlaybackManagerAdapter.duration();
       }
-      
+
       // Legacy: Use video element
       if (playerAdapter && typeof playerAdapter.getDuration === 'function') {
          return playerAdapter.getDuration();
@@ -2062,7 +2070,7 @@ var PlayerController = (function () {
     */
    function buildPlaybackData() {
       var currentTimeTicks = Math.floor(getCurrentTime() * 10000000);
-      
+
       // Determine paused state - prioritize adapter over HTML5 video element
       var isPausedState;
       if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
@@ -2072,14 +2080,14 @@ var PlayerController = (function () {
       } else {
          isPausedState = videoPlayer ? videoPlayer.paused : true;
       }
-      
+
       var playMethod = "DirectPlay";
       if (isTranscoding) {
          playMethod = "Transcode";
       } else if (currentMediaSource && !currentMediaSource.SupportsDirectPlay && currentMediaSource.SupportsDirectStream) {
          playMethod = "DirectStream";
       }
-      
+
       var data = {
          ItemId: itemId,
          PlaySessionId: playSessionId,
@@ -2090,12 +2098,12 @@ var PlayerController = (function () {
          CanSeek: true,
          PlayMethod: playMethod
       };
-      
+
       // Add MediaSourceId - required for Jellyfin to save position correctly
       if (currentMediaSource && currentMediaSource.Id) {
          data.MediaSourceId = currentMediaSource.Id;
       }
-      
+
       return data;
    }
 
@@ -2130,8 +2138,8 @@ var PlayerController = (function () {
       makePlaybackRequest(
          auth.serverAddress + "/Sessions/Playing",
          buildPlaybackData(),
-         function () {},
-         function (err) {}
+         function () { },
+         function (err) { }
       );
    }
 
@@ -2154,7 +2162,7 @@ var PlayerController = (function () {
          mediaSourceId: playbackData.MediaSourceId,
          playMethod: playbackData.PlayMethod
       });
-      
+
       makePlaybackRequest(
          auth.serverAddress + "/Sessions/Playing/Progress",
          playbackData,
@@ -2196,7 +2204,7 @@ var PlayerController = (function () {
       progressInterval = setInterval(function () {
          reportPlaybackProgress();
       }, PROGRESS_REPORT_INTERVAL_MS);
-      
+
       console.log("[Player] Progress reporting started - interval set to", PROGRESS_REPORT_INTERVAL_MS, "ms");
    }
 
@@ -2222,12 +2230,12 @@ var PlayerController = (function () {
          PlaybackManagerAdapter.playPause();
          return;
       }
-      
+
       // Legacy: Use adapter's isPaused if available, otherwise fallback to video element
-      var isPaused = playerAdapter && typeof playerAdapter.isPaused === 'function' 
-         ? playerAdapter.isPaused() 
+      var isPaused = playerAdapter && typeof playerAdapter.isPaused === 'function'
+         ? playerAdapter.isPaused()
          : videoPlayer.paused;
-      
+
       if (isPaused) {
          play();
       } else {
@@ -2243,7 +2251,7 @@ var PlayerController = (function () {
          PlaybackManagerAdapter.unpause();
          return;
       }
-      
+
       // Legacy: Use adapter if available
       if (playerAdapter && typeof playerAdapter.play === 'function') {
          playerAdapter.play();
@@ -2265,7 +2273,7 @@ var PlayerController = (function () {
          PlaybackManagerAdapter.pause();
          return;
       }
-      
+
       // Legacy: Use adapter if available
       if (playerAdapter && typeof playerAdapter.pause === 'function') {
          playerAdapter.pause();
@@ -2321,13 +2329,13 @@ var PlayerController = (function () {
             duration
          );
          seekTo(seekPosition);
-         
+
          // Update trickplay bubble during keyboard seeking
          if (isSeekbarFocused && duration) {
             var percent = (seekPosition / duration) * 100;
             updateTrickplayBubble(seekPosition * TICKS_PER_SECOND, percent);
          }
-         
+
          showControls();
       }
    }
@@ -2344,13 +2352,13 @@ var PlayerController = (function () {
             : getCurrentTime();
       seekPosition = Math.max(currentPosition - SKIP_INTERVAL_SECONDS, 0);
       seekTo(seekPosition);
-      
+
       // Update trickplay bubble during keyboard seeking
       if (isSeekbarFocused && duration) {
          var percent = (seekPosition / duration) * 100;
          updateTrickplayBubble(seekPosition * TICKS_PER_SECOND, percent);
       }
-      
+
       showControls();
    }
 
@@ -2561,7 +2569,7 @@ var PlayerController = (function () {
          readyState: videoPlayer.readyState,
          networkState: videoPlayer.networkState
       });
-      
+
       clearLoadingTimeout();
       setLoadingState(LoadingState.READY);
 
@@ -2597,16 +2605,16 @@ var PlayerController = (function () {
       console.log("[Player] Video data loaded (first frame ready)");
       console.log("[Player] Video dimensions:", videoPlayer.videoWidth + "x" + videoPlayer.videoHeight);
       clearLoadingTimeout();
-      
+
       // Try to play if paused
       if (videoPlayer.paused) {
          console.log("[Player] Video has data but is paused, calling play()");
          if (playerAdapter && typeof playerAdapter.play === 'function') {
-            playerAdapter.play().catch(function(err) {
+            playerAdapter.play().catch(function (err) {
                console.error("[Player] play() in onLoadedData failed:", err);
             });
          } else {
-            videoPlayer.play().catch(function(err) {
+            videoPlayer.play().catch(function (err) {
                console.error("[Player] play() in onLoadedData failed:", err);
             });
          }
@@ -2636,11 +2644,11 @@ var PlayerController = (function () {
          volume: videoPlayer.volume,
          muted: videoPlayer.muted
       });
-      
+
       if (videoPlayer.audioTracks && videoPlayer.audioTracks.length > 0) {
          console.log("[Player] Audio tracks available:", videoPlayer.audioTracks.length);
          console.log("[Player] Selected audio index from media source:", currentAudioIndex);
-         
+
          // Ensure at least one audio track is enabled 
          var hasEnabledTrack = false;
          for (var i = 0; i < videoPlayer.audioTracks.length; i++) {
@@ -2656,12 +2664,12 @@ var PlayerController = (function () {
                enabled: track.enabled
             });
          }
-         
+
          // If no track is enabled, enable the user-selected or default track
          if (!hasEnabledTrack && videoPlayer.audioTracks.length > 0) {
             // Use currentAudioIndex if valid, otherwise fall back to first track
-            var trackToEnable = currentAudioIndex >= 0 && currentAudioIndex < videoPlayer.audioTracks.length 
-               ? currentAudioIndex 
+            var trackToEnable = currentAudioIndex >= 0 && currentAudioIndex < videoPlayer.audioTracks.length
+               ? currentAudioIndex
                : 0;
             console.log("[Player] No audio track enabled, enabling track index:", trackToEnable);
             videoPlayer.audioTracks[trackToEnable].enabled = true;
@@ -2669,7 +2677,7 @@ var PlayerController = (function () {
       } else {
          console.log("[Player] No audio tracks exposed via DOM API (embedded audio stream)");
       }
-      
+
       clearLoadingTimeout();
       setLoadingState(LoadingState.READY);
 
@@ -2677,15 +2685,15 @@ var PlayerController = (function () {
          console.log("[Player] Starting progress reporting for session:", playSessionId);
          reportPlaybackStart();
          startProgressReporting();
-         
+
          // Send immediate progress report to establish position
-         setTimeout(function() {
+         setTimeout(function () {
             console.log("[Player] Sending immediate progress report");
             reportPlaybackProgress();
          }, 1000);
-         
+
          detectCurrentAudioTrack();
-         
+
          // Initialize audio normalization after playback starts
          initializeAudioNormalization();
       }
@@ -2701,11 +2709,11 @@ var PlayerController = (function () {
       showControls();
 
       if (
-         elements.progressBar &&
-         !document.activeElement.classList.contains("progress-bar")
+         elements.playPauseBtn &&
+         !document.activeElement.classList.contains("control-btn")
       ) {
          setTimeout(function () {
-            elements.progressBar.focus();
+            elements.playPauseBtn.focus();
          }, FOCUS_DELAY_MS);
       }
    }
@@ -2719,7 +2727,7 @@ var PlayerController = (function () {
 
       var currentTime = getCurrentTime();
       var progress = (currentTime / duration) * 100;
-      
+
       if (elements.progressFill) {
          elements.progressFill.style.width = progress + "%";
       }
@@ -2821,14 +2829,14 @@ var PlayerController = (function () {
             itemName: itemData ? itemData.Name : "Unknown",
             mediaSource: currentMediaSource
                ? {
-                    id: currentMediaSource.Id,
-                    protocol: currentMediaSource.Protocol,
-                    container: currentMediaSource.Container,
-                    supportsDirectPlay: currentMediaSource.SupportsDirectPlay,
-                    supportsDirectStream:
-                       currentMediaSource.SupportsDirectStream,
-                    supportsTranscoding: currentMediaSource.SupportsTranscoding,
-                 }
+                  id: currentMediaSource.Id,
+                  protocol: currentMediaSource.Protocol,
+                  container: currentMediaSource.Container,
+                  supportsDirectPlay: currentMediaSource.SupportsDirectPlay,
+                  supportsDirectStream:
+                     currentMediaSource.SupportsDirectStream,
+                  supportsTranscoding: currentMediaSource.SupportsTranscoding,
+               }
                : null,
             currentTime: videoPlayer.currentTime,
             duration: videoPlayer.duration,
@@ -2917,11 +2925,11 @@ var PlayerController = (function () {
             clearTimeout(playbackHealthCheckTimer);
             playbackHealthCheckTimer = null;
          }
-         
+
          saveForcePlayMode(null);
 
          if (playerAdapter) {
-            playerAdapter.destroy().catch(function (err) {});
+            playerAdapter.destroy().catch(function (err) { });
             playerAdapter = null;
          }
 
@@ -2977,7 +2985,7 @@ var PlayerController = (function () {
       hideLoading();
 
       if (!elements.errorDialog) return;
-      
+
       // Prevent multiple error dialogs from stacking
       if (elements.errorDialog.style.display === "flex") {
          console.log('[Player] Error dialog already visible, ignoring duplicate');
@@ -3053,7 +3061,7 @@ var PlayerController = (function () {
             // For non-Shaka, initialize to default track
             initializeDefaultTrackIndices();
          }
-      } catch (error) {}
+      } catch (error) { }
    }
 
    function initializeDefaultTrackIndices() {
@@ -3208,7 +3216,7 @@ var PlayerController = (function () {
       currentAudioIndex = index;
       var stream = audioStreams[index];
       var language = stream.Language || "und";
-      
+
       if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
          try {
             PlaybackManagerAdapter.setAudioStreamIndex(stream.Index);
@@ -3254,7 +3262,7 @@ var PlayerController = (function () {
                return;
             } else {
             }
-         } catch (error) {}
+         } catch (error) { }
       }
 
       reloadVideoWithTrack("audio", stream);
@@ -3284,12 +3292,12 @@ var PlayerController = (function () {
       }
 
       currentSubtitleIndex = index;
-      
+
       if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
          try {
             // PlaybackManager uses -1 to disable, or stream Index for subtitle
-            var streamIndex = index >= 0 && index < subtitleStreams.length 
-               ? subtitleStreams[index].Index 
+            var streamIndex = index >= 0 && index < subtitleStreams.length
+               ? subtitleStreams[index].Index
                : -1;
             PlaybackManagerAdapter.setSubtitleStreamIndex(streamIndex);
             console.log('[Player] Subtitle track switched via PlaybackManager:', streamIndex);
@@ -3331,7 +3339,7 @@ var PlayerController = (function () {
             } else {
             }
             return;
-         } catch (error) {}
+         } catch (error) { }
       }
 
       var tracks = videoPlayer.textTracks;
@@ -3446,7 +3454,7 @@ var PlayerController = (function () {
             videoPlayer.currentTime = currentTime;
 
             if (!wasPaused) {
-               playerAdapter ? playerAdapter.play() : videoPlayer.play().catch(function (err) {});
+               playerAdapter ? playerAdapter.play() : videoPlayer.play().catch(function (err) { });
             }
 
             setLoadingState(LoadingState.READY);
@@ -4202,21 +4210,21 @@ var PlayerController = (function () {
          closeModal();
          return;
       }
-      
+
       forcePlayMode = mode;
       saveForcePlayMode(mode);
       console.log("[Player] Playback mode changed to:", mode, "- reloading video");
-      
+
       var currentPos = videoPlayer ? Math.floor(videoPlayer.currentTime) : 0;
-      
+
       if (videoPlayer) {
          reportPlaybackStop();
          stopProgressReporting();
          stopBitrateMonitoring();
       }
-      
+
       closeModal();
-      
+
       var params = new URLSearchParams(window.location.search);
       params.set('position', currentPos);
       window.location.search = params.toString();
@@ -4373,7 +4381,7 @@ var PlayerController = (function () {
                         (segment.EndTicks - segment.StartTicks) / 10000000;
                      return duration >= 1;
                   });
-                  mediaSegments.forEach(function (seg) {});
+                  mediaSegments.forEach(function (seg) { });
                } else {
                   mediaSegments = [];
                }
@@ -4416,7 +4424,7 @@ var PlayerController = (function () {
 
       var url =
          auth.serverAddress + "/Shows/" + itemData.SeriesId + "/Episodes";
-      
+
       // Fetch all episodes to find previous and next
       var params = {
          UserId: auth.userId,
@@ -4446,7 +4454,7 @@ var PlayerController = (function () {
             try {
                var data = response;
                console.log("[loadAdjacentEpisodes] Response - Total episodes:", data && data.Items ? data.Items.length : 0);
-               
+
                if (data && data.Items && data.Items.length > 0) {
                   // Find current episode index
                   var currentIndex = -1;
@@ -4456,9 +4464,9 @@ var PlayerController = (function () {
                         break;
                      }
                   }
-                  
+
                   console.log("[loadAdjacentEpisodes] Current episode index:", currentIndex);
-                  
+
                   // Set previous episode if exists
                   if (currentIndex > 0) {
                      previousEpisodeData = data.Items[currentIndex - 1];
@@ -4471,7 +4479,7 @@ var PlayerController = (function () {
                      previousEpisodeData = null;
                      console.log("[loadAdjacentEpisodes] No previous episode (first in season)");
                   }
-                  
+
                   // Set next episode if exists
                   if (currentIndex >= 0 && currentIndex < data.Items.length - 1) {
                      nextEpisodeData = data.Items[currentIndex + 1];
@@ -4638,7 +4646,7 @@ var PlayerController = (function () {
     */
    function playPreviousEpisode() {
       console.log("[playPreviousEpisode] START");
-      
+
       if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
          console.log('[Player] Playing previous episode via PlaybackManager');
          try {
@@ -4650,7 +4658,7 @@ var PlayerController = (function () {
             // Fall through to legacy method
          }
       }
-      
+
       // Legacy method
       if (!previousEpisodeData) {
          console.log("[playPreviousEpisode] No previous episode data available");
@@ -4683,7 +4691,7 @@ var PlayerController = (function () {
          var newUrl = "player.html?id=" + prevEpisodeId;
          window.history.replaceState({}, "", newUrl);
       }
-      
+
       // Load and play the previous episode
       itemId = prevEpisodeId;
       loadItemAndPlay();
@@ -4695,7 +4703,7 @@ var PlayerController = (function () {
     */
    function playNextEpisode() {
       console.log("[playNextEpisode] START");
-      
+
       if (USE_PLAYBACK_MANAGER && playbackManagerReady) {
          console.log('[Player] Playing next episode via PlaybackManager');
          try {
@@ -4707,7 +4715,7 @@ var PlayerController = (function () {
             // Fall through to legacy method
          }
       }
-      
+
       // Legacy method
       if (!nextEpisodeData) {
          console.log("[playNextEpisode] No next episode data available");
@@ -4857,7 +4865,7 @@ var PlayerController = (function () {
             var info = trickplayResolutions[widthKey];
             var width = info.Width;
 
-            if (!bestWidth || 
+            if (!bestWidth ||
                (width < bestWidth && bestWidth > maxWidth) ||
                (width > bestWidth && width <= maxWidth)) {
                bestWidth = width;
@@ -4938,9 +4946,9 @@ var PlayerController = (function () {
       var offsetY = -(tileOffsetY * trickplayResolution.Height);
 
       // Build trickplay image URL (following jellyfin-web API format)
-      var imgSrc = auth.serverAddress + "/Videos/" + itemId + "/Trickplay/" + 
-                   trickplayResolution.Width + "/" + imageIndex + ".jpg?MediaSourceId=" + 
-                   trickplayData.mediaSourceId;
+      var imgSrc = auth.serverAddress + "/Videos/" + itemId + "/Trickplay/" +
+         trickplayResolution.Width + "/" + imageIndex + ".jpg?MediaSourceId=" +
+         trickplayData.mediaSourceId;
 
       // Update thumbnail
       if (elements.trickplayThumb) {
