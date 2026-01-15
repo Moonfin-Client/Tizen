@@ -2934,6 +2934,15 @@ var SettingsController = (function () {
             } else {
                newOkBtn.focus();
             }
+         } else if (evt.keyCode === KeyCodes.ENTER) {
+            evt.preventDefault();
+            // Trigger click on the focused button (Confirm or Cancel)
+            if (
+               document.activeElement === newOkBtn ||
+               document.activeElement === newCancelBtn
+            ) {
+               document.activeElement.click();
+            }
          }
       };
 
