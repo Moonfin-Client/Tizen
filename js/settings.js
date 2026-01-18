@@ -259,7 +259,7 @@ var SettingsController = (function () {
       var serverVersionValue = document.getElementById("serverVersionValue");
       if (serverVersionValue && displayServer) {
          // Try authenticated endpoint first, then fall back to public endpoint
-         var tryPublicEndpoint = function() {
+         var tryPublicEndpoint = function () {
             JellyfinAPI.getSystemInfo(
                displayServer,
                function (err, data) {
@@ -272,7 +272,7 @@ var SettingsController = (function () {
                }
             );
          };
-         
+
          if (displayAccessToken) {
             JellyfinAPI.getSystemInfo(
                displayServer,
@@ -294,7 +294,7 @@ var SettingsController = (function () {
 
       // Update platform information in About section
       updatePlatformInfo();
-      
+
       // Update app version in About section
       var appVersionValue = document.getElementById("appVersionValue");
       if (appVersionValue) {
@@ -1465,13 +1465,13 @@ var SettingsController = (function () {
                } else if (typeof JellyfinAPI !== "undefined" && JellyfinAPI.getStoredAuth) {
                   testAuth = JellyfinAPI.getStoredAuth();
                }
-               
+
                if (!testAuth || !testAuth.accessToken) {
                   console.log("[Settings] No auth available for test log");
                   showAlert("Not logged in. Please log in first to send test logs.", "Error");
                   break;
                }
-               
+
                console.log("[Settings] Sending test log to server:", testAuth.serverAddress);
                ServerLogger.logAppInfo("Test log from Moonfin settings", {
                   test: true,
@@ -1971,25 +1971,30 @@ var SettingsController = (function () {
          "Are you sure you want to sign out? This will remove saved credentials and redirect to the login page.",
          "Sign Out",
          function () {
-            // Get current server/user before logging out
-            var activeServer = MultiServerManager.getActiveServer();
+            try {
+               // Get current server/user before logging out
+               var activeServer = MultiServerManager.getActiveServer();
 
-            // Clear Jellyfin credentials
-            JellyfinAPI.logout();
+               // Clear Jellyfin credentials
+               JellyfinAPI.logout();
 
-            // Remove saved server/user from MultiServerManager
-            if (activeServer && activeServer.serverId && activeServer.userId) {
-               MultiServerManager.removeServer(
-                  activeServer.serverId,
-                  activeServer.userId
-               );
-               Logger.info(
-                  "[LOGOUT] Removed saved credentials for user:",
-                  activeServer.userId
-               );
+               // Remove saved server/user from MultiServerManager
+               if (activeServer && activeServer.serverId && activeServer.userId) {
+                  MultiServerManager.removeServer(
+                     activeServer.serverId,
+                     activeServer.userId
+                  );
+                  // Use console.log for safety as Logger might not be globally available
+                  console.log(
+                     "[LOGOUT] Removed saved credentials for user:",
+                     activeServer.userId
+                  );
+               }
+            } catch (error) {
+               console.error("[LOGOUT] Error during logout cleanup:", error);
+            } finally {
+               window.location.href = "login.html";
             }
-
-            window.location.href = "login.html";
          },
          function () {
             if (returnFocus) returnFocus.focus();
@@ -2133,7 +2138,7 @@ var SettingsController = (function () {
                });
                return merged;
             }
-         } catch (e) {}
+         } catch (e) { }
       }
       return JSON.parse(JSON.stringify(defaultHomeRows));
    }
@@ -2564,8 +2569,8 @@ var SettingsController = (function () {
                      .then(function () {
                         showAlert(
                            "Successfully authenticated with Jellyseerr as " +
-                              (user.displayName || user.username) +
-                              "!",
+                           (user.displayName || user.username) +
+                           "!",
                            "Success"
                         );
                         updateSettingValues();
@@ -2650,7 +2655,7 @@ var SettingsController = (function () {
                      .then(function () {
                         showAlert(
                            "Successfully logged in to Jellyseerr as " +
-                              user.displayName,
+                           user.displayName,
                            "Success"
                         );
                         updateSettingValues();
@@ -2769,7 +2774,7 @@ var SettingsController = (function () {
          .catch(function (error) {
             showAlert(
                "Connection failed. Please check the URL and ensure Jellyseerr is running.\n\nError: " +
-                  (error.message || error),
+               (error.message || error),
                "Connection Failed"
             );
          });
@@ -2928,6 +2933,15 @@ var SettingsController = (function () {
                newCancelBtn.focus();
             } else {
                newOkBtn.focus();
+            }
+         } else if (evt.keyCode === KeyCodes.ENTER) {
+            evt.preventDefault();
+            // Trigger click on the focused button (Confirm or Cancel)
+            if (
+               document.activeElement === newOkBtn ||
+               document.activeElement === newCancelBtn
+            ) {
+               document.activeElement.click();
             }
          }
       };
@@ -3413,8 +3427,8 @@ var SettingsController = (function () {
                showAlert(
                   "Server Offline",
                   "Cannot connect to " +
-                     server.name +
-                     ". Please check if the server is running."
+                  server.name +
+                  ". Please check if the server is running."
                );
                return;
             }
@@ -3433,10 +3447,10 @@ var SettingsController = (function () {
                showAlert(
                   "Server Changed",
                   "Now connected to " +
-                     server.name +
-                     " as " +
-                     server.username +
-                     ". Reloading..."
+                  server.name +
+                  " as " +
+                  server.username +
+                  ". Reloading..."
                );
 
                // Reload the page to refresh libraries and content
@@ -3475,10 +3489,10 @@ var SettingsController = (function () {
       showConfirm(
          "Remove User",
          'Are you sure you want to remove "' +
-            username +
-            '" from server "' +
-            serverName +
-            '"?',
+         username +
+         '" from server "' +
+         serverName +
+         '"?',
          function () {
             if (MultiServerManager.removeServer(serverId, userId)) {
                renderServerList();
