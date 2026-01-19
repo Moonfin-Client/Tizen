@@ -43,10 +43,12 @@ var SubtitleManager = (function () {
          */
         loadTrack(track, item, mediaSource, auth) {
             this.cues = [];
-            this.activeCue = null;
-            this.innerOverlay.innerHTML = '';
             this.isEnabled = true;
             this.overlay.style.display = 'flex';
+
+            // Load latest settings
+            this.loadSettings();
+            this.applyStyles();
 
             const userAuth = auth || JellyfinAPI.getStoredAuth(); // Use passed auth or fallback
             if (!userAuth) {
@@ -118,7 +120,6 @@ var SubtitleManager = (function () {
             }
 
             console.log(`[SubtitleManager] Parsed ${this.cues.length} cues`);
-            if (window.debugOverlay) window.debugOverlay.log('Parsed ' + this.cues.length + ' cues');
             this.applyStyles(this.settings);
         }
 
@@ -146,6 +147,28 @@ var SubtitleManager = (function () {
                     end: this.parseTime(match[2]),
                     text: match[3].trim()
                 });
+            }
+        }
+
+        /**
+         * Load settings from storage
+         */
+        loadSettings() {
+            try {
+                if (window.storage) {
+                    const stored = window.storage.getUserPreference('jellyfin_settings', null);
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        // Merge stored settings with defaults
+                        if (parsed.subtitleSize) this.settings.subtitleSize = parsed.subtitleSize;
+                        if (parsed.subtitleColor) this.settings.subtitleColor = parsed.subtitleColor;
+                        if (parsed.subtitlePosition) this.settings.subtitlePosition = parsed.subtitlePosition;
+                        if (parsed.subtitleBackground) this.settings.subtitleBackground = parsed.subtitleBackground;
+                        console.log('[SubtitleManager] Loaded settings:', this.settings);
+                    }
+                }
+            } catch (e) {
+                console.error('[SubtitleManager] Error loading settings:', e);
             }
         }
 
@@ -204,11 +227,11 @@ var SubtitleManager = (function () {
 
             // Size (Percent of base)
             const sizes = {
-                'smaller': '1.8em',
-                'small': '2.2em',
-                'medium': '2.8em', // Default
-                'large': '3.6em',
-                'extralarge': '4.6em' // Corrected key from 'extra large' to match typical values
+                'smaller': '2.2em', // Was 1.8
+                'small': '2.8em',   // Was 2.2
+                'medium': '3.5em',  // Was 2.8
+                'large': '4.5em',   // Was 3.6
+                'extralarge': '5.5em' // Was 4.6
             };
             s.fontSize = sizes[conf.subtitleSize || 'medium'] || sizes['medium'];
 
@@ -222,26 +245,43 @@ var SubtitleManager = (function () {
             // Ensure flex display (redundant but safe)
             this.overlay.style.display = 'flex';
 
-            // Reset position properties to keep full screen overlay
+            // Reset position properties
             overlayStyle.top = '0';
             overlayStyle.bottom = '0';
             overlayStyle.left = '0';
             overlayStyle.right = '0';
 
             // Use flexbox for positioning
+            overlayStyle.justifyContent = (position === 'top') ? 'flex-start' : 'flex-end';
+
+            // Margins for fine-tuning
+            this.innerOverlay.style.marginTop = '0';
+            this.innerOverlay.style.marginBottom = '10%'; // Default bottom
+
             if (position === 'top') {
-                overlayStyle.justifyContent = 'flex-start';
                 this.innerOverlay.style.marginTop = '10%';
                 this.innerOverlay.style.marginBottom = '0';
-            } else { // bottom
-                overlayStyle.justifyContent = 'flex-end';
-                this.innerOverlay.style.marginTop = '0';
-                this.innerOverlay.style.marginBottom = '10%';
+            } else if (position === 'bottom-low') {
+                this.innerOverlay.style.marginBottom = '2%'; // Lower
+            } else if (position === 'bottom-high') {
+                this.innerOverlay.style.marginBottom = '20%'; // Higher
+            } else if (position === 'middle') {
+                overlayStyle.justifyContent = 'center';
+                this.innerOverlay.style.marginBottom = '0';
             }
 
             // Background / Shadow
-            // TODO: Add more complex text-shadow/background support if needed
-            s.textShadow = '0px 0px 8px rgba(0,0,0,1)'; // Default strong shadow
+            const bg = conf.subtitleBackground || 'drop-shadow';
+            if (bg === 'drop-shadow') {
+                s.textShadow = '0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)';
+                s.background = 'none';
+            } else if (bg === 'background') {
+                s.textShadow = 'none';
+                s.background = 'rgba(0, 0, 0, 0.7)';
+            } else { // none
+                s.textShadow = 'none';
+                s.background = 'none';
+            }
 
             // Force layout reflow
             if (this.activeCue) {

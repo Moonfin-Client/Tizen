@@ -247,242 +247,252 @@
             <h1>Subtitle Settings</h1>
 
             <div class="settings-group">
-               <h2>Appearance</h2>
-
-               <div class="setting-item" data-setting="subtitleSize" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Text Size</div>
-                     <div class="setting-description">
-                        Size of the subtitle text
+               <div class="settings-group">
+                  <h2>Preview</h2>
+                  <div id="subtitlePreviewContainer"
+                     style="width: 100%; height: 200px; background: url('assets/backdrop-placeholder.jpg') center/cover; position: relative; border-radius: 8px; margin-bottom: 20px; overflow: hidden; display: flex; justify-content: center;">
+                     <div id="subtitlePreviewText"
+                        style="position: absolute; bottom: 10px; text-align: center; padding: 2px 5px;">
+                        This is a sample subtitle
                      </div>
                   </div>
-                  <div class="setting-value" id="subtitleSizeValue">Medium</div>
-               </div>
 
-               <div class="setting-item" data-setting="subtitleColor" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Text Color</div>
-                     <div class="setting-description">
-                        Color of the subtitle text
+                  <h2>Appearance</h2>
+
+                  <div class="setting-item" data-setting="subtitleSize" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Text Size</div>
+                        <div class="setting-description">
+                           Size of the subtitle text
+                        </div>
                      </div>
+                     <div class="setting-value" id="subtitleSizeValue">Medium</div>
                   </div>
-                  <div class="setting-value" id="subtitleColorValue">White</div>
-               </div>
 
-               <div class="setting-item" data-setting="subtitlePosition" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Vertical Position</div>
-                     <div class="setting-description">
-                        Position on the screen
+                  <div class="setting-item" data-setting="subtitleColor" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Text Color</div>
+                        <div class="setting-description">
+                           Color of the subtitle text
+                        </div>
                      </div>
+                     <div class="setting-value" id="subtitleColorValue">White</div>
                   </div>
-                  <div class="setting-value" id="subtitlePositionValue">Bottom</div>
-               </div>
 
-               <div class="setting-item" data-setting="subtitleBackground" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Background</div>
-                     <div class="setting-description">
-                        Background style for better readability
+                  <div class="setting-item" data-setting="subtitlePosition" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Vertical Position</div>
+                        <div class="setting-description">
+                           Position on the screen
+                        </div>
                      </div>
+                     <div class="setting-value" id="subtitlePositionValue">Bottom</div>
                   </div>
-                  <div class="setting-value" id="subtitleBackgroundValue">Drop Shadow</div>
-               </div>
-            </div>
-         </div>
 
-         <!-- Interface Settings -->
-         <div class="settings-panel" id="interfacePanel">
-            <h1>Interface Settings</h1>
-
-            <div class="settings-group">
-               <h2>Navigation Bar</h2>
-
-               <div class="setting-item" data-setting="showShuffleButton" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Show Shuffle Button</div>
-                     <div class="setting-description">
-                        Display shuffle button in navigation bar
+                  <div class="setting-item" data-setting="subtitleBackground" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Background</div>
+                        <div class="setting-description">
+                           Background style for better readability
+                        </div>
                      </div>
-                  </div>
-                  <div class="setting-value" id="showShuffleButtonValue">
-                     On
-                  </div>
-               </div>
-
-               <div class="setting-item" data-setting="showGenresButton" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Show Genres Button</div>
-                     <div class="setting-description">
-                        Display genres button in navigation bar
-                     </div>
-                  </div>
-                  <div class="setting-value" id="showGenresButtonValue">
-                     On
-                  </div>
-               </div>
-
-               <div class="setting-item" data-setting="showFavoritesButton" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Show Favorites Button</div>
-                     <div class="setting-description">
-                        Display favorites button in navigation bar
-                     </div>
-                  </div>
-                  <div class="setting-value" id="showFavoritesButtonValue">
-                     On
-                  </div>
-               </div>
-
-               <div class="setting-item" data-setting="showLibrariesInToolbar" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">
-                        Show Libraries in Toolbar
-                     </div>
-                     <div class="setting-description">
-                        Display library buttons in navigation bar
-                     </div>
-                  </div>
-                  <div class="setting-value" id="showLibrariesInToolbarValue">
-                     On
+                     <div class="setting-value" id="subtitleBackgroundValue">Drop Shadow</div>
                   </div>
                </div>
             </div>
-         </div>
 
-         <!-- Display Settings -->
-         <div class="settings-panel" id="displayPanel">
-            <h1>Display Settings</h1>
+            <!-- Interface Settings -->
+            <div class="settings-panel" id="interfacePanel">
+               <h1>Interface Settings</h1>
 
-            <div class="settings-group">
-               <h2>Appearance</h2>
+               <div class="settings-group">
+                  <h2>Navigation Bar</h2>
 
-               <div class="setting-item" data-setting="theme" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Theme</div>
-                     <div class="setting-description">
-                        Choose the app theme
+                  <div class="setting-item" data-setting="showShuffleButton" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Show Shuffle Button</div>
+                        <div class="setting-description">
+                           Display shuffle button in navigation bar
+                        </div>
+                     </div>
+                     <div class="setting-value" id="showShuffleButtonValue">
+                        On
                      </div>
                   </div>
-                  <div class="setting-value" id="themeValue">Dark</div>
-               </div>
 
-               <div class="setting-item" data-setting="accentColor" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Accent Color</div>
-                     <div class="setting-description">
-                        Choose the highlight color used throughout the app
+                  <div class="setting-item" data-setting="showGenresButton" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Show Genres Button</div>
+                        <div class="setting-description">
+                           Display genres button in navigation bar
+                        </div>
+                     </div>
+                     <div class="setting-value" id="showGenresButtonValue">
+                        On
                      </div>
                   </div>
-                  <div class="setting-value" id="accentColorValue">Blue</div>
+
+                  <div class="setting-item" data-setting="showFavoritesButton" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Show Favorites Button</div>
+                        <div class="setting-description">
+                           Display favorites button in navigation bar
+                        </div>
+                     </div>
+                     <div class="setting-value" id="showFavoritesButtonValue">
+                        On
+                     </div>
+                  </div>
+
+                  <div class="setting-item" data-setting="showLibrariesInToolbar" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">
+                           Show Libraries in Toolbar
+                        </div>
+                        <div class="setting-description">
+                           Display library buttons in navigation bar
+                        </div>
+                     </div>
+                     <div class="setting-value" id="showLibrariesInToolbarValue">
+                        On
+                     </div>
+                  </div>
                </div>
             </div>
 
-            <div class="settings-group">
-               <h2>Artwork</h2>
+            <!-- Display Settings -->
+            <div class="settings-panel" id="displayPanel">
+               <h1>Display Settings</h1>
 
-               <div class="setting-item" data-setting="imageType" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Image Type</div>
-                     <div class="setting-description">
-                        Choose portrait posters or landscape thumbnails
+               <div class="settings-group">
+                  <h2>Appearance</h2>
+
+                  <div class="setting-item" data-setting="theme" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Theme</div>
+                        <div class="setting-description">
+                           Choose the app theme
+                        </div>
                      </div>
+                     <div class="setting-value" id="themeValue">Dark</div>
                   </div>
-                  <div class="setting-value" id="imageTypeValue">Poster</div>
+
+                  <div class="setting-item" data-setting="accentColor" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Accent Color</div>
+                        <div class="setting-description">
+                           Choose the highlight color used throughout the app
+                        </div>
+                     </div>
+                     <div class="setting-value" id="accentColorValue">Blue</div>
+                  </div>
                </div>
-            </div>
 
-            <div class="settings-group">
-               <h2>Background Effects</h2>
+               <div class="settings-group">
+                  <h2>Artwork</h2>
 
-               <div class="setting-item" data-setting="backdrop-blur-home" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Home Screen Blur</div>
-                     <div class="setting-description">
-                        Blur intensity for backdrops on home, genres, and
-                        favorites screens (0-5)
+                  <div class="setting-item" data-setting="imageType" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Image Type</div>
+                        <div class="setting-description">
+                           Choose portrait posters or landscape thumbnails
+                        </div>
                      </div>
+                     <div class="setting-value" id="imageTypeValue">Poster</div>
                   </div>
-                  <div class="slider-container" style="display: none">
-                     <div class="slider-track">
-                        <div class="slider-fill" id="backdrop-blur-home-fill" style="width: 60%"></div>
+               </div>
+
+               <div class="settings-group">
+                  <h2>Background Effects</h2>
+
+                  <div class="setting-item" data-setting="backdrop-blur-home" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Home Screen Blur</div>
+                        <div class="setting-description">
+                           Blur intensity for backdrops on home, genres, and
+                           favorites screens (0-5)
+                        </div>
                      </div>
-                     <div class="slider-value-display" id="backdrop-blur-home-slider-value">
+                     <div class="slider-container" style="display: none">
+                        <div class="slider-track">
+                           <div class="slider-fill" id="backdrop-blur-home-fill" style="width: 60%"></div>
+                        </div>
+                        <div class="slider-value-display" id="backdrop-blur-home-slider-value">
+                           3
+                        </div>
+                     </div>
+                     <div class="setting-value" id="backdrop-blur-home-value">
                         3
                      </div>
                   </div>
-                  <div class="setting-value" id="backdrop-blur-home-value">
-                     3
-                  </div>
-               </div>
 
-               <div class="setting-item" data-setting="backdrop-blur-detail" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Detail Screen Blur</div>
-                     <div class="setting-description">
-                        Blur intensity for backdrops on movie, TV show, and
-                        episode details (0-5)
+                  <div class="setting-item" data-setting="backdrop-blur-detail" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Detail Screen Blur</div>
+                        <div class="setting-description">
+                           Blur intensity for backdrops on movie, TV show, and
+                           episode details (0-5)
+                        </div>
                      </div>
-                  </div>
-                  <div class="slider-container" style="display: none">
-                     <div class="slider-track">
-                        <div class="slider-fill" id="backdrop-blur-detail-fill" style="width: 60%"></div>
+                     <div class="slider-container" style="display: none">
+                        <div class="slider-track">
+                           <div class="slider-fill" id="backdrop-blur-detail-fill" style="width: 60%"></div>
+                        </div>
+                        <div class="slider-value-display" id="backdrop-blur-detail-slider-value">
+                           3
+                        </div>
                      </div>
-                     <div class="slider-value-display" id="backdrop-blur-detail-slider-value">
+                     <div class="setting-value" id="backdrop-blur-detail-value">
                         3
                      </div>
                   </div>
-                  <div class="setting-value" id="backdrop-blur-detail-value">
-                     3
-                  </div>
                </div>
             </div>
-         </div>
 
-         <!-- Jellyseerr Settings -->
-         <div class="settings-panel" id="jellyseerrPanel">
-            <h1>Jellyseerr Settings</h1>
+            <!-- Jellyseerr Settings -->
+            <div class="settings-panel" id="jellyseerrPanel">
+               <h1>Jellyseerr Settings</h1>
 
-            <div class="settings-group">
-               <h2>Connection</h2>
+               <div class="settings-group">
+                  <h2>Connection</h2>
 
-               <div class="setting-item" data-setting="jellyseerrEnabled" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Enable Jellyseerr</div>
-                     <div class="setting-description">
-                        Connect to Jellyseerr for content requests
+                  <div class="setting-item" data-setting="jellyseerrEnabled" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Enable Jellyseerr</div>
+                        <div class="setting-description">
+                           Connect to Jellyseerr for content requests
+                        </div>
+                     </div>
+                     <div class="setting-value" id="jellyseerrEnabledValue">
+                        Off
                      </div>
                   </div>
-                  <div class="setting-value" id="jellyseerrEnabledValue">
-                     Off
-                  </div>
-               </div>
 
-               <div class="setting-item" data-setting="jellyseerrUrl" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Jellyseerr URL</div>
-                     <div class="setting-description">
-                        Your Jellyseerr server address
+                  <div class="setting-item" data-setting="jellyseerrUrl" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Jellyseerr URL</div>
+                        <div class="setting-description">
+                           Your Jellyseerr server address
+                        </div>
+                     </div>
+                     <div class="setting-value" id="jellyseerrUrlValue">
+                        Not Set
                      </div>
                   </div>
-                  <div class="setting-value" id="jellyseerrUrlValue">
-                     Not Set
-                  </div>
-               </div>
 
-               <div class="setting-item" data-setting="jellyseerrApiKey" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">API Key</div>
-                     <div class="setting-description">
-                        Required for Tizen (Admin only)
+                  <div class="setting-item" data-setting="jellyseerrApiKey" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">API Key</div>
+                        <div class="setting-description">
+                           Required for Tizen (Admin only)
+                        </div>
+                     </div>
+                     <div class="setting-value" id="jellyseerrApiKeyValue">
+                        Not Set
                      </div>
                   </div>
-                  <div class="setting-value" id="jellyseerrApiKeyValue">
-                     Not Set
-                  </div>
-               </div>
 
-               <!-- <div class="setting-item" data-setting="jellyseerrAuthJellyfin" tabindex="0">
+                  <!-- <div class="setting-item" data-setting="jellyseerrAuthJellyfin" tabindex="0">
                         <div class="setting-label">
                             <div class="setting-title">Login with Jellyfin Account</div>
                             <div class="setting-description">Sign in using your Jellyfin credentials</div>
@@ -498,378 +508,378 @@
                         <div class="setting-value">Login</div>
                     </div> -->
 
-               <div class="setting-item action-item" data-setting="testJellyseerrConnection" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Test Connection</div>
-                     <div class="setting-description">
-                        Verify connection to Jellyseerr server
+                  <div class="setting-item action-item" data-setting="testJellyseerrConnection" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Test Connection</div>
+                        <div class="setting-description">
+                           Verify connection to Jellyseerr server
+                        </div>
                      </div>
-                  </div>
-                  <div class="setting-value">Test</div>
-               </div>
-            </div>
-
-            <div class="settings-group">
-               <h2>Display</h2>
-
-               <div class="setting-item" data-setting="jellyseerrFilterNSFW" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Filter NSFW Content</div>
-                     <div class="setting-description">
-                        Hide adult content in Discover
-                     </div>
-                  </div>
-                  <div class="setting-value" id="jellyseerrFilterNSFWValue">
-                     On
+                     <div class="setting-value">Test</div>
                   </div>
                </div>
-            </div>
 
-            <div class="settings-group">
-               <h2>Actions</h2>
+               <div class="settings-group">
+                  <h2>Display</h2>
 
-               <div class="setting-item action-item" data-setting="clearJellyseerrCache" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Clear Cache</div>
-                     <div class="setting-description">
-                        Clear stored Jellyseerr data
+                  <div class="setting-item" data-setting="jellyseerrFilterNSFW" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Filter NSFW Content</div>
+                        <div class="setting-description">
+                           Hide adult content in Discover
+                        </div>
+                     </div>
+                     <div class="setting-value" id="jellyseerrFilterNSFWValue">
+                        On
                      </div>
                   </div>
-                  <div class="setting-value">Clear</div>
                </div>
 
-               <div class="setting-item action-item" data-setting="disconnectJellyseerr" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Disconnect</div>
-                     <div class="setting-description">
-                        Sign out of Jellyseerr
+               <div class="settings-group">
+                  <h2>Actions</h2>
+
+                  <div class="setting-item action-item" data-setting="clearJellyseerrCache" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Clear Cache</div>
+                        <div class="setting-description">
+                           Clear stored Jellyseerr data
+                        </div>
                      </div>
+                     <div class="setting-value">Clear</div>
                   </div>
-                  <div class="setting-value">Disconnect</div>
-               </div>
-            </div>
-         </div>
 
-         <!-- Account Settings -->
-         <div class="settings-panel" id="accountPanel">
-            <h1>Account Settings</h1>
-
-            <div class="settings-group">
-               <h2>Servers</h2>
-
-               <div class="setting-item action-item" data-setting="manageServers" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Manage Servers</div>
-                     <div class="setting-description">
-                        Add, remove, or switch between Jellyfin servers
+                  <div class="setting-item action-item" data-setting="disconnectJellyseerr" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Disconnect</div>
+                        <div class="setting-description">
+                           Sign out of Jellyseerr
+                        </div>
                      </div>
-                  </div>
-                  <div class="setting-value" id="serverCountValue">
-                     1 server
+                     <div class="setting-value">Disconnect</div>
                   </div>
                </div>
             </div>
 
-            <div class="settings-group">
-               <h2>User</h2>
+            <!-- Account Settings -->
+            <div class="settings-panel" id="accountPanel">
+               <h1>Account Settings</h1>
 
-               <div class="setting-item" data-setting="username" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Username</div>
-                     <div class="setting-description">
-                        Current logged in user
+               <div class="settings-group">
+                  <h2>Servers</h2>
+
+                  <div class="setting-item action-item" data-setting="manageServers" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Manage Servers</div>
+                        <div class="setting-description">
+                           Add, remove, or switch between Jellyfin servers
+                        </div>
+                     </div>
+                     <div class="setting-value" id="serverCountValue">
+                        1 server
                      </div>
                   </div>
-                  <div class="setting-value" id="usernameValue">-</div>
                </div>
 
-               <div class="setting-item" data-setting="server" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Active Server</div>
-                     <div class="setting-description">
-                        Currently connected server
+               <div class="settings-group">
+                  <h2>User</h2>
+
+                  <div class="setting-item" data-setting="username" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Username</div>
+                        <div class="setting-description">
+                           Current logged in user
+                        </div>
                      </div>
+                     <div class="setting-value" id="usernameValue">-</div>
                   </div>
-                  <div class="setting-value" id="serverValue">-</div>
+
+                  <div class="setting-item" data-setting="server" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Active Server</div>
+                        <div class="setting-description">
+                           Currently connected server
+                        </div>
+                     </div>
+                     <div class="setting-value" id="serverValue">-</div>
+                  </div>
+               </div>
+
+               <div class="settings-group">
+                  <h2>Actions</h2>
+
+                  <div class="setting-item action-item" data-setting="logout" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Sign Out</div>
+                        <div class="setting-description">
+                           Sign out of your account
+                        </div>
+                     </div>
+                     <div class="setting-value">Sign Out</div>
+                  </div>
                </div>
             </div>
 
-            <div class="settings-group">
-               <h2>Actions</h2>
+            <!-- About Settings -->
+            <div class="settings-panel" id="aboutPanel">
+               <h1>About</h1>
 
-               <div class="setting-item action-item" data-setting="logout" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Sign Out</div>
-                     <div class="setting-description">
-                        Sign out of your account
+               <div class="settings-group">
+                  <h2>Application</h2>
+
+                  <div class="setting-item non-interactive">
+                     <div class="setting-label">
+                        <div class="setting-title">Version</div>
+                        <div class="setting-description">
+                           Current app version
+                        </div>
                      </div>
+                     <div class="setting-value" id="appVersionValue">1.0.0</div>
                   </div>
-                  <div class="setting-value">Sign Out</div>
-               </div>
-            </div>
-         </div>
 
-         <!-- About Settings -->
-         <div class="settings-panel" id="aboutPanel">
-            <h1>About</h1>
-
-            <div class="settings-group">
-               <h2>Application</h2>
-
-               <div class="setting-item non-interactive">
-                  <div class="setting-label">
-                     <div class="setting-title">Version</div>
-                     <div class="setting-description">
-                        Current app version
+                  <div class="setting-item non-interactive">
+                     <div class="setting-label">
+                        <div class="setting-title">Platform</div>
+                        <div class="setting-description">Samsung Tizen</div>
                      </div>
-                  </div>
-                  <div class="setting-value" id="appVersionValue">1.0.0</div>
-               </div>
-
-               <div class="setting-item non-interactive">
-                  <div class="setting-label">
-                     <div class="setting-title">Platform</div>
-                     <div class="setting-description">Samsung Tizen</div>
-                  </div>
-                  <div class="setting-value">Samsung Smart TV</div>
-               </div>
-            </div>
-
-            <div class="settings-group">
-               <h2>Server</h2>
-
-               <div class="setting-item non-interactive">
-                  <div class="setting-label">
-                     <div class="setting-title">Server Version</div>
-                     <div class="setting-description">
-                        Jellyfin server version
-                     </div>
-                  </div>
-                  <div class="setting-value" id="serverVersionValue">-</div>
-               </div>
-            </div>
-
-            <div class="settings-group">
-               <h2>Troubleshooting</h2>
-
-               <div class="setting-item" data-setting="serverLogging" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Server Error Logging</div>
-                     <div class="setting-description">
-                        Send error reports to your Jellyfin server for
-                        troubleshooting (viewable in Dashboard > Logs)
-                     </div>
-                  </div>
-                  <div class="setting-value" id="serverLoggingValue">
-                     Off
+                     <div class="setting-value">Samsung Smart TV</div>
                   </div>
                </div>
 
-               <div class="setting-item" data-setting="sendTestLog" tabindex="0">
-                  <div class="setting-label">
-                     <div class="setting-title">Send Test Log</div>
-                     <div class="setting-description">
-                        Send a test log entry to verify server logging works
+               <div class="settings-group">
+                  <h2>Server</h2>
+
+                  <div class="setting-item non-interactive">
+                     <div class="setting-label">
+                        <div class="setting-title">Server Version</div>
+                        <div class="setting-description">
+                           Jellyfin server version
+                        </div>
+                     </div>
+                     <div class="setting-value" id="serverVersionValue">-</div>
+                  </div>
+               </div>
+
+               <div class="settings-group">
+                  <h2>Troubleshooting</h2>
+
+                  <div class="setting-item" data-setting="serverLogging" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Server Error Logging</div>
+                        <div class="setting-description">
+                           Send error reports to your Jellyfin server for
+                           troubleshooting (viewable in Dashboard > Logs)
+                        </div>
+                     </div>
+                     <div class="setting-value" id="serverLoggingValue">
+                        Off
                      </div>
                   </div>
-                  <div class="setting-value">Send</div>
+
+                  <div class="setting-item" data-setting="sendTestLog" tabindex="0">
+                     <div class="setting-label">
+                        <div class="setting-title">Send Test Log</div>
+                        <div class="setting-description">
+                           Send a test log entry to verify server logging works
+                        </div>
+                     </div>
+                     <div class="setting-value">Send</div>
+                  </div>
                </div>
             </div>
          </div>
       </div>
-   </div>
 
-   <!-- Home Rows Configuration Modal -->
-   <div id="homeRowsModal" class="modal" style="display: none">
-      <div class="modal-content home-rows-modal">
-         <h2>Configure Home Rows</h2>
-         <p class="modal-description">
-            Select which rows appear on your home screen and drag to reorder
-         </p>
+      <!-- Home Rows Configuration Modal -->
+      <div id="homeRowsModal" class="modal" style="display: none">
+         <div class="modal-content home-rows-modal">
+            <h2>Configure Home Rows</h2>
+            <p class="modal-description">
+               Select which rows appear on your home screen and drag to reorder
+            </p>
 
-         <div class="home-rows-list" id="homeRowsList">
-            <!-- Rows will be dynamically populated -->
-         </div>
+            <div class="home-rows-list" id="homeRowsList">
+               <!-- Rows will be dynamically populated -->
+            </div>
 
-         <div class="modal-actions">
-            <button class="btn-secondary" id="resetRowsBtn" tabindex="0">
-               Reset to Default
-            </button>
-            <button class="btn-primary" id="saveRowsBtn" tabindex="0">
-               Save Changes
-            </button>
-            <button class="btn-secondary" id="cancelRowsBtn" tabindex="0">
-               Cancel
-            </button>
-         </div>
-      </div>
-   </div>
-
-   <!-- Jellyseerr URL Input Modal -->
-   <div id="jellyseerrUrlModal" class="modal" style="display: none">
-      <div class="modal-content">
-         <h2>Jellyseerr Server URL</h2>
-         <p class="modal-description">
-            Enter your Jellyseerr server address (e.g.,
-            http://192.168.1.100:5055)
-         </p>
-
-         <input type="text" id="jellyseerrUrlInput" class="url-input" placeholder="http://" tabindex="0" />
-
-         <div class="modal-actions">
-            <button class="btn-primary" id="saveJellyseerrUrlBtn" tabindex="0">
-               Save
-            </button>
-            <button class="btn-secondary" id="cancelJellyseerrUrlBtn" tabindex="0">
-               Cancel
-            </button>
+            <div class="modal-actions">
+               <button class="btn-secondary" id="resetRowsBtn" tabindex="0">
+                  Reset to Default
+               </button>
+               <button class="btn-primary" id="saveRowsBtn" tabindex="0">
+                  Save Changes
+               </button>
+               <button class="btn-secondary" id="cancelRowsBtn" tabindex="0">
+                  Cancel
+               </button>
+            </div>
          </div>
       </div>
-   </div>
 
-   <!-- Jellyseerr API Key Input Modal -->
-   <div id="jellyseerrApiKeyModal" class="modal" style="display: none">
-      <div class="modal-content">
-         <h2>Jellyseerr API Key</h2>
-         <p class="modal-description">
-            Enter your API key from Jellyseerr Settings → General.<br />Required
-            for Samsung Tizen TVs.
-         </p>
+      <!-- Jellyseerr URL Input Modal -->
+      <div id="jellyseerrUrlModal" class="modal" style="display: none">
+         <div class="modal-content">
+            <h2>Jellyseerr Server URL</h2>
+            <p class="modal-description">
+               Enter your Jellyseerr server address (e.g.,
+               http://192.168.1.100:5055)
+            </p>
 
-         <input type="text" id="jellyseerrApiKeyInput" class="url-input" placeholder="API Key" tabindex="0" />
+            <input type="text" id="jellyseerrUrlInput" class="url-input" placeholder="http://" tabindex="0" />
 
-         <div class="modal-actions">
-            <button class="btn-primary" id="saveJellyseerrApiKeyBtn" tabindex="0">
-               Save
-            </button>
-            <button class="btn-secondary" id="cancelJellyseerrApiKeyBtn" tabindex="0">
-               Cancel
-            </button>
+            <div class="modal-actions">
+               <button class="btn-primary" id="saveJellyseerrUrlBtn" tabindex="0">
+                  Save
+               </button>
+               <button class="btn-secondary" id="cancelJellyseerrUrlBtn" tabindex="0">
+                  Cancel
+               </button>
+            </div>
          </div>
       </div>
-   </div>
 
-   <!-- Jellyseerr Jellyfin Authentication Modal -->
-   <div id="jellyseerrJellyfinAuthModal" class="modal" style="display: none">
-      <div class="modal-content">
-         <h2>Jellyfin Authentication</h2>
-         <p class="modal-description">
-            Enter your Jellyfin password to authenticate with Jellyseerr
-         </p>
+      <!-- Jellyseerr API Key Input Modal -->
+      <div id="jellyseerrApiKeyModal" class="modal" style="display: none">
+         <div class="modal-content">
+            <h2>Jellyseerr API Key</h2>
+            <p class="modal-description">
+               Enter your API key from Jellyseerr Settings → General.<br />Required
+               for Samsung Tizen TVs.
+            </p>
 
-         <input type="password" id="jellyseerrJellyfinAuthPasswordInput" class="url-input" placeholder="Password"
-            tabindex="0" />
+            <input type="text" id="jellyseerrApiKeyInput" class="url-input" placeholder="API Key" tabindex="0" />
 
-         <div class="modal-actions">
-            <button class="btn-primary" id="saveJellyseerrJellyfinAuthBtn" tabindex="0">
-               Authenticate
-            </button>
-            <button class="btn-secondary" id="cancelJellyseerrJellyfinAuthBtn" tabindex="0">
-               Cancel
-            </button>
+            <div class="modal-actions">
+               <button class="btn-primary" id="saveJellyseerrApiKeyBtn" tabindex="0">
+                  Save
+               </button>
+               <button class="btn-secondary" id="cancelJellyseerrApiKeyBtn" tabindex="0">
+                  Cancel
+               </button>
+            </div>
          </div>
       </div>
-   </div>
 
-   <!-- Jellyseerr Local Login Modal -->
-   <div id="jellyseerrLocalModal" class="modal" style="display: none">
-      <div class="modal-content">
-         <h2>Jellyseerr Local Account</h2>
-         <p class="modal-description">
-            Sign in with your Jellyseerr account credentials
-         </p>
+      <!-- Jellyseerr Jellyfin Authentication Modal -->
+      <div id="jellyseerrJellyfinAuthModal" class="modal" style="display: none">
+         <div class="modal-content">
+            <h2>Jellyfin Authentication</h2>
+            <p class="modal-description">
+               Enter your Jellyfin password to authenticate with Jellyseerr
+            </p>
 
-         <input type="email" id="jellyseerrEmailInput" class="url-input" placeholder="Email" tabindex="0" />
-         <input type="password" id="jellyseerrLocalPasswordInput" class="url-input" placeholder="Password" tabindex="0"
-            style="margin-top: 10px" />
+            <input type="password" id="jellyseerrJellyfinAuthPasswordInput" class="url-input" placeholder="Password"
+               tabindex="0" />
 
-         <div class="modal-actions">
-            <button class="btn-primary" id="saveJellyseerrLocalBtn" tabindex="0">
-               Login
-            </button>
-            <button class="btn-secondary" id="cancelJellyseerrLocalBtn" tabindex="0">
-               Cancel
-            </button>
+            <div class="modal-actions">
+               <button class="btn-primary" id="saveJellyseerrJellyfinAuthBtn" tabindex="0">
+                  Authenticate
+               </button>
+               <button class="btn-secondary" id="cancelJellyseerrJellyfinAuthBtn" tabindex="0">
+                  Cancel
+               </button>
+            </div>
          </div>
       </div>
-   </div>
 
-   <!-- Custom Alert Modal -->
-   <!-- Server Manager Modal -->
-   <div id="serverManagerModal" class="modal" style="display: none">
-      <div class="modal-content server-manager-modal">
-         <h2>Server Manager</h2>
-         <p class="modal-description">
-            Manage your Jellyfin server connections
-         </p>
+      <!-- Jellyseerr Local Login Modal -->
+      <div id="jellyseerrLocalModal" class="modal" style="display: none">
+         <div class="modal-content">
+            <h2>Jellyseerr Local Account</h2>
+            <p class="modal-description">
+               Sign in with your Jellyseerr account credentials
+            </p>
 
-         <div class="server-list" id="serverList">
-            <!-- Servers will be dynamically populated -->
-         </div>
+            <input type="email" id="jellyseerrEmailInput" class="url-input" placeholder="Email" tabindex="0" />
+            <input type="password" id="jellyseerrLocalPasswordInput" class="url-input" placeholder="Password"
+               tabindex="0" style="margin-top: 10px" />
 
-         <div class="modal-actions">
-            <button class="btn-primary" id="addServerBtn" tabindex="0">
-               Add Server
-            </button>
-            <button class="btn-secondary" id="closeServerManagerBtn" tabindex="0">
-               Close
-            </button>
-         </div>
-      </div>
-   </div>
-
-   <!-- Add Server Modal -->
-   <div id="addServerModal" class="modal" style="display: none">
-      <div class="modal-content">
-         <h2>Add New Server</h2>
-         <p class="modal-description">Enter your Jellyfin server URL</p>
-
-         <input type="text" id="newServerUrlInput" class="url-input"
-            placeholder="Server URL (e.g., http://192.168.1.100:8096)" tabindex="0" />
-
-         <div class="modal-actions">
-            <button class="btn-primary" id="connectNewServerBtn" tabindex="0">
-               Connect
-            </button>
-            <button class="btn-secondary" id="cancelAddServerBtn" tabindex="0">
-               Cancel
-            </button>
+            <div class="modal-actions">
+               <button class="btn-primary" id="saveJellyseerrLocalBtn" tabindex="0">
+                  Login
+               </button>
+               <button class="btn-secondary" id="cancelJellyseerrLocalBtn" tabindex="0">
+                  Cancel
+               </button>
+            </div>
          </div>
       </div>
-   </div>
 
-   <!-- Confirmation Modal -->
-   <div id="confirmModal" class="modal" style="display: none">
-      <div class="modal-content">
-         <h2 id="confirmTitle">Confirm Action</h2>
-         <p id="confirmMessage" class="modal-description"></p>
+      <!-- Custom Alert Modal -->
+      <!-- Server Manager Modal -->
+      <div id="serverManagerModal" class="modal" style="display: none">
+         <div class="modal-content server-manager-modal">
+            <h2>Server Manager</h2>
+            <p class="modal-description">
+               Manage your Jellyfin server connections
+            </p>
 
-         <div class="modal-actions">
-            <button class="btn-secondary" id="confirmCancelBtn" tabindex="0">
-               Cancel
-            </button>
-            <button class="btn-primary" id="confirmOkBtn" tabindex="0">
-               Confirm
-            </button>
+            <div class="server-list" id="serverList">
+               <!-- Servers will be dynamically populated -->
+            </div>
+
+            <div class="modal-actions">
+               <button class="btn-primary" id="addServerBtn" tabindex="0">
+                  Add Server
+               </button>
+               <button class="btn-secondary" id="closeServerManagerBtn" tabindex="0">
+                  Close
+               </button>
+            </div>
          </div>
       </div>
-   </div>
 
-   <!-- Alert Modal -->
-   <div id="customAlertModal" class="modal" style="display: none">
-      <div class="modal-content">
-         <h2 id="alertTitle">Alert</h2>
-         <p id="alertMessage" class="modal-description"></p>
+      <!-- Add Server Modal -->
+      <div id="addServerModal" class="modal" style="display: none">
+         <div class="modal-content">
+            <h2>Add New Server</h2>
+            <p class="modal-description">Enter your Jellyfin server URL</p>
 
-         <div class="modal-actions">
-            <button class="btn-primary" id="alertOkBtn" tabindex="0">
-               OK
-            </button>
+            <input type="text" id="newServerUrlInput" class="url-input"
+               placeholder="Server URL (e.g., http://192.168.1.100:8096)" tabindex="0" />
+
+            <div class="modal-actions">
+               <button class="btn-primary" id="connectNewServerBtn" tabindex="0">
+                  Connect
+               </button>
+               <button class="btn-secondary" id="cancelAddServerBtn" tabindex="0">
+                  Cancel
+               </button>
+            </div>
          </div>
       </div>
-   </div>
 
-   <script src="js/settings.js"></script>
+      <!-- Confirmation Modal -->
+      <div id="confirmModal" class="modal" style="display: none">
+         <div class="modal-content">
+            <h2 id="confirmTitle">Confirm Action</h2>
+            <p id="confirmMessage" class="modal-description"></p>
+
+            <div class="modal-actions">
+               <button class="btn-secondary" id="confirmCancelBtn" tabindex="0">
+                  Cancel
+               </button>
+               <button class="btn-primary" id="confirmOkBtn" tabindex="0">
+                  Confirm
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <!-- Alert Modal -->
+      <div id="customAlertModal" class="modal" style="display: none">
+         <div class="modal-content">
+            <h2 id="alertTitle">Alert</h2>
+            <p id="alertMessage" class="modal-description"></p>
+
+            <div class="modal-actions">
+               <button class="btn-primary" id="alertOkBtn" tabindex="0">
+                  OK
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <script src="js/settings.js"></script>
 </body>
 
 </html>

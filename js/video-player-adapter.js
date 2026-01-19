@@ -807,27 +807,17 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
             // Store context for later use (needed for loading tracks)
             this.currentMediaItem = options.items ? options.items[0] : options.item;
             this.currentMediaSource = options.mediaSource;
+            this.currentMediaSource = options.mediaSource;
             this.auth = options.auth;
-
-            if (window.debugOverlay) {
-                window.debugOverlay.log('Adapter Load - Item: ' + (!!this.currentMediaItem) +
-                    ', Src: ' + (!!this.currentMediaSource) +
-                    ', OptItems: ' + (options.items ? options.items.length : 'N/A') +
-                    ', OptItem: ' + (!!options.item));
-            }
 
             // Initialize with container (document.body since overlay is fixed position)
             // Ensure we have an item context before initializing
             if (this.currentMediaItem) {
                 this.subtitleManager = new SubtitleManager(document.body);
                 console.log('[TizenAdapter] SubtitleManager initialized');
-                if (window.debugOverlay) window.debugOverlay.log('SubManager initialized');
             } else {
                 console.warn('[TizenAdapter] No media item for SubtitleManager');
-                if (window.debugOverlay) window.debugOverlay.error('SubManager init failed: No Item');
             }
-        } else {
-            if (window.debugOverlay) window.debugOverlay.error('SubtitleManager undefined');
         }
 
         try {

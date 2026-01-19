@@ -609,6 +609,60 @@ var SettingsController = (function () {
 
       // Jellyseerr settings
       updateJellyseerrSettingValues();
+
+      // Update subtitle preview
+      updateSubtitlePreview();
+   }
+
+   function updateSubtitlePreview() {
+      var previewContainer = document.getElementById('subtitlePreviewText');
+      if (!previewContainer) return;
+
+      // Apply styles mapping from SubtitleManager
+      var s = previewContainer.style;
+
+      // Size
+      var sizes = {
+         'smaller': '1.8em',
+         'small': '2.2em',
+         'medium': '2.8em',
+         'large': '3.6em',
+         'extralarge': '4.6em'
+      };
+      // Scale down slightly for settings preview to fit
+      var val = sizes[settings.subtitleSize || 'medium'] || sizes['medium'];
+      s.fontSize = "calc(" + val + " * 0.6)";
+
+      // Color
+      s.color = settings.subtitleColor || '#ffffff';
+
+      // Background
+      var bg = settings.subtitleBackground || 'drop-shadow';
+      if (bg === 'drop-shadow') {
+         s.textShadow = '0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)';
+         s.background = 'none';
+      } else if (bg === 'background') {
+         s.textShadow = 'none';
+         s.background = 'rgba(0, 0, 0, 0.7)';
+      } else {
+         s.textShadow = 'none';
+         s.background = 'none';
+      }
+
+      // Position (in preview box)
+      var pos = settings.subtitlePosition || 'bottom';
+      if (pos === 'top') {
+         previewContainer.style.bottom = 'auto';
+         previewContainer.style.top = '10px';
+      } else if (pos === 'middle') {
+         previewContainer.style.bottom = '50%';
+         previewContainer.style.top = 'auto';
+         previewContainer.style.transform = 'translateY(50%)';
+      } else {
+         previewContainer.style.bottom = '10px';
+         previewContainer.style.top = 'auto';
+         previewContainer.style.transform = 'none';
+      }
    }
 
    /**
@@ -1343,11 +1397,52 @@ var SettingsController = (function () {
             break;
 
          case "accentColor":
-            settings.accentColor =
-               settings.accentColor === "blue" ? "purple" : "blue";
+         case "imageType":
+            settings.imageType =
+               settings.imageType === "Primary" ? "Backdrop" : "Primary";
             saveSettings();
-            applyAccentColor();
+            syncImageHelperSettings();
             updateSettingValues();
+            break;
+
+         case "subtitleSize":
+            var sizes = ["smaller", "small", "medium", "large", "extralarge"];
+            var currentSizeIndex = sizes.indexOf(settings.subtitleSize || "medium");
+            var nextSizeIndex = (currentSizeIndex + 1) % sizes.length;
+            settings.subtitleSize = sizes[nextSizeIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
+            break;
+
+         case "subtitleColor":
+            var colors = ["#ffffff", "#ffff00", "#000000", "#00ffff", "#0000ff"];
+            var currentColorIndex = colors.indexOf(settings.subtitleColor || "#ffffff");
+            var nextColorIndex = (currentColorIndex + 1) % colors.length;
+            settings.subtitleColor = colors[nextColorIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
+            break;
+
+         case "subtitlePosition":
+            var positions = ["bottom", "bottom-low", "bottom-high", "top", "middle"];
+            var currentPosIndex = positions.indexOf(settings.subtitlePosition || "bottom");
+            var nextPosIndex = (currentPosIndex + 1) % positions.length;
+            settings.subtitlePosition = positions[nextPosIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
+            break;
+
+         case "subtitleBackground":
+            var backgrounds = ["drop-shadow", "background", "none"];
+            var currentBgIndex = backgrounds.indexOf(settings.subtitleBackground || "drop-shadow");
+            var nextBgIndex = (currentBgIndex + 1) % backgrounds.length;
+            settings.subtitleBackground = backgrounds[nextBgIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
             break;
 
          case "carouselSpeed":
@@ -3989,6 +4084,65 @@ var SettingsController = (function () {
          var count = MultiServerManager.getServerCount();
          serverCountValue.textContent =
             count + (count === 1 ? " server" : " servers");
+      }
+   }
+
+   /**
+    * Update subtitle preview text based on current settings
+    * @private
+    */
+   function updateSubtitlePreview() {
+      var container = document.getElementById("subtitlePreviewContainer");
+      var text = document.getElementById("subtitlePreviewText");
+      if (!container || !text) return;
+
+      // Apply font size
+      var sizes = {
+         'smaller': '2.2em',
+         'small': '2.8em',
+         'medium': '3.5em',
+         'large': '4.5em',
+         'extralarge': '5.5em'
+      };
+      text.style.fontSize =
+         sizes[settings.subtitleSize || "medium"] || sizes["medium"];
+
+      // Apply color
+      text.style.color = settings.subtitleColor || "#ffffff";
+
+      // Apply background/shadow
+      var bg = settings.subtitleBackground || "drop-shadow";
+      if (bg === "drop-shadow") {
+         text.style.textShadow =
+            "0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)";
+         text.style.background = "none";
+      } else if (bg === "background") {
+         text.style.textShadow = "none";
+         text.style.background = "rgba(0, 0, 0, 0.7)";
+      } else {
+         text.style.textShadow = "none";
+         text.style.background = "none";
+      }
+
+      // Apply position
+      var pos = settings.subtitlePosition || "bottom";
+      container.style.display = 'flex';
+      container.style.flexDirection = 'column';
+      container.style.justifyContent = (pos === 'top') ? 'flex-start' : 'flex-end';
+
+      text.style.marginTop = '0';
+      text.style.marginBottom = '10%'; // Default bottom
+
+      if (pos === 'top') {
+         text.style.marginTop = '10%';
+         text.style.marginBottom = '0';
+      } else if (pos === 'bottom-low') {
+         text.style.marginBottom = '2%';
+      } else if (pos === 'bottom-high') {
+         text.style.marginBottom = '20%';
+      } else if (pos === 'middle') {
+         container.style.justifyContent = 'center';
+         text.style.marginBottom = '0';
       }
    }
 
