@@ -1233,6 +1233,25 @@ var PlayerController = (function () {
          }
       }
 
+      // Check for user-selected track preferences from details page
+      if (!isLiveTV) {
+         try {
+            var savedSub = localStorage.getItem("preferredSubtitleTrack_" + itemData.Id);
+            if (savedSub !== null) {
+               var parsedSub = parseInt(savedSub);
+               if (!isNaN(parsedSub)) {
+                  // Verify index exists
+                  if (parsedSub === -1 || (parsedSub >= 0 && parsedSub < subtitleStreams.length)) {
+                     currentSubtitleIndex = parsedSub;
+                     console.log("[Player] Restored saved subtitle preference:", currentSubtitleIndex);
+                  }
+               }
+            }
+         } catch (e) {
+            console.warn("[Player] Failed to load subtitle preference:", e);
+         }
+      }
+
       var isLiveTV = itemData && itemData.Type === "TvChannel";
       var streamUrl;
       var mimeType;
@@ -1583,6 +1602,15 @@ var PlayerController = (function () {
             // Start health check for both direct play AND transcoding
             // This ensures playback actually starts regardless of method
             startPlaybackHealthCheck(mediaSource, useDirectPlay);
+
+            // Apply initial subtitle selection
+            if (currentSubtitleIndex !== -1) {
+               console.log("[Player] Applying initial subtitle selection:", currentSubtitleIndex);
+               // Use setTimeout to ensure player is fully ready
+               setTimeout(function () {
+                  selectSubtitleTrack(currentSubtitleIndex);
+               }, 500);
+            }
          })
          .catch(function (error) {
             handlePlaybackLoadError(error, mediaSource, useDirectPlay);
