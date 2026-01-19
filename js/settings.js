@@ -598,8 +598,14 @@ var SettingsController = (function () {
 
       var subtitlePositionValue = document.getElementById("subtitlePositionValue");
       if (subtitlePositionValue) {
-         subtitlePositionValue.textContent = (settings.subtitlePosition || "bottom").charAt(0).toUpperCase() + (settings.subtitlePosition || "bottom").slice(1);
+         var pos = settings.subtitlePosition || "bottom";
+         var displayPos = pos.charAt(0).toUpperCase() + pos.slice(1);
+         if (pos === "bottom-low") displayPos = "Bottom (Low)";
+         if (pos === "bottom-high") displayPos = "Bottom (High)";
+         subtitlePositionValue.textContent = displayPos;
       }
+
+
 
       var subtitleBackgroundValue = document.getElementById("subtitleBackgroundValue");
       if (subtitleBackgroundValue) {
@@ -1258,7 +1264,7 @@ var SettingsController = (function () {
       categories.forEach(function (cat, index) {
          if (index === focusManager.sidebarIndex) {
             cat.classList.add("focused");
-            cat.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            cat.scrollIntoView({ behavior: "auto", block: "center" });
          } else {
             cat.classList.remove("focused");
          }
@@ -1269,7 +1275,7 @@ var SettingsController = (function () {
       items.forEach(function (item, index) {
          if (index === focusManager.contentIndex) {
             item.classList.add("focused");
-            item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            item.scrollIntoView({ behavior: "auto", block: "center" });
          } else {
             item.classList.remove("focused");
          }
@@ -1300,6 +1306,17 @@ var SettingsController = (function () {
       var panel = document.getElementById(categoryName + "Panel");
       if (panel) {
          panel.classList.add("active");
+      }
+
+      // Handle subtitle preview visibility
+      var previewContainer = document.getElementById("subtitlePreviewContainer");
+      if (previewContainer) {
+         if (categoryName === "subtitles") {
+            previewContainer.style.display = "block";
+            updateSubtitlePreview();
+         } else {
+            previewContainer.style.display = "none";
+         }
       }
 
       updateSidebarFocus();
@@ -4125,24 +4142,34 @@ var SettingsController = (function () {
       }
 
       // Apply position
-      var pos = settings.subtitlePosition || "bottom";
-      container.style.display = 'flex';
-      container.style.flexDirection = 'column';
-      container.style.justifyContent = (pos === 'top') ? 'flex-start' : 'flex-end';
 
-      text.style.marginTop = '0';
-      text.style.marginBottom = '10%'; // Default bottom
+      // Apply position
+      var pos = settings.subtitlePosition || "bottom";
+
+      // Ensure container allows absolute positioning
+      container.style.position = 'relative';
+      container.style.display = 'block'; // Reset flex
+
+      // Reset all positioning
+      text.style.position = 'absolute';
+      text.style.margin = '0';
+      text.style.top = 'auto';
+      text.style.bottom = 'auto';
+      text.style.left = '0';
+      text.style.right = '0';
+      text.style.transform = 'none';
 
       if (pos === 'top') {
-         text.style.marginTop = '10%';
-         text.style.marginBottom = '0';
+         text.style.top = '10%';
+      } else if (pos === 'bottom') {
+         text.style.bottom = '10%';
       } else if (pos === 'bottom-low') {
-         text.style.marginBottom = '2%';
+         text.style.bottom = '2%';
       } else if (pos === 'bottom-high') {
-         text.style.marginBottom = '20%';
+         text.style.bottom = '20%';
       } else if (pos === 'middle') {
-         container.style.justifyContent = 'center';
-         text.style.marginBottom = '0';
+         text.style.top = '50%';
+         text.style.transform = 'translateY(-50%)';
       }
    }
 
