@@ -878,9 +878,9 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
             // Set display mode - try multiple modes for compatibility with older Tizen versions
             var displayModeSet = false;
             var displayModes = [
-                'PLAYER_DISPLAY_MODE_FULL_SCREEN',
+                'PLAYER_DISPLAY_MODE_LETTER_BOX',
                 'PLAYER_DISPLAY_MODE_AUTO_ASPECT_RATIO',
-                'PLAYER_DISPLAY_MODE_LETTER_BOX'
+                'PLAYER_DISPLAY_MODE_FULL_SCREEN'
             ];
 
             for (var i = 0; i < displayModes.length && !displayModeSet; i++) {
