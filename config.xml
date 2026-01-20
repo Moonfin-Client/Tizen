@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="http://jellyfin.org/jellyfin" version="1.2.0" viewmodes="maximized">
+<widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="http://jellyfin.org/jellyfin" version="1.3.0" viewmodes="maximized">
     <access origin="*" subdomains="true"></access>
     <tizen:application id="MoonfinApp.Moonfin" package="MoonfinApp" required_version="2.3"/>
     <author>Moonfin</author>

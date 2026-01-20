@@ -218,7 +218,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
             // Create player instance (use attach method instead of constructor with element)
             this.player = new shaka.Player();
             await this.player.attach(this.videoElement);
-            
+
             // Detect codec support using MediaSource API
             // Test multiple Dolby Vision profiles and variants
             // HEVC Levels: L120=4.0 (1080p), L150=5.0 (4K@30), L153=5.1 (4K@60)
@@ -232,11 +232,11 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
                 vp9: this.checkCodecSupport('video/webm; codecs="vp9"'),
                 vp9Profile2: this.checkCodecSupport('video/webm; codecs="vp09.02.10.10"')
             };
-            
+
             // Determine overall HDR capability
             const hasDolbyVision = this.codecSupport.dolbyVisionP5 || this.codecSupport.dolbyVisionP7 || this.codecSupport.dolbyVisionP8;
             const hasHDR = this.codecSupport.hevcMain10 || hasDolbyVision || this.codecSupport.vp9Profile2;
-            
+
             console.log('[ShakaAdapter] Hardware codec support detected:');
             console.log('  - H.264/AVC:', this.codecSupport.h264);
             console.log('  - HEVC/H.265:', this.codecSupport.hevc, '(10-bit:', this.codecSupport.hevcMain10 + ')');
@@ -245,7 +245,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
             console.log('  - Dolby Vision Profile 8:', this.codecSupport.dolbyVisionP8);
             console.log('  - VP9:', this.codecSupport.vp9, '(HDR:', this.codecSupport.vp9Profile2 + ')');
             console.log('[ShakaAdapter] HDR Capabilities: Dolby Vision=' + hasDolbyVision + ', HDR10=' + this.codecSupport.hevcMain10);
-            
+
             // Store for later reference
             this.hasDolbyVisionSupport = hasDolbyVision;
             this.hasHDRSupport = hasHDR;
@@ -325,7 +325,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
                     bandwidth: stats.estimatedBandwidth
                 });
             });
-            
+
             // Setup variant change events (audio/video track changes)
             this.player.addEventListener('variantchanged', () => {
                 const currentVariant = this.player.getVariantTracks().find(t => t.active);
@@ -354,11 +354,11 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
             if (options.startPosition) {
                 console.log('[ShakaAdapter] Start position:', options.startPosition, 'seconds');
             }
-            
+
             // Provide helpful info about playback method and codec support
             const isDirect = url.includes('.mp4') && !url.includes('.m3u8') && !url.includes('.mpd');
             const isStreaming = url.includes('.m3u8') || url.includes('.mpd');
-            
+
             if (isDirect) {
                 console.log('[ShakaAdapter] Direct file playback mode');
                 if (this.hasDolbyVisionSupport) {
@@ -376,11 +376,11 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
                     console.log('[ShakaAdapter] ✓ Will prefer HDR10 tracks if available');
                 }
             }
-            
+
             // Load the manifest
             await this.player.load(url);
             console.log('[ShakaAdapter] Manifest loaded successfully');
-            
+
             this.emit('loaded', { url });
 
             // Set start position AFTER loading (when metadata is available)
@@ -411,7 +411,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
         try {
             const allTracks = this.player.getVariantTracks();
             console.log('[ShakaAdapter] Selecting audio track:', trackId, 'from', allTracks.length, 'variants');
-            
+
             // Get unique audio languages
             const audioLanguages = [];
             const seenLanguages = new Set();
@@ -421,11 +421,11 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
                     audioLanguages.push(track.language);
                 }
             });
-            
-            
+
+
             if (trackId >= 0 && trackId < audioLanguages.length) {
                 const targetLanguage = audioLanguages[trackId];
-                
+
                 // Select all variant tracks with this language
                 const tracksToSelect = allTracks.filter(t => t.language === targetLanguage);
                 if (tracksToSelect.length > 0) {
@@ -435,7 +435,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
                     return true;
                 }
             }
-            
+
             return false;
         } catch (error) {
             return false;
@@ -457,7 +457,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
 
             const tracks = this.player.getTextTracks();
             console.log('[ShakaAdapter] Selecting subtitle:', trackId, 'from', tracks.length, 'tracks');
-            
+
             if (trackId >= 0 && trackId < tracks.length) {
                 const track = tracks[trackId];
                 this.player.selectTextTrack(track);
@@ -465,7 +465,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
                 console.log('[ShakaAdapter] Subtitle track selected:', track.language || trackId);
                 return true;
             }
-            
+
             return false;
         } catch (error) {
             return false;
@@ -477,7 +477,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
 
         const tracks = this.player.getVariantTracks();
         const uniqueLanguages = new Map();
-        
+
         tracks.forEach(track => {
             if (track.language && !uniqueLanguages.has(track.language)) {
                 uniqueLanguages.set(track.language, {
@@ -514,17 +514,17 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
             const stats = this.player.getStats();
             const variantTracks = this.player.getVariantTracks();
             const activeVariant = variantTracks.find(t => t.active);
-            
+
             if (!activeVariant) return null;
 
             // Extract codec information
             const videoCodec = activeVariant.videoCodec || 'unknown';
             const audioCodec = activeVariant.audioCodec || 'unknown';
-            
+
             // Determine HDR type from codec string
             let hdrType = 'SDR';
             let colorInfo = null;
-            
+
             if (videoCodec.startsWith('dvhe.') || videoCodec.startsWith('dvh1.')) {
                 // Dolby Vision profiles
                 const profileMatch = videoCodec.match(/dv[he]1?\.(\d+)/);
@@ -541,7 +541,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
             } else if (videoCodec.includes('vp9')) {
                 hdrType = 'HDR (VP9)';
             }
-            
+
             // Get color information from video element if available
             if (this.videoElement && this.videoElement.videoWidth) {
                 colorInfo = {
@@ -555,18 +555,18 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
                 videoCodec: videoCodec,
                 audioCodec: audioCodec,
                 hdrType: hdrType,
-                
+
                 // Quality information
                 width: stats.width || (activeVariant.width || 0),
                 height: stats.height || (activeVariant.height || 0),
                 bandwidth: activeVariant.bandwidth || 0,
-                
+
                 // Performance stats
                 estimatedBandwidth: stats.estimatedBandwidth || 0,
                 droppedFrames: stats.droppedFrames || 0,
                 stallsDetected: stats.stallsDetected || 0,
                 streamBandwidth: stats.streamBandwidth || 0,
-                
+
                 // Additional info
                 frameRate: activeVariant.frameRate || 0,
                 audioChannels: activeVariant.channelsCount || 0,
@@ -642,7 +642,7 @@ class ShakaPlayerAdapter extends VideoPlayerAdapter {
     getName() {
         return 'ShakaPlayer';
     }
-    
+
     /**
      * Check if a specific codec is supported by the browser/device
      * @param {string} mimeType - MIME type with codec string
@@ -675,6 +675,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
         this.currentUrl = null;
         this.isPrepared = false;
         this.duration = 0;
+        this.subtitleManager = null;
     }
 
     async initialize() {
@@ -706,32 +707,32 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
             const urlLower = url.toLowerCase();
             const videoCodec = (options.videoCodec || '').toLowerCase();
             const container = (options.container || '').toLowerCase();
-            
+
             // Check for HEVC content from options (most reliable) or URL
             const isHEVC = options.isHEVC === true ||
-                           videoCodec === 'hevc' ||
-                           videoCodec.startsWith('hev1') ||
-                           videoCodec.startsWith('hvc1') ||
-                           videoCodec.startsWith('h265') ||
-                           urlLower.includes('hevc') || 
-                           urlLower.includes('h265') ||
-                           urlLower.includes('videocodec=hevc');
-            
+                videoCodec === 'hevc' ||
+                videoCodec.startsWith('hev1') ||
+                videoCodec.startsWith('hvc1') ||
+                videoCodec.startsWith('h265') ||
+                urlLower.includes('hevc') ||
+                urlLower.includes('h265') ||
+                urlLower.includes('videocodec=hevc');
+
             // Check for 10-bit HEVC (Main 10 profile)
             const is10bit = options.isHEVC10bit === true ||
-                            urlLower.includes('10bit') ||
-                            urlLower.includes('main10');
-            
+                urlLower.includes('10bit') ||
+                urlLower.includes('main10');
+
             // Check for 4K content
             const is4K = (options.width && options.width >= 3840) ||
-                         (options.height && options.height >= 2160) ||
-                         urlLower.includes('2160') ||
-                         urlLower.includes('4k');
-            
+                (options.height && options.height >= 2160) ||
+                urlLower.includes('2160') ||
+                urlLower.includes('4k');
+
             // Check for Direct Play mode
             const isDirectPlay = options.isDirectPlay === true ||
-                                 urlLower.includes('static=true');
-            
+                urlLower.includes('static=true');
+
             console.log('[TizenAdapter] Stream detection:', {
                 isHEVC: isHEVC,
                 is10bit: is10bit,
@@ -742,7 +743,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                 width: options.width,
                 height: options.height
             });
-            
+
             // For HEVC Direct Play, we need to set streaming property
             if (isHEVC && isDirectPlay) {
                 // Build bitrate info
@@ -750,7 +751,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                 if (is4K) {
                     bitrate = Math.max(bitrate, 80000000); // At least 80 Mbps for 4K HEVC
                 }
-                
+
                 // Set ADAPTIVE_INFO to help AVPlay with buffer allocation
                 try {
                     var adaptiveInfo = 'BITRATES=' + bitrate + '|STARTBITRATE=' + bitrate + '|SKIPBITRATE=LOWEST';
@@ -759,7 +760,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                 } catch (e) {
                     console.warn('[TizenAdapter] Could not set ADAPTIVE_INFO:', e);
                 }
-                
+
                 // Enable 4K mode for 4K content
                 if (is4K) {
                     try {
@@ -769,7 +770,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                         console.warn('[TizenAdapter] Could not set 4K mode:', e);
                     }
                 }
-                
+
                 // For HEVC 10-bit, some Tizen versions need additional configuration
                 // Try to set codec info explicitly
                 if (is10bit) {
@@ -784,12 +785,12 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                     }
                 }
             }
-            
+
             // Log container info
             if (container === 'mkv') {
                 console.log('[TizenAdapter] MKV container - Tizen AVPlay supports MKV natively');
             }
-            
+
         } catch (error) {
             console.warn('[TizenAdapter] Error configuring streaming properties:', error);
         }
@@ -798,6 +799,27 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
     async load(url, options = {}) {
         if (!this.initialized) {
             throw new Error('Tizen AVPlay API not initialized');
+        }
+
+        this.options = options;
+
+        // Initialize SubtitleManager if available
+        // Initialize SubtitleManager if available
+        if (typeof SubtitleManager !== 'undefined') {
+            // Store context for later use (needed for loading tracks)
+            this.currentMediaItem = options.items ? options.items[0] : options.item;
+            this.currentMediaSource = options.mediaSource;
+            this.currentMediaSource = options.mediaSource;
+            this.auth = options.auth;
+
+            // Initialize with container (document.body since overlay is fixed position)
+            // Ensure we have an item context before initializing
+            if (this.currentMediaItem) {
+                this.subtitleManager = new SubtitleManager(document.body);
+                console.log('[TizenAdapter] SubtitleManager initialized');
+            } else {
+                console.warn('[TizenAdapter] No media item for SubtitleManager');
+            }
         }
 
         try {
@@ -813,7 +835,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                 this.videoElement.style.background = 'transparent';
                 console.log('[TizenAdapter] Hidden HTML video element for AVPlay rendering');
             }
-            
+
             // Make body transparent so AVPlay video layer shows through
             // Save original background to restore on destroy
             this.originalBodyBackground = document.body.style.background;
@@ -823,19 +845,19 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
             // Close previous session if any
             try {
                 webapis.avplay.close();
-            } catch (e) {}
+            } catch (e) { }
 
             // Open new media
             webapis.avplay.open(url);
-            
+
             // Configure streaming properties for HEVC/4K content
             // This is CRITICAL for Direct Play of HEVC on Samsung TVs
             this.configureStreamingProperties(url, options);
-            
+
             // Get actual screen resolution from Tizen TV API
             var screenWidth = window.innerWidth;
             var screenHeight = window.innerHeight;
-            
+
             try {
                 if (typeof webapis !== 'undefined' && webapis.productinfo) {
                     var resolution = webapis.productinfo.getResolution();
@@ -848,19 +870,19 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
             } catch (e) {
                 console.log('[TizenAdapter] Could not get TV resolution, using window size:', screenWidth + 'x' + screenHeight);
             }
-            
+
             // Set display area to full screen
             console.log('[TizenAdapter] Setting display rect: 0, 0,', screenWidth, 'x', screenHeight);
             webapis.avplay.setDisplayRect(0, 0, screenWidth, screenHeight);
-            
+
             // Set display mode - try multiple modes for compatibility with older Tizen versions
             var displayModeSet = false;
             var displayModes = [
-                'PLAYER_DISPLAY_MODE_FULL_SCREEN',
+                'PLAYER_DISPLAY_MODE_LETTER_BOX',
                 'PLAYER_DISPLAY_MODE_AUTO_ASPECT_RATIO',
-                'PLAYER_DISPLAY_MODE_LETTER_BOX'
+                'PLAYER_DISPLAY_MODE_FULL_SCREEN'
             ];
-            
+
             for (var i = 0; i < displayModes.length && !displayModeSet; i++) {
                 try {
                     webapis.avplay.setDisplayMethod(displayModes[i]);
@@ -883,6 +905,14 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                 onbufferingcomplete: () => {
                     console.log('[TizenAdapter] Buffering complete');
                     this.emit('buffering', false);
+
+                    // Retry pending track selection if needed
+                    if (this.pendingAudioIndex !== undefined && this.pendingAudioIndex !== -1) {
+                        console.log('[TizenAdapter] Retrying pending audio selection after buffering:', this.pendingAudioIndex);
+                        if (this.selectAudioTrack(this.pendingAudioIndex)) {
+                            this.pendingAudioIndex = -1;
+                        }
+                    }
                 },
                 onstreamcompleted: () => {
                     console.log('[TizenAdapter] Stream completed');
@@ -900,23 +930,36 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                         // Trigger timeupdate event on video element for UI updates
                         this.videoElement.dispatchEvent(new Event('timeupdate'));
                     }
+
+                    // Update subtitles
+                    if (this.subtitleManager) {
+                        this.subtitleManager.update(currentTime);
+                    }
+
                     this.emit('timeupdate', { currentTime: timeInSeconds });
+
+                    // Final safety check: if we started playing and still have a pending track, try one last time
+                    if (this.pendingAudioIndex !== undefined && this.pendingAudioIndex !== -1 && currentTime > 0) {
+                        if (this.selectAudioTrack(this.pendingAudioIndex)) {
+                            this.pendingAudioIndex = -1;
+                        }
+                    }
                 },
                 onerror: (errorType) => {
                     // Get detailed error info for debugging
                     var state = 'UNKNOWN';
                     try {
                         state = webapis.avplay.getState();
-                    } catch (e) {}
-                    
+                    } catch (e) { }
+
                     var errorDetails = {
                         type: errorType,
                         state: state,
                         url: this.currentUrl ? this.currentUrl.substring(0, 100) : 'none'
                     };
-                    
+
                     console.error('[TizenAdapter] Playback error:', errorDetails);
-                    
+
                     this.emit('error', {
                         type: 'TIZEN_AVPLAY_ERROR',
                         code: errorType,
@@ -962,22 +1005,22 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                     () => {
                         this.isPrepared = true;
                         this.duration = webapis.avplay.getDuration() / 1000;
-                        
+
                         // Log AVPlay state for debugging
                         var state = 'UNKNOWN';
                         try {
                             state = webapis.avplay.getState();
-                        } catch (e) {}
-                        
+                        } catch (e) { }
+
                         console.log('[TizenAdapter] Prepared successfully');
                         console.log('[TizenAdapter] Duration:', this.duration, 'seconds');
                         console.log('[TizenAdapter] State:', state);
-                        
+
                         // Log stream info to debug codec detection
                         try {
                             var streamInfo = webapis.avplay.getCurrentStreamInfo();
                             console.log('[TizenAdapter] Stream info:', JSON.stringify(streamInfo, null, 2));
-                            
+
                             var trackInfo = webapis.avplay.getTotalTrackInfo();
                             console.log('[TizenAdapter] Track count:', trackInfo.length);
                             for (var t = 0; t < trackInfo.length; t++) {
@@ -986,7 +1029,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                         } catch (infoErr) {
                             console.warn('[TizenAdapter] Could not get stream info:', infoErr);
                         }
-                        
+
                         // Update video element duration for UI compatibility
                         if (this.videoElement) {
                             Object.defineProperty(this.videoElement, 'duration', {
@@ -996,6 +1039,22 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
                             // Trigger loadedmetadata for UI initialization
                             this.videoElement.dispatchEvent(new Event('loadedmetadata'));
                         }
+
+                        // Apply initial track preferences if provided
+                        if (this.options) {
+                            if (typeof this.options.initialAudioIndex === 'number' && this.options.initialAudioIndex >= 0) {
+                                console.log('[TizenAdapter] Applying initial audio track preference:', this.options.initialAudioIndex);
+                                if (!this.selectAudioTrack(this.options.initialAudioIndex)) {
+                                    console.log('[TizenAdapter] Selection failed/deferred, storing as pending');
+                                    this.pendingAudioIndex = this.options.initialAudioIndex;
+                                }
+                            }
+                            if (typeof this.options.initialSubtitleIndex === 'number') {
+                                console.log('[TizenAdapter] Applying initial subtitle track preference:', this.options.initialSubtitleIndex);
+                                this.selectSubtitleTrack(this.options.initialSubtitleIndex);
+                            }
+                        }
+
                         resolve();
                     },
                     (error) => {
@@ -1012,16 +1071,25 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
     play() {
         try {
             console.log('[TizenAdapter] Calling play()');
+
+            // Try pending audio selection before playing
+            if (this.pendingAudioIndex !== undefined && this.pendingAudioIndex !== -1) {
+                console.log('[TizenAdapter] Retrying pending audio selection before play:', this.pendingAudioIndex);
+                if (this.selectAudioTrack(this.pendingAudioIndex)) {
+                    this.pendingAudioIndex = -1;
+                }
+            }
+
             webapis.avplay.play();
-            
+
             // Log state after play
             setTimeout(() => {
                 try {
                     const state = webapis.avplay.getState();
                     console.log('[TizenAdapter] State after play():', state);
-                } catch (e) {}
+                } catch (e) { }
             }, 100);
-            
+
             return Promise.resolve();
         } catch (error) {
             console.error('[TizenAdapter] Play error:', error);
@@ -1090,15 +1158,24 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
         }
     }
 
-    selectAudioTrack(trackId) {
+    selectAudioTrack(trackIndex) {
         try {
             const totalTracks = webapis.avplay.getTotalTrackInfo();
+            let audioCount = 0;
+
+            if (window.debugOverlay) window.debugOverlay.log('[TizenAdapter] selecting Audio Index: ' + trackIndex);
+
             for (let i = 0; i < totalTracks.length; i++) {
-                if (totalTracks[i].type === 'AUDIO' && totalTracks[i].index === trackId) {
-                    webapis.avplay.setSelectTrack('AUDIO', trackId);
-                    return true;
+                if (totalTracks[i].type === 'AUDIO') {
+                    if (audioCount === trackIndex) {
+                        if (window.debugOverlay) window.debugOverlay.log('[TizenAdapter] Found matching track ID: ' + totalTracks[i].index);
+                        webapis.avplay.setSelectTrack('AUDIO', totalTracks[i].index);
+                        return true;
+                    }
+                    audioCount++;
                 }
             }
+            console.warn('[TizenAdapter] Audio track not found for index:', trackIndex);
             return false;
         } catch (error) {
             console.error('[TizenAdapter] Audio track selection error:', error);
@@ -1110,9 +1187,65 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
         try {
             if (trackId === -1) {
                 webapis.avplay.setSilentSubtitle(true);
+                if (this.subtitleManager) {
+                    this.subtitleManager.disable();
+                }
                 return true;
             }
-            
+
+            // Try SubtitleManager first (for external SRT/VTT)
+            // Try SubtitleManager first (for external SRT/VTT)
+            if (window.debugOverlay) window.debugOverlay.log('TizenAdapter selectTrack: ' + trackId);
+
+            if (this.subtitleManager && this.currentMediaSource) {
+                // Find the stream in MediaSource
+                const streams = this.currentMediaSource.MediaStreams || [];
+                if (window.debugOverlay) window.debugOverlay.log('Looking for TrackID: ' + trackId + ' (' + typeof trackId + ')');
+
+                // Debug available streams
+                const subStreams = streams.filter(s => s.Type === 'Subtitle');
+                if (window.debugOverlay && subStreams.length > 0) {
+                    window.debugOverlay.log('Avail Subs: ' + subStreams.map(s => s.Index + '[' + s.IsExternal + ']').join(', '));
+                }
+
+                // Loose equality check for flexibility
+                const track = streams.find(s => s.Type === 'Subtitle' && s.Index == trackId);
+
+                // Determine if we should handle this via SubtitleManager
+                // 1. It is explicitly external
+                // 2. OR it is a text format (not PGS/DVD) that we can render manually
+                const codec = (track && track.Codec ? track.Codec.toLowerCase() : '');
+                const isImageFormat = ['hdmv_pgs_subtitle', 'pgs', 'dvd_subtitle', 'dvdsub', 'vobsub'].includes(codec);
+                const isTextFormat = !isImageFormat;
+
+                const isExternal = track && track.IsExternal;
+                const shouldUseManager = track && (isExternal || isTextFormat);
+
+                if (window.debugOverlay) {
+                    window.debugOverlay.log('Track Check - Codec: ' + codec +
+                        ', IsExt: ' + isExternal +
+                        ', IsText: ' + isTextFormat);
+                }
+
+                if (shouldUseManager) {
+                    // Load the track using SubtitleManager
+                    console.log('[TizenAdapter] Text/External track detected, delegating to SubtitleManager');
+                    if (window.debugOverlay) window.debugOverlay.log('Delegating ' + codec + ' to SubMgr');
+
+                    this.subtitleManager.loadTrack(track, this.currentMediaItem, this.currentMediaSource, this.auth);
+                    webapis.avplay.setSilentSubtitle(true);
+                    return true;
+                }
+            } else {
+                if (window.debugOverlay) window.debugOverlay.log('SubMgr: ' + (!!this.subtitleManager) + ', Src: ' + (!!this.currentMediaSource));
+            }
+
+            // Fallback to AVPlay internal tracks
+            if (window.debugOverlay) window.debugOverlay.log('Falling back to internal track');
+            if (this.subtitleManager) {
+                this.subtitleManager.disable(); // Disable overlay if using internal
+            }
+
             webapis.avplay.setSilentSubtitle(false);
             webapis.avplay.setSelectTrack('TEXT', trackId);
             return true;
@@ -1126,7 +1259,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
         try {
             const totalTracks = webapis.avplay.getTotalTrackInfo();
             const audioTracks = [];
-            
+
             for (let i = 0; i < totalTracks.length; i++) {
                 if (totalTracks[i].type === 'AUDIO') {
                     audioTracks.push({
@@ -1147,7 +1280,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
         try {
             const totalTracks = webapis.avplay.getTotalTrackInfo();
             const textTracks = [];
-            
+
             for (let i = 0; i < totalTracks.length; i++) {
                 if (totalTracks[i].type === 'TEXT') {
                     textTracks.push({
@@ -1171,7 +1304,7 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
 
         try {
             const streamInfo = webapis.avplay.getCurrentStreamInfo();
-            
+
             if (streamInfo) {
                 const videoCategory = {
                     type: 'video',
@@ -1221,10 +1354,17 @@ class TizenVideoAdapter extends VideoPlayerAdapter {
             if (this.originalBodyBackground !== undefined) {
                 document.body.style.background = this.originalBodyBackground;
             }
-        } catch (error) {}
+        } catch (error) { }
         this.currentUrl = null;
         this.isPrepared = false;
         this.initialized = false;
+        this.initialized = false;
+
+        if (this.subtitleManager) {
+            this.subtitleManager.destroy();
+            this.subtitleManager = null;
+        }
+
         await super.destroy();
     }
 
@@ -1249,7 +1389,7 @@ function handleHlsJsMediaError(hlsPlayer) {
         console.log('[HLS Recovery] Attempting to recover from media error...');
         hlsPlayer.recoverMediaError();
         return true;
-    } 
+    }
     // Second attempt: swap audio codec and recover
     else if (!recoverSwapAudioCodecDate || (now - recoverSwapAudioCodecDate) > 3000) {
         recoverSwapAudioCodecDate = now;
@@ -1257,7 +1397,7 @@ function handleHlsJsMediaError(hlsPlayer) {
         hlsPlayer.swapAudioCodec();
         hlsPlayer.recoverMediaError();
         return true;
-    } 
+    }
     // Failed: cannot recover
     else {
         console.error('[HLS Recovery] Cannot recover, last attempts failed');
@@ -1302,7 +1442,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
         try {
             // Check if HLS stream and HLS.js is available
             const isHLS = url.includes('.m3u8') || (options.mimeType && options.mimeType.includes('mpegURL'));
-            
+
             if (isHLS && typeof Hls !== 'undefined' && Hls.isSupported()) {
                 return this.loadWithHlsJs(url, options);
             }
@@ -1312,11 +1452,11 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
             if (crossOrigin) {
                 this.videoElement.crossOrigin = crossOrigin;
             }
-            
+
             // Set src directly on video element, NOT via source child
             // This is critical for Tizen compatibility
             this.videoElement.src = url;
-            
+
             if (options.mimeType) {
                 this.videoElement.setAttribute('type', options.mimeType);
             }
@@ -1324,7 +1464,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
             this.emit('loaded', { url });
 
             this.videoElement.load();
-            
+
             if (options.startPosition && options.startPosition > 0) {
                 this.videoElement.currentTime = options.startPosition;
             }
@@ -1332,20 +1472,20 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
             // Wait for video to be ready with timeout
             return new Promise((resolve, reject) => {
                 let timeoutId = null;
-                
+
                 const cleanup = () => {
                     if (timeoutId) clearTimeout(timeoutId);
                     this.videoElement.removeEventListener('canplay', onCanPlay);
                     this.videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
                     this.videoElement.removeEventListener('error', onError);
                 };
-                
+
                 const onCanPlay = () => {
                     console.log('[HTML5Adapter] canplay event fired');
                     cleanup();
                     resolve();
                 };
-                
+
                 const onLoadedMetadata = () => {
                     console.log('[HTML5Adapter] loadedmetadata event fired, waiting for canplay...');
                     // Metadata loaded, extend timeout since we're making progress
@@ -1354,12 +1494,12 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                         timeoutId = setTimeout(onTimeout, 15000); // Extend by 15 more seconds
                     }
                 };
-                
+
                 const onError = (e) => {
                     console.error('[HTML5Adapter] Video error event:', e);
                     console.error('[HTML5Adapter] Video error code:', this.videoElement.error ? this.videoElement.error.code : 'none');
                     console.error('[HTML5Adapter] Video error message:', this.videoElement.error ? this.videoElement.error.message : 'none');
-                    
+
                     // Log to server
                     if (typeof ServerLogger !== 'undefined') {
                         ServerLogger.logPlaybackError('HTML5 video load error', {
@@ -1368,14 +1508,14 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                             url: url.substring(0, 100)
                         });
                     }
-                    
+
                     cleanup();
                     reject(new Error('Video load error: ' + (this.videoElement.error ? this.videoElement.error.message : 'Unknown error')));
                 };
-                
+
                 const onTimeout = () => {
                     console.warn('[HTML5Adapter] Video load timeout - readyState:', this.videoElement.readyState);
-                    
+
                     // Log to server
                     if (typeof ServerLogger !== 'undefined') {
                         ServerLogger.logPlaybackWarning('HTML5 video load timeout', {
@@ -1384,7 +1524,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                             url: url.substring(0, 100)
                         });
                     }
-                    
+
                     cleanup();
                     // Don't reject immediately - resolve and let health check handle fallback
                     // This allows the player to try and may work on some devices
@@ -1394,10 +1534,10 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                 this.videoElement.addEventListener('canplay', onCanPlay);
                 this.videoElement.addEventListener('loadedmetadata', onLoadedMetadata);
                 this.videoElement.addEventListener('error', onError);
-                
+
                 // Set timeout for load (10 seconds initial)
                 timeoutId = setTimeout(onTimeout, 10000);
-                
+
                 // Try to trigger load
                 this.videoElement.load();
             });
@@ -1416,7 +1556,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
     loadWithHlsJs(url, options = {}) {
         return new Promise((resolve, reject) => {
             console.log('[HTML5+HLS.js] Loading HLS stream:', url.substring(0, 100) + '...');
-            
+
             // Destroy existing HLS player
             if (this.hlsPlayer) {
                 try {
@@ -1439,23 +1579,23 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                 fragLoadingTimeOut: 20000,
                 fragLoadingMaxRetry: 6,
                 fragLoadingRetryDelay: 1000,
-                
+
                 // Buffer settings for smooth playback
                 maxBufferLength: 30,
                 maxMaxBufferLength: 600,
                 maxBufferSize: 60 * 1000 * 1000, // 60 MB
                 maxBufferHole: 0.5,
-                
+
                 // Back buffer for seeking back
                 backBufferLength: 90,
                 liveBackBufferLength: 90,
-                
+
                 // Low latency mode disabled for VOD transcodes
                 lowLatencyMode: false,
-                
+
                 // Start position
                 startPosition: options.startPosition || -1,
-                
+
                 // ABR (Adaptive Bitrate) settings
                 abrEwmaDefaultEstimate: 5000000, // 5 Mbps default
                 abrEwmaFastLive: 3.0,
@@ -1501,17 +1641,17 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                     console.log('[HTML5+HLS.js] First level:', level.width + 'x' + level.height, '@', level.bitrate, 'bps');
                 }
                 console.log('[HTML5+HLS.js] Audio tracks:', (data.audioTracks && data.audioTracks.length) || 0);
-                
+
                 this.emit('loaded', { url });
                 this.emit('buffering', false);
-                
+
                 console.log('[HTML5+HLS.js] Video element state before play:', {
                     paused: this.videoElement.paused,
                     readyState: this.videoElement.readyState,
                     networkState: this.videoElement.networkState,
                     currentTime: this.videoElement.currentTime
                 });
-                
+
                 // Try to play - critical for transcoded streams
                 this.videoElement.play()
                     .then(() => {
@@ -1522,7 +1662,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                         console.error('[HTML5+HLS.js] Play failed:', err);
                         console.error('[HTML5+HLS.js] Error name:', err.name);
                         console.error('[HTML5+HLS.js] Error message:', err.message);
-                        
+
                         // Log to server for diagnostics
                         if (typeof ServerLogger !== 'undefined') {
                             ServerLogger.logPlaybackWarning('HLS play() failed after manifest parsed', {
@@ -1533,7 +1673,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                                 networkState: this.videoElement.networkState
                             });
                         }
-                        
+
                         // Still resolve. the player controller will handle retrying
                         resolve();
                     });
@@ -1565,7 +1705,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                 if (data.fatal) {
                     hasError = true;
                     console.error('[HTML5+HLS.js] Fatal error occurred');
-                    
+
                     // Log to ServerLogger for diagnostics
                     if (typeof ServerLogger !== 'undefined') {
                         ServerLogger.logPlaybackError('HLS.js fatal error: ' + data.type + ' - ' + data.details, {
@@ -1576,19 +1716,19 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                             reason: data.reason || 'Unknown'
                         });
                     }
-                    
+
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
                             // Try to recover from network errors
                             if (data.response && data.response.code >= 400 && data.response.code < 500) {
                                 // 4xx errors are unrecoverable (auth, not found, etc.)
                                 console.error('[HTML5+HLS.js] Unrecoverable network error:', data.response.code);
-                                
+
                                 // Special handling for 401/403 - likely reverse proxy auth issue
                                 if (data.response.code === 401 || data.response.code === 403) {
                                     console.error('[HTML5+HLS.js] Authentication error - check reverse proxy configuration');
                                 }
-                                
+
                                 hls.destroy();
                                 this.emit('error', { type: MediaError.SERVER_ERROR, details: data });
                                 reject(new Error(MediaError.SERVER_ERROR + ': HTTP ' + data.response.code));
@@ -1602,7 +1742,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                                 hls.startLoad();
                             }
                             break;
-                            
+
                         case Hls.ErrorTypes.MEDIA_ERROR:
                             console.log('[HTML5+HLS.js] Media error, attempting recovery...');
                             if (handleHlsJsMediaError(hls)) {
@@ -1614,7 +1754,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
                                 reject(new Error(MediaError.MEDIA_DECODE_ERROR));
                             }
                             break;
-                            
+
                         default:
                             console.error('[HTML5+HLS.js] Unhandled fatal error type:', data.type);
                             hls.destroy();
@@ -1633,7 +1773,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
 
             this.hlsPlayer = hls;
             this.emit('buffering', true);
-            
+
             setTimeout(() => {
                 if (!manifestParsed && !hasError) {
                     console.error('[HTML5+HLS.js] Manifest load timeout');
@@ -1663,7 +1803,7 @@ class HTML5VideoAdapter extends VideoPlayerAdapter {
     selectSubtitleTrack(trackId) {
         try {
             const textTracks = this.videoElement.textTracks;
-            
+
             if (trackId === -1) {
                 for (let i = 0; i < textTracks.length; i++) {
                     textTracks[i].mode = 'disabled';
@@ -1800,11 +1940,11 @@ class VideoPlayerFactory {
     static async createPlayer(videoElement, options = {}) {
         // Check if HLS.js is available for HLS streams
         const hlsAvailable = typeof Hls !== 'undefined' && Hls.isSupported();
-        
+
         // Log availability
         console.log('[PlayerFactory] HLS.js available:', hlsAvailable);
         console.log('[PlayerFactory] Options:', JSON.stringify(options));
-        
+
         // Determine adapter priority based on platform and playback needs
         let adapters;
 
@@ -1848,7 +1988,7 @@ class VideoPlayerFactory {
                 console.log('[PlayerFactory] Attempting:', AdapterClass.name);
                 const adapter = new AdapterClass(videoElement);
                 const success = await adapter.initialize();
-                
+
                 if (success) {
                     console.log('[PlayerFactory] Using:', adapter.getName());
                     return adapter;

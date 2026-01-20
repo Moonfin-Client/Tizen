@@ -28,6 +28,7 @@ var DetailsController = (function () {
    let modalFocusableItems = [];
    let currentModalFocusIndex = 0;
    let activeModal = null;
+   let modalOpenerButton = null;
 
    let elements = {};
 
@@ -2085,12 +2086,23 @@ var DetailsController = (function () {
    }
 
    function showAudioTrackSelector(audioStreams) {
-      // Find currently selected track (default track)
+      modalOpenerButton = document.activeElement;
+
+      // Find currently selected track (prioritize saved preference)
       var currentIndex = -1;
-      for (var i = 0; i < audioStreams.length; i++) {
-         if (audioStreams[i].IsDefault) {
-            currentIndex = i;
-            break;
+      var savedPref = localStorage.getItem("preferredAudioTrack_" + itemId);
+
+      if (savedPref !== null) {
+         currentIndex = parseInt(savedPref);
+      }
+
+      if (currentIndex === -1 || isNaN(currentIndex)) {
+         currentIndex = -1; // Reset if invalid
+         for (var i = 0; i < audioStreams.length; i++) {
+            if (audioStreams[i].IsDefault) {
+               currentIndex = i;
+               break;
+            }
          }
       }
 
@@ -2106,6 +2118,7 @@ var DetailsController = (function () {
             });
             if (modalFocusableItems[selectedIndex]) {
                modalFocusableItems[selectedIndex].classList.add("selected");
+               modalFocusableItems[selectedIndex].focus();
             }
 
             // Store preference for this item so player can apply it on playback
@@ -2114,10 +2127,7 @@ var DetailsController = (function () {
                selectedIndex
             );
 
-            // Close after a brief delay to show the selection
-            setTimeout(function () {
-               closeModal();
-            }, 150);
+            // Auto-close removed
          }
       );
 
@@ -2130,12 +2140,24 @@ var DetailsController = (function () {
    }
 
    function showSubtitleTrackSelector(subtitleStreams) {
-      // Find currently selected track (default track)
+      modalOpenerButton = document.activeElement;
+
+      // Find currently selected track (prioritize saved preference)
       var currentIndex = -1;
-      for (var i = 0; i < subtitleStreams.length; i++) {
-         if (subtitleStreams[i].IsDefault) {
-            currentIndex = i;
-            break;
+      var savedPref = localStorage.getItem("preferredSubtitleTrack_" + itemId);
+
+      if (savedPref !== null) {
+         currentIndex = parseInt(savedPref); // Can be -1
+      }
+
+      // If no valid preference is saved, verify default
+      if (savedPref === null || isNaN(currentIndex)) {
+         currentIndex = -1; // Default to None if not found
+         for (var i = 0; i < subtitleStreams.length; i++) {
+            if (subtitleStreams[i].IsDefault) {
+               currentIndex = i;
+               break;
+            }
          }
       }
 
@@ -2153,6 +2175,7 @@ var DetailsController = (function () {
             var modalIndex = selectedIndex === -1 ? 0 : selectedIndex + 1; // +1 because "None" is at position 0
             if (modalFocusableItems[modalIndex]) {
                modalFocusableItems[modalIndex].classList.add("selected");
+               modalFocusableItems[modalIndex].focus();
             }
 
             // Store preference for this item so player can apply it on playback
@@ -2161,10 +2184,7 @@ var DetailsController = (function () {
                selectedIndex
             );
 
-            // Close after a brief delay to show the selection
-            setTimeout(function () {
-               closeModal();
-            }, 150);
+            // Auto-close removed
          }
       );
 
@@ -2188,6 +2208,11 @@ var DetailsController = (function () {
       }
       activeModal = null;
       modalFocusableItems = [];
+
+      if (modalOpenerButton) {
+         modalOpenerButton.focus();
+         modalOpenerButton = null;
+      }
    }
 
    // ==================== Jellyseerr Integration ====================

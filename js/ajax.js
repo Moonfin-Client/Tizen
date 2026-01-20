@@ -28,7 +28,7 @@ var ajax = new AJAX();
  * AJAX utility for making HTTP requests
  * @constructor
  */
-function AJAX() {}
+function AJAX() { }
 
 /**
  * Make an HTTP request
@@ -140,11 +140,17 @@ AJAX.prototype.request = function (url, settings) {
          if (xhr.status == 200) {
             if (settings.success) {
                try {
-                  console.log("[AJAX] Parsing JSON...");
-                  var jsonData = JSON.parse(xhr.responseText);
-                  console.log(
-                     "[AJAX] JSON parsed successfully, calling success callback"
-                  );
+                  var jsonData;
+                  if (settings.dataType === 'text') {
+                     console.log("[AJAX] dataType is text, returning raw response");
+                     jsonData = xhr.responseText;
+                  } else {
+                     console.log("[AJAX] Parsing JSON...");
+                     jsonData = JSON.parse(xhr.responseText);
+                     console.log(
+                        "[AJAX] JSON parsed successfully, calling success callback"
+                     );
+                  }
                   settings.success(jsonData);
                   console.log("[AJAX] Success callback returned");
                } catch (error) {

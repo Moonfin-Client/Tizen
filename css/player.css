@@ -43,7 +43,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.9) 100%);
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 20%, transparent 80%, rgba(0, 0, 0, 0.9) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -815,8 +815,13 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .error-dialog-content {
@@ -835,6 +840,7 @@ body {
         transform: translateY(-50px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -902,4 +908,40 @@ body {
     box-shadow: 0 0 0 3px rgba(0, 164, 220, 0.3);
     transform: scale(1.05);
     outline: none;
+}
+
+/* Subtitle Overlay */
+.videoSubtitles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 40;
+    /* Lowered to be below controls (100) but above dimmer (50) */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    overflow: hidden;
+}
+
+.videoSubtitlesInner {
+    text-align: center;
+    color: #fff;
+    font-size: 2.8em;
+    /* Base size */
+    font-weight: 500;
+    padding: 0 50px;
+    margin-bottom: 50px;
+    text-shadow: 0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1);
+    line-height: normal;
+}
+
+/* Utility to hide elements */
+.hide {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
 }

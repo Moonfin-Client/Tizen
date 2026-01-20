@@ -339,6 +339,11 @@ var SettingsController = (function () {
          backdropBlurHome: 3,
          backdropBlurDetail: 3,
          serverLogging: true,
+         // Subtitle defaults
+         subtitleSize: "medium",
+         subtitleColor: "#ffffff",
+         subtitlePosition: "bottom",
+         subtitleBackground: "drop-shadow",
       };
 
       for (var key in defaults) {
@@ -579,8 +584,91 @@ var SettingsController = (function () {
          serverLoggingValue.textContent = settings.serverLogging ? "On" : "Off";
       }
 
+      // Subtitle Customization
+      var subtitleSizeValue = document.getElementById("subtitleSizeValue");
+      if (subtitleSizeValue) {
+         subtitleSizeValue.textContent = (settings.subtitleSize || "medium").charAt(0).toUpperCase() + (settings.subtitleSize || "medium").slice(1);
+      }
+
+      var subtitleColorValue = document.getElementById("subtitleColorValue");
+      if (subtitleColorValue) {
+         var colorMap = { "#ffffff": "White", "#ffff00": "Yellow", "#000000": "Black", "#00ffff": "Cyan", "#0000ff": "Blue" };
+         subtitleColorValue.textContent = colorMap[settings.subtitleColor] || "White";
+      }
+
+      var subtitlePositionValue = document.getElementById("subtitlePositionValue");
+      if (subtitlePositionValue) {
+         var pos = settings.subtitlePosition || "bottom";
+         var displayPos = pos.charAt(0).toUpperCase() + pos.slice(1);
+         if (pos === "bottom-low") displayPos = "Bottom (Low)";
+         if (pos === "bottom-high") displayPos = "Bottom (High)";
+         subtitlePositionValue.textContent = displayPos;
+      }
+
+
+
+      var subtitleBackgroundValue = document.getElementById("subtitleBackgroundValue");
+      if (subtitleBackgroundValue) {
+         var bgMap = { "none": "None", "drop-shadow": "Drop Shadow", "background": "Opaque Box" };
+         subtitleBackgroundValue.textContent = bgMap[settings.subtitleBackground] || "Drop Shadow";
+      }
+
       // Jellyseerr settings
       updateJellyseerrSettingValues();
+
+      // Update subtitle preview
+      updateSubtitlePreview();
+   }
+
+   function updateSubtitlePreview() {
+      var previewContainer = document.getElementById('subtitlePreviewText');
+      if (!previewContainer) return;
+
+      // Apply styles mapping from SubtitleManager
+      var s = previewContainer.style;
+
+      // Size
+      var sizes = {
+         'smaller': '1.8em',
+         'small': '2.2em',
+         'medium': '2.8em',
+         'large': '3.6em',
+         'extralarge': '4.6em'
+      };
+      // Scale down slightly for settings preview to fit
+      var val = sizes[settings.subtitleSize || 'medium'] || sizes['medium'];
+      s.fontSize = "calc(" + val + " * 0.6)";
+
+      // Color
+      s.color = settings.subtitleColor || '#ffffff';
+
+      // Background
+      var bg = settings.subtitleBackground || 'drop-shadow';
+      if (bg === 'drop-shadow') {
+         s.textShadow = '0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)';
+         s.background = 'none';
+      } else if (bg === 'background') {
+         s.textShadow = 'none';
+         s.background = 'rgba(0, 0, 0, 0.7)';
+      } else {
+         s.textShadow = 'none';
+         s.background = 'none';
+      }
+
+      // Position (in preview box)
+      var pos = settings.subtitlePosition || 'bottom';
+      if (pos === 'top') {
+         previewContainer.style.bottom = 'auto';
+         previewContainer.style.top = '10px';
+      } else if (pos === 'middle') {
+         previewContainer.style.bottom = '50%';
+         previewContainer.style.top = 'auto';
+         previewContainer.style.transform = 'translateY(50%)';
+      } else {
+         previewContainer.style.bottom = '10px';
+         previewContainer.style.top = 'auto';
+         previewContainer.style.transform = 'none';
+      }
    }
 
    /**
@@ -1176,7 +1264,7 @@ var SettingsController = (function () {
       categories.forEach(function (cat, index) {
          if (index === focusManager.sidebarIndex) {
             cat.classList.add("focused");
-            cat.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            cat.scrollIntoView({ behavior: "auto", block: "center" });
          } else {
             cat.classList.remove("focused");
          }
@@ -1187,7 +1275,7 @@ var SettingsController = (function () {
       items.forEach(function (item, index) {
          if (index === focusManager.contentIndex) {
             item.classList.add("focused");
-            item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            item.scrollIntoView({ behavior: "auto", block: "center" });
          } else {
             item.classList.remove("focused");
          }
@@ -1218,6 +1306,17 @@ var SettingsController = (function () {
       var panel = document.getElementById(categoryName + "Panel");
       if (panel) {
          panel.classList.add("active");
+      }
+
+      // Handle subtitle preview visibility
+      var previewContainer = document.getElementById("subtitlePreviewContainer");
+      if (previewContainer) {
+         if (categoryName === "subtitles") {
+            previewContainer.style.display = "block";
+            updateSubtitlePreview();
+         } else {
+            previewContainer.style.display = "none";
+         }
       }
 
       updateSidebarFocus();
@@ -1315,11 +1414,52 @@ var SettingsController = (function () {
             break;
 
          case "accentColor":
-            settings.accentColor =
-               settings.accentColor === "blue" ? "purple" : "blue";
+         case "imageType":
+            settings.imageType =
+               settings.imageType === "Primary" ? "Backdrop" : "Primary";
             saveSettings();
-            applyAccentColor();
+            syncImageHelperSettings();
             updateSettingValues();
+            break;
+
+         case "subtitleSize":
+            var sizes = ["smaller", "small", "medium", "large", "extralarge"];
+            var currentSizeIndex = sizes.indexOf(settings.subtitleSize || "medium");
+            var nextSizeIndex = (currentSizeIndex + 1) % sizes.length;
+            settings.subtitleSize = sizes[nextSizeIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
+            break;
+
+         case "subtitleColor":
+            var colors = ["#ffffff", "#ffff00", "#000000", "#00ffff", "#0000ff"];
+            var currentColorIndex = colors.indexOf(settings.subtitleColor || "#ffffff");
+            var nextColorIndex = (currentColorIndex + 1) % colors.length;
+            settings.subtitleColor = colors[nextColorIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
+            break;
+
+         case "subtitlePosition":
+            var positions = ["bottom", "bottom-low", "bottom-high", "top", "middle"];
+            var currentPosIndex = positions.indexOf(settings.subtitlePosition || "bottom");
+            var nextPosIndex = (currentPosIndex + 1) % positions.length;
+            settings.subtitlePosition = positions[nextPosIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
+            break;
+
+         case "subtitleBackground":
+            var backgrounds = ["drop-shadow", "background", "none"];
+            var currentBgIndex = backgrounds.indexOf(settings.subtitleBackground || "drop-shadow");
+            var nextBgIndex = (currentBgIndex + 1) % backgrounds.length;
+            settings.subtitleBackground = backgrounds[nextBgIndex];
+            saveSettings();
+            updateSettingValues();
+            updateSubtitlePreview();
             break;
 
          case "carouselSpeed":
@@ -1494,6 +1634,40 @@ var SettingsController = (function () {
 
          case "logout":
             handleLogout();
+            break;
+
+         case "logout":
+            handleLogout();
+            break;
+
+         case "subtitleSize":
+            var sizes = ["smaller", "small", "medium", "large", "extralarge"];
+            var currentSizeIdx = sizes.indexOf(settings.subtitleSize || "medium");
+            settings.subtitleSize = sizes[(currentSizeIdx + 1) % sizes.length];
+            saveSettings();
+            updateSettingValues();
+            break;
+
+         case "subtitleColor":
+            var colors = ["#ffffff", "#ffff00", "#000000", "#00ffff", "#0000ff"];
+            var currentColorIdx = colors.indexOf(settings.subtitleColor || "#ffffff");
+            settings.subtitleColor = colors[(currentColorIdx + 1) % colors.length];
+            saveSettings();
+            updateSettingValues();
+            break;
+
+         case "subtitlePosition":
+            settings.subtitlePosition = (settings.subtitlePosition === "bottom" || !settings.subtitlePosition) ? "top" : "bottom";
+            saveSettings();
+            updateSettingValues();
+            break;
+
+         case "subtitleBackground":
+            var bgs = ["none", "drop-shadow", "background"];
+            var currentBgIdx = bgs.indexOf(settings.subtitleBackground || "drop-shadow");
+            settings.subtitleBackground = bgs[(currentBgIdx + 1) % bgs.length];
+            saveSettings();
+            updateSettingValues();
             break;
 
          case "manageServers":
@@ -3927,6 +4101,75 @@ var SettingsController = (function () {
          var count = MultiServerManager.getServerCount();
          serverCountValue.textContent =
             count + (count === 1 ? " server" : " servers");
+      }
+   }
+
+   /**
+    * Update subtitle preview text based on current settings
+    * @private
+    */
+   function updateSubtitlePreview() {
+      var container = document.getElementById("subtitlePreviewContainer");
+      var text = document.getElementById("subtitlePreviewText");
+      if (!container || !text) return;
+
+      // Apply font size
+      var sizes = {
+         'smaller': '2.2em',
+         'small': '2.8em',
+         'medium': '3.5em',
+         'large': '4.5em',
+         'extralarge': '5.5em'
+      };
+      text.style.fontSize =
+         sizes[settings.subtitleSize || "medium"] || sizes["medium"];
+
+      // Apply color
+      text.style.color = settings.subtitleColor || "#ffffff";
+
+      // Apply background/shadow
+      var bg = settings.subtitleBackground || "drop-shadow";
+      if (bg === "drop-shadow") {
+         text.style.textShadow =
+            "0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)";
+         text.style.background = "none";
+      } else if (bg === "background") {
+         text.style.textShadow = "none";
+         text.style.background = "rgba(0, 0, 0, 0.7)";
+      } else {
+         text.style.textShadow = "none";
+         text.style.background = "none";
+      }
+
+      // Apply position
+
+      // Apply position
+      var pos = settings.subtitlePosition || "bottom";
+
+      // Ensure container allows absolute positioning
+      container.style.position = 'relative';
+      container.style.display = 'block'; // Reset flex
+
+      // Reset all positioning
+      text.style.position = 'absolute';
+      text.style.margin = '0';
+      text.style.top = 'auto';
+      text.style.bottom = 'auto';
+      text.style.left = '0';
+      text.style.right = '0';
+      text.style.transform = 'none';
+
+      if (pos === 'top') {
+         text.style.top = '10%';
+      } else if (pos === 'bottom') {
+         text.style.bottom = '10%';
+      } else if (pos === 'bottom-low') {
+         text.style.bottom = '2%';
+      } else if (pos === 'bottom-high') {
+         text.style.bottom = '20%';
+      } else if (pos === 'middle') {
+         text.style.top = '50%';
+         text.style.transform = 'translateY(-50%)';
       }
    }
 
