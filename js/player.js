@@ -336,6 +336,9 @@ var PlayerController = (function () {
          trickplayThumb: document.getElementById("trickplayThumb"),
          trickplayChapterName: document.getElementById("trickplayChapterName"),
          trickplayTime: document.getElementById("trickplayTime"),
+         // Subtitle Settings elements
+         subtitleSettingsBtn: document.getElementById("subtitleSettingsBtn"),
+         subtitleSettingsOverlay: document.getElementById("subtitleSettingsOverlay"),
       };
 
       videoPlayer = elements.videoPlayer;
@@ -471,6 +474,11 @@ var PlayerController = (function () {
                hideTrickplayBubble();
             }
          });
+      }
+
+      // Subtitle Settings button (in subtitle modal header)
+      if (elements.subtitleSettingsBtn) {
+         elements.subtitleSettingsBtn.addEventListener("click", showSubtitleSettingsOverlay);
       }
    }
 
@@ -759,6 +767,12 @@ var PlayerController = (function () {
                closeModal();
                break;
          }
+         return;
+      }
+
+      // Special handling for subtitle settings overlay
+      if (activeModal === "subtitleSettings") {
+         handleSubtitleSettingsKeyDown(evt);
          return;
       }
 
@@ -3252,10 +3266,17 @@ var PlayerController = (function () {
          selectSubtitleTrack
       );
 
+      // Add settings button at the START so UP from first track goes to settings
+      if (elements.subtitleSettingsBtn) {
+         modalFocusableItems.unshift(elements.subtitleSettingsBtn);
+      }
+
       modalOpenerButton = elements.subtitleBtn; // Store the button that opened this modal
       activeModal = "subtitle";
       elements.subtitleModal.style.display = "flex";
-      currentModalFocusIndex = currentSubtitleIndex + 1; // +1 because of "None" option
+      // +1 for "None" option, +1 for settings button at start = +2
+      currentModalFocusIndex = currentSubtitleIndex + 2;
+      if (currentModalFocusIndex < 1) currentModalFocusIndex = 1; // At least start at "None"
       if (modalFocusableItems[currentModalFocusIndex]) {
          modalFocusableItems[currentModalFocusIndex].focus();
       }
@@ -3265,6 +3286,258 @@ var PlayerController = (function () {
     * Select audio track by index
     * @param {number} index - Track index
     */
+
+   // ==================== In-Player Subtitle Settings ====================
+
+   // State for in-player subtitle settings
+   var subtitleSettingsState = {
+      active: false,
+      focusIndex: 0,
+      settings: null // Loaded from storage
+   };
+
+   /**
+    * Show the in-player subtitle settings overlay
+    */
+   function showSubtitleSettingsOverlay() {
+      console.log('[Player] Showing subtitle settings overlay');
+
+      // Close subtitle modal first
+      elements.subtitleModal.style.display = 'none';
+
+      // Load current settings from storage
+      loadSubtitleSettingsForPlayer();
+
+      // Show overlay
+      elements.subtitleSettingsOverlay.style.display = 'flex';
+      subtitleSettingsState.active = true;
+      subtitleSettingsState.focusIndex = 0;
+      activeModal = 'subtitleSettings';
+
+      // Focus first item
+      var items = elements.subtitleSettingsOverlay.querySelectorAll('.subtitle-setting-item');
+      if (items[0]) items[0].focus();
+
+      updateSubtitleSettingsDisplay();
+   }
+
+   /**
+    * Hide the subtitle settings overlay and save changes
+    */
+   function hideSubtitleSettingsOverlay() {
+      console.log('[Player] Hiding subtitle settings overlay');
+      elements.subtitleSettingsOverlay.style.display = 'none';
+      subtitleSettingsState.active = false;
+      activeModal = null;
+
+      // Re-apply settings to SubtitleManager
+      if (window.subtitleManager) {
+         window.subtitleManager.loadSettings();
+         window.subtitleManager.applyStyles();
+      }
+
+      // WORKAROUND: Deselect and reselect the current subtitle track to force refresh
+      // This triggers a full reload of the subtitle with new settings
+      if (currentSubtitleIndex >= 0) {
+         console.log('[Player] Forcing subtitle refresh by toggling track');
+         var savedIndex = currentSubtitleIndex;
+
+         // Deselect (set to none)
+         selectSubtitleTrack(-1);
+
+         // Reselect after a small delay to ensure deselection completes
+         setTimeout(function () {
+            selectSubtitleTrack(savedIndex);
+         }, 100);
+      }
+
+      // Return focus to subtitle button
+      if (elements.subtitleBtn) elements.subtitleBtn.focus();
+   }
+
+   /**
+    * Load subtitle settings from storage for in-player editing
+    */
+   function loadSubtitleSettingsForPlayer() {
+      try {
+         var stored = window.storage.getUserPreference('jellyfin_settings', null);
+         if (stored) {
+            subtitleSettingsState.settings = JSON.parse(stored);
+         } else {
+            subtitleSettingsState.settings = {};
+         }
+      } catch (e) {
+         console.error('[Player] Error loading subtitle settings:', e);
+         subtitleSettingsState.settings = {};
+      }
+   }
+
+   /**
+    * Save subtitle settings to storage
+    */
+   function saveSubtitleSettingsFromPlayer() {
+      try {
+         window.storage.setUserPreference('jellyfin_settings', JSON.stringify(subtitleSettingsState.settings));
+      } catch (e) {
+         console.error('[Player] Error saving subtitle settings:', e);
+      }
+   }
+
+   /**
+    * Update the subtitle settings overlay display values
+    */
+   function updateSubtitleSettingsDisplay() {
+      var s = subtitleSettingsState.settings;
+
+      var sizeEl = document.getElementById('playerSubSize');
+      var colorEl = document.getElementById('playerSubColor');
+      var opacityEl = document.getElementById('playerSubOpacity');
+      var positionEl = document.getElementById('playerSubPosition');
+      var backgroundEl = document.getElementById('playerSubBackground');
+      var absolutePositionItem = document.getElementById('playerAbsolutePositionItem');
+      var absolutePositionEl = document.getElementById('playerSubAbsolutePosition');
+      var absoluteSliderFill = document.getElementById('playerAbsoluteSliderFill');
+
+      // Size
+      var sizeLabels = { smaller: 'Smaller', small: 'Small', medium: 'Medium', large: 'Large', extralarge: 'Extra Large' };
+      if (sizeEl) sizeEl.textContent = sizeLabels[s.subtitleSize || 'medium'] || 'Medium';
+
+      // Color
+      var colorLabels = { '#ffffff': 'White', '#ffff00': 'Yellow', '#000000': 'Black', '#00ffff': 'Cyan', '#0000ff': 'Blue', '#808080': 'Gray', '#404040': 'Dark Gray' };
+      if (colorEl) colorEl.textContent = colorLabels[s.subtitleColor || '#ffffff'] || 'White';
+
+      // Opacity
+      if (opacityEl) opacityEl.textContent = (s.subtitleOpacity || 100) + '%';
+
+      // Position
+      var posLabels = { bottom: 'Bottom', 'bottom-low': 'Bottom (Low)', 'bottom-extra-low': 'Bottom (Extra Low)', 'bottom-high': 'Bottom (High)', top: 'Top', middle: 'Middle', absolute: 'Absolute' };
+      if (positionEl) positionEl.textContent = posLabels[s.subtitlePosition || 'bottom'] || 'Bottom';
+
+      // Show/hide absolute position slider based on position selection
+      if (absolutePositionItem) {
+         if (s.subtitlePosition === 'absolute') {
+            absolutePositionItem.style.display = 'flex';
+            var absValue = parseInt(s.subtitlePositionAbsolute) || 90;
+            if (absolutePositionEl) absolutePositionEl.textContent = absValue + '%';
+            if (absoluteSliderFill) absoluteSliderFill.style.width = absValue + '%';
+         } else {
+            absolutePositionItem.style.display = 'none';
+         }
+      }
+
+      // Background
+      var bgLabels = { 'drop-shadow': 'Drop Shadow', background: 'Background', none: 'None' };
+      if (backgroundEl) backgroundEl.textContent = bgLabels[s.subtitleBackground || 'drop-shadow'] || 'Drop Shadow';
+   }
+
+   /**
+    * Handle keyboard navigation within subtitle settings overlay
+    * @param {KeyboardEvent} evt
+    */
+   function handleSubtitleSettingsKeyDown(evt) {
+      var items = elements.subtitleSettingsOverlay.querySelectorAll('.subtitle-setting-item');
+
+      switch (evt.keyCode) {
+         case KeyCodes.UP:
+            evt.preventDefault();
+            if (subtitleSettingsState.focusIndex > 0) {
+               subtitleSettingsState.focusIndex--;
+               items[subtitleSettingsState.focusIndex].focus();
+            }
+            break;
+
+         case KeyCodes.DOWN:
+            evt.preventDefault();
+            if (subtitleSettingsState.focusIndex < items.length - 1) {
+               subtitleSettingsState.focusIndex++;
+               items[subtitleSettingsState.focusIndex].focus();
+            }
+            break;
+
+         case KeyCodes.ENTER:
+         case KeyCodes.RIGHT:
+            evt.preventDefault();
+            cycleSubtitleSetting(items[subtitleSettingsState.focusIndex].dataset.setting, 1);
+            break;
+
+         case KeyCodes.LEFT:
+            evt.preventDefault();
+            cycleSubtitleSetting(items[subtitleSettingsState.focusIndex].dataset.setting, -1);
+            break;
+
+         case KeyCodes.BACK:
+         case KeyCodes.ESC:
+            evt.preventDefault();
+            hideSubtitleSettingsOverlay();
+            break;
+      }
+   }
+
+   /**
+    * Cycle through values for a subtitle setting
+    * @param {string} settingName - The setting to cycle
+    * @param {number} direction - 1 for forward, -1 for backward
+    */
+   function cycleSubtitleSetting(settingName, direction) {
+      var s = subtitleSettingsState.settings;
+
+      switch (settingName) {
+         case 'size':
+            var sizes = ['smaller', 'small', 'medium', 'large', 'extralarge'];
+            var sizeIdx = sizes.indexOf(s.subtitleSize || 'medium');
+            sizeIdx = (sizeIdx + direction + sizes.length) % sizes.length;
+            s.subtitleSize = sizes[sizeIdx];
+            break;
+
+         case 'color':
+            var colors = ['#ffffff', '#ffff00', '#000000', '#00ffff', '#0000ff', '#808080', '#404040'];
+            var colorIdx = colors.indexOf(s.subtitleColor || '#ffffff');
+            colorIdx = (colorIdx + direction + colors.length) % colors.length;
+            s.subtitleColor = colors[colorIdx];
+            break;
+
+         case 'opacity':
+            var opacities = [100, 75, 50, 25];
+            var opIdx = opacities.indexOf(s.subtitleOpacity || 100);
+            opIdx = (opIdx + direction + opacities.length) % opacities.length;
+            s.subtitleOpacity = opacities[opIdx];
+            break;
+
+         case 'position':
+            var positions = ['bottom', 'bottom-low', 'bottom-extra-low', 'bottom-high', 'top', 'middle', 'absolute'];
+            var posIdx = positions.indexOf(s.subtitlePosition || 'bottom');
+            posIdx = (posIdx + direction + positions.length) % positions.length;
+            s.subtitlePosition = positions[posIdx];
+            break;
+
+         case 'absolutePosition':
+            // Slider: adjust value by step
+            var absVal = parseInt(s.subtitlePositionAbsolute) || 90;
+            absVal = absVal + (direction * 1); // Step of 1
+            absVal = Math.max(0, Math.min(100, absVal));
+            s.subtitlePositionAbsolute = absVal;
+            break;
+
+         case 'background':
+            var bgs = ['drop-shadow', 'background', 'none'];
+            var bgIdx = bgs.indexOf(s.subtitleBackground || 'drop-shadow');
+            bgIdx = (bgIdx + direction + bgs.length) % bgs.length;
+            s.subtitleBackground = bgs[bgIdx];
+            break;
+      }
+
+      // Save and update
+      saveSubtitleSettingsFromPlayer();
+      updateSubtitleSettingsDisplay();
+
+      // Apply live to SubtitleManager
+      if (window.subtitleManager) {
+         window.subtitleManager.loadSettings();
+         window.subtitleManager.applyStyles();
+      }
+   }
+
+   // ==================== End In-Player Subtitle Settings ====================
    function selectAudioTrack(index) {
       console.log("[Player] Selecting audio track:", index);
 

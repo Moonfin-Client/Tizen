@@ -147,7 +147,12 @@
    <!-- Subtitle Track Selection Modal -->
    <div id="subtitleModal" class="track-modal">
       <div class="modal-content">
-         <h2 class="modal-title">Select Subtitle</h2>
+         <div class="modal-header">
+            <h2 class="modal-title">Select Subtitle</h2>
+            <button id="subtitleSettingsBtn" class="modal-header-btn" tabindex="0" title="Subtitle Settings">
+               <img src="assets/icons/options.png" alt="Settings" class="modal-header-icon" />
+            </button>
+         </div>
          <div id="subtitleTrackList" class="track-list"></div>
       </div>
    </div>
@@ -205,6 +210,46 @@
    <div id="loadingIndicator" class="loading-indicator">
       <div class="spinner"></div>
       <p>Loading...</p>
+   </div>
+
+   <!-- Subtitle Settings Overlay (In-Player) -->
+   <div id="subtitleSettingsOverlay" class="track-modal" style="display: none;">
+      <div class="modal-content subtitle-settings-modal">
+         <h2 class="modal-title">Subtitle Settings</h2>
+         <div class="subtitle-settings-list">
+            <div class="subtitle-setting-item" data-setting="size" tabindex="0">
+               <span class="setting-label">Size</span>
+               <span id="playerSubSize" class="setting-value">Medium</span>
+            </div>
+            <div class="subtitle-setting-item" data-setting="color" tabindex="0">
+               <span class="setting-label">Color</span>
+               <span id="playerSubColor" class="setting-value">White</span>
+            </div>
+            <div class="subtitle-setting-item" data-setting="opacity" tabindex="0">
+               <span class="setting-label">Opacity</span>
+               <span id="playerSubOpacity" class="setting-value">100%</span>
+            </div>
+            <div class="subtitle-setting-item" data-setting="position" tabindex="0">
+               <span class="setting-label">Position</span>
+               <span id="playerSubPosition" class="setting-value">Bottom</span>
+            </div>
+            <div class="subtitle-setting-item subtitle-setting-slider" data-setting="absolutePosition" tabindex="0"
+               id="playerAbsolutePositionItem" style="display: none;">
+               <span class="setting-label">Absolute Position</span>
+               <div class="player-slider-container">
+                  <div class="player-slider-track">
+                     <div id="playerAbsoluteSliderFill" class="player-slider-fill"></div>
+                  </div>
+                  <span id="playerSubAbsolutePosition" class="setting-value">90%</span>
+               </div>
+            </div>
+            <div class="subtitle-setting-item" data-setting="background" tabindex="0">
+               <span class="setting-label">Background</span>
+               <span id="playerSubBackground" class="setting-value">Drop Shadow</span>
+            </div>
+         </div>
+         <p class="modal-hint">Press BACK to save and return</p>
+      </div>
    </div>
 
    <!-- Debug Overlay -->

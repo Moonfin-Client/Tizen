@@ -3,7 +3,7 @@
  * Shared functionality for audio and subtitle track selection modals
  */
 
-var TrackSelector = (function() {
+var TrackSelector = (function () {
     'use strict';
 
     /**
@@ -19,28 +19,28 @@ var TrackSelector = (function() {
         container.innerHTML = '';
         const focusableItems = [];
 
-        audioStreams.forEach(function(stream, index) {
+        audioStreams.forEach(function (stream, index) {
             const trackItem = document.createElement('div');
             trackItem.className = 'track-item';
             trackItem.tabIndex = 0;
-            
+
             const lang = stream.Language || 'Unknown';
             const codec = stream.Codec ? stream.Codec.toUpperCase() : '';
             const channels = stream.Channels ? stream.Channels + 'ch' : '';
             const isDefault = stream.IsDefault ? ' [Default]' : '';
-            
+
             trackItem.innerHTML = '<span class="track-name">' + lang + '</span>' +
-                                  '<span class="track-info">' + codec + ' ' + channels + isDefault + '</span>';
-            
+                '<span class="track-info">' + codec + ' ' + channels + isDefault + '</span>';
+
             if (index === currentIndex) {
                 trackItem.classList.add('selected');
             }
-            
-            trackItem.addEventListener('click', function(evt) {
+
+            trackItem.addEventListener('click', function (evt) {
                 evt.stopPropagation();
                 onSelect(index);
             });
-            
+
             container.appendChild(trackItem);
             focusableItems.push(trackItem);
         });
@@ -65,41 +65,41 @@ var TrackSelector = (function() {
         noneItem.className = 'track-item';
         noneItem.tabIndex = 0;
         noneItem.innerHTML = '<span class="track-name">None</span>';
-        
+
         if (currentIndex === -1) {
             noneItem.classList.add('selected');
         }
-        
-        noneItem.addEventListener('click', function(evt) {
+
+        noneItem.addEventListener('click', function (evt) {
             evt.stopPropagation();
             onSelect(-1);
         });
-        
+
         container.appendChild(noneItem);
         focusableItems.push(noneItem);
 
-        subtitleStreams.forEach(function(stream, index) {
+        subtitleStreams.forEach(function (stream, index) {
             const trackItem = document.createElement('div');
             trackItem.className = 'track-item';
             trackItem.tabIndex = 0;
-            
+
             const lang = stream.Language || 'Unknown';
             const codec = stream.Codec ? stream.Codec.toUpperCase() : '';
             const forced = stream.IsForced ? ' [Forced]' : '';
             const isDefault = stream.IsDefault ? ' [Default]' : '';
-            
+
             trackItem.innerHTML = '<span class="track-name">' + lang + '</span>' +
-                                  '<span class="track-info">' + codec + forced + isDefault + '</span>';
-            
+                '<span class="track-info">' + codec + forced + isDefault + '</span>';
+
             if (index === currentIndex) {
                 trackItem.classList.add('selected');
             }
-            
-            trackItem.addEventListener('click', function(evt) {
+
+            trackItem.addEventListener('click', function (evt) {
                 evt.stopPropagation();
                 onSelect(index);
             });
-            
+
             container.appendChild(trackItem);
             focusableItems.push(trackItem);
         });
@@ -116,7 +116,7 @@ var TrackSelector = (function() {
      * @returns {number} New focus index
      */
     function handleModalKeyDown(evt, focusableItems, currentFocusIndex, onClose) {
-        
+
         switch (evt.keyCode) {
             case KeyCodes.UP:
                 evt.preventDefault();
@@ -147,7 +147,7 @@ var TrackSelector = (function() {
                 evt.preventDefault();
                 onClose();
                 break;
-            
+
             default:
         }
 
