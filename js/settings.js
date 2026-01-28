@@ -56,6 +56,8 @@ var SettingsController = (function () {
       // Backdrop blur settings
       backdropBlurHome: 3,
       backdropBlurDetail: 3,
+      // Subtitle settings
+      subtitleOpacity: 100,
       // Jellyseerr settings
       jellyseerrEnabled: false,
       jellyseerrUrl: "",
@@ -343,7 +345,9 @@ var SettingsController = (function () {
          subtitleSize: "medium",
          subtitleColor: "#ffffff",
          subtitlePosition: "bottom",
+         subtitlePositionAbsolute: 90,
          subtitleBackground: "drop-shadow",
+         subtitleOpacity: 100,
       };
 
       for (var key in defaults) {
@@ -592,8 +596,13 @@ var SettingsController = (function () {
 
       var subtitleColorValue = document.getElementById("subtitleColorValue");
       if (subtitleColorValue) {
-         var colorMap = { "#ffffff": "White", "#ffff00": "Yellow", "#000000": "Black", "#00ffff": "Cyan", "#0000ff": "Blue" };
+         var colorMap = { "#ffffff": "White", "#ffff00": "Yellow", "#000000": "Black", "#00ffff": "Cyan", "#0000ff": "Blue", "#808080": "Gray", "#404040": "Dark Gray" };
          subtitleColorValue.textContent = colorMap[settings.subtitleColor] || "White";
+      }
+
+      var subtitleOpacityValue = document.getElementById("subtitleOpacityValue");
+      if (subtitleOpacityValue) {
+         subtitleOpacityValue.textContent = (settings.subtitleOpacity || 100) + "%";
       }
 
       var subtitlePositionValue = document.getElementById("subtitlePositionValue");
@@ -602,7 +611,24 @@ var SettingsController = (function () {
          var displayPos = pos.charAt(0).toUpperCase() + pos.slice(1);
          if (pos === "bottom-low") displayPos = "Bottom (Low)";
          if (pos === "bottom-high") displayPos = "Bottom (High)";
+         if (pos === "bottom-extra-low") displayPos = "Bottom (Extra Low)";
+         if (pos === "absolute") displayPos = "Absolute";
          subtitlePositionValue.textContent = displayPos;
+
+         // Toggle visibility of absolute position slider
+         var absItem = document.getElementById("subtitlePositionAbsoluteItem");
+         if (absItem) {
+            if (pos === "absolute") {
+               absItem.style.display = "flex";
+            } else {
+               absItem.style.display = "none";
+            }
+         }
+      }
+
+      var subtitlePositionAbsoluteValue = document.getElementById("subtitlePositionAbsoluteValue");
+      if (subtitlePositionAbsoluteValue) {
+         subtitlePositionAbsoluteValue.textContent = (settings.subtitlePositionAbsolute || 90) + "%";
       }
 
 
@@ -621,31 +647,42 @@ var SettingsController = (function () {
    }
 
    function updateSubtitlePreview() {
-      var previewContainer = document.getElementById('subtitlePreviewText');
-      if (!previewContainer) return;
+      var container = document.getElementById("subtitlePreviewContainer");
+      var text = document.getElementById("subtitlePreviewText");
+      if (!container || !text) return;
 
-      // Apply styles mapping from SubtitleManager
-      var s = previewContainer.style;
+      var s = text.style; // Manipulate text style directly
 
-      // Size
-      var sizes = {
+      // 1. Size
+      // Scale down slightly for settings preview to fit
+      var sizesVal = {
          'smaller': '1.8em',
          'small': '2.2em',
          'medium': '2.8em',
          'large': '3.6em',
          'extralarge': '4.6em'
       };
-      // Scale down slightly for settings preview to fit
-      var val = sizes[settings.subtitleSize || 'medium'] || sizes['medium'];
-      s.fontSize = "calc(" + val + " * 0.6)";
+      var val = sizesVal[settings.subtitleSize || 'medium'] || sizesVal['medium'];
+      s.fontSize = val;
 
-      // Color
-      s.color = settings.subtitleColor || '#ffffff';
+      // 2. Color & Opacity
+      var opacityVal = (settings.subtitleOpacity !== undefined ? settings.subtitleOpacity : 100);
+      var hexColor = settings.subtitleColor || '#ffffff';
 
-      // Background
+      // Convert hex to rgb
+      var r = parseInt(hexColor.slice(1, 3), 16);
+      var g = parseInt(hexColor.slice(3, 5), 16);
+      var b = parseInt(hexColor.slice(5, 7), 16);
+
+      var rgbaColor = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + (opacityVal / 100) + ')';
+      s.color = rgbaColor;
+
+      // 3. Background / Shadow
       var bg = settings.subtitleBackground || 'drop-shadow';
+      var shadowOpacity = opacityVal / 100;
+
       if (bg === 'drop-shadow') {
-         s.textShadow = '0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)';
+         s.textShadow = '0px 0px 8px rgba(0, 0, 0, ' + shadowOpacity + '), 0px 0px 4px rgba(0, 0, 0, ' + shadowOpacity + ')';
          s.background = 'none';
       } else if (bg === 'background') {
          s.textShadow = 'none';
@@ -655,19 +692,36 @@ var SettingsController = (function () {
          s.background = 'none';
       }
 
-      // Position (in preview box)
+      // 4. Position
       var pos = settings.subtitlePosition || 'bottom';
+
+      // Reset positioning
+      s.position = 'absolute';
+      s.margin = '0';
+      s.left = '0';
+      s.right = '0';
+      s.padding = '2px 5px';
+      s.width = 'auto';
+      s.transform = 'none';
+      s.top = 'auto'; // default
+      s.bottom = 'auto'; // default
+
       if (pos === 'top') {
-         previewContainer.style.bottom = 'auto';
-         previewContainer.style.top = '10px';
+         s.top = '10%';
+      } else if (pos === 'bottom') {
+         s.bottom = '10%';
+      } else if (pos === 'bottom-low') {
+         s.bottom = '2%';
+      } else if (pos === 'bottom-high') {
+         s.bottom = '20%';
+      } else if (pos === 'bottom-extra-low') {
+         s.bottom = '0px';
       } else if (pos === 'middle') {
-         previewContainer.style.bottom = '50%';
-         previewContainer.style.top = 'auto';
-         previewContainer.style.transform = 'translateY(50%)';
-      } else {
-         previewContainer.style.bottom = '10px';
-         previewContainer.style.top = 'auto';
-         previewContainer.style.transform = 'none';
+         s.top = '50%';
+         s.transform = 'translateY(-50%)';
+      } else if (pos === 'absolute') {
+         var absTop = settings.subtitlePositionAbsolute !== undefined ? settings.subtitlePositionAbsolute : 90;
+         s.top = absTop + '%';
       }
    }
 
@@ -1148,6 +1202,18 @@ var SettingsController = (function () {
     * @private
     */
    function handleContentNavigation(evt) {
+      // If in absolute slider mode, handle it specifically
+      if (focusManager.inAbsoluteSliderMode) {
+         handleAbsoluteSliderNavigation(evt);
+         return;
+      }
+
+      // If in opacity slider mode, handle it specifically
+      if (focusManager.inOpacitySliderMode) {
+         handleOpacitySliderNavigation(evt);
+         return;
+      }
+
       // If in slider mode, handle slider navigation
       if (focusManager.inSliderMode) {
          handleSliderNavigation(evt);
@@ -1433,23 +1499,32 @@ var SettingsController = (function () {
             break;
 
          case "subtitleColor":
-            var colors = ["#ffffff", "#ffff00", "#000000", "#00ffff", "#0000ff"];
+            var colors = ["#ffffff", "#ffff00", "#000000", "#00ffff", "#0000ff", "#808080", "#404040"];
             var currentColorIndex = colors.indexOf(settings.subtitleColor || "#ffffff");
             var nextColorIndex = (currentColorIndex + 1) % colors.length;
+            settings.subtitleColor = colors[nextColorIndex];
             settings.subtitleColor = colors[nextColorIndex];
             saveSettings();
             updateSettingValues();
             updateSubtitlePreview();
             break;
 
+         case "subtitleOpacity":
+            enterOpacitySliderMode(settings.subtitleOpacity || 100);
+            break;
+
          case "subtitlePosition":
-            var positions = ["bottom", "bottom-low", "bottom-high", "top", "middle"];
+            var positions = ["bottom", "bottom-low", "bottom-extra-low", "bottom-high", "top", "middle", "absolute"];
             var currentPosIndex = positions.indexOf(settings.subtitlePosition || "bottom");
             var nextPosIndex = (currentPosIndex + 1) % positions.length;
             settings.subtitlePosition = positions[nextPosIndex];
             saveSettings();
             updateSettingValues();
             updateSubtitlePreview();
+            break;
+
+         case "subtitlePositionAbsolute":
+            enterAbsoluteSliderMode(settings.subtitlePositionAbsolute || 90);
             break;
 
          case "subtitleBackground":
@@ -2318,12 +2393,13 @@ var SettingsController = (function () {
    }
 
    /**
-    * Enter slider mode for blur settings
+    * Enter slider mode for settings
     * @param {string} settingName - The setting name
     * @param {number} currentValue - The current value
     * @private
     */
    function enterSliderMode(settingName, currentValue) {
+      console.log('[Settings] enterSliderMode Name:', settingName, 'Value:', currentValue);
       focusManager.inSliderMode = true;
       focusManager.sliderSetting = settingName;
 
@@ -2333,7 +2409,13 @@ var SettingsController = (function () {
       if (!settingItem) return;
 
       // Initialize slider with current value
-      var percentage = (currentValue / 5) * 100;
+      var percentage = 0;
+      if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
+         percentage = currentValue; // Already 0-100
+      } else {
+         percentage = (currentValue / 5) * 100; // 0-5 mapping
+      }
+
       var fillElement = settingItem.querySelector(".slider-fill");
       var sliderValueDisplay = settingItem.querySelector(
          ".slider-value-display"
@@ -2343,7 +2425,11 @@ var SettingsController = (function () {
          fillElement.style.width = percentage + "%";
       }
       if (sliderValueDisplay) {
-         sliderValueDisplay.textContent = currentValue;
+         var suffix = "";
+         if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
+            suffix = "%";
+         }
+         sliderValueDisplay.textContent = currentValue + suffix;
       }
 
       // Hide the value display, show the slider
@@ -2366,15 +2452,20 @@ var SettingsController = (function () {
       focusManager.inSliderMode = false;
       focusManager.sliderSetting = null;
 
-      // Update the setting based on which blur control
+      // Update the setting based on which control
       if (settingName === "backdrop-blur-home") {
          settings.backdropBlurHome = newValue;
       } else if (settingName === "backdrop-blur-detail") {
          settings.backdropBlurDetail = newValue;
+      } else if (settingName === "subtitlePositionAbsolute") {
+         settings.subtitlePositionAbsolute = newValue;
+      } else if (settingName === "subtitleOpacity") {
+         settings.subtitleOpacity = newValue;
       }
 
       saveSettings();
       updateSettingValues();
+      updateSubtitlePreview(); // Update preview for subtitles
 
       var settingItem = document.querySelector(
          '[data-setting="' + settingName + '"]'
@@ -2392,67 +2483,323 @@ var SettingsController = (function () {
    }
 
    /**
+    * Update slider display during navigation
+    * @param {string} settingName 
+    * @param {number} value 
+    */
+   function updateSliderDisplay(settingName, value) {
+      // Ensure value is a number
+      value = parseInt(value);
+
+      // Update in-memory setting for live preview
+      if (settingName === "subtitlePositionAbsolute") {
+         settings.subtitlePositionAbsolute = value;
+         updateSubtitlePreview();
+      } else if (settingName === "backdrop-blur-home") {
+         settings.backdropBlurHome = value;
+      } else if (settingName === "backdrop-blur-detail") {
+         settings.backdropBlurDetail = value;
+      } else if (settingName === "subtitleOpacity") {
+         settings.subtitleOpacity = value;
+         updateSubtitlePreview();
+      }
+
+      var settingItem = document.querySelector('[data-setting="' + settingName + '"]');
+      if (!settingItem) return;
+
+      var percentage = 0;
+      if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
+         percentage = value; // 0-100 maps directly to percentage
+      } else {
+         percentage = (value / 5) * 100; // 0-5 maps to 0-100%
+      }
+
+      var fillElement = settingItem.querySelector(".slider-fill");
+      var sliderValueDisplay = settingItem.querySelector(".slider-value-display");
+
+      if (fillElement) {
+         fillElement.style.width = percentage + "%";
+      }
+      if (sliderValueDisplay) {
+         var suffix = "";
+         if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
+            suffix = "%";
+         }
+         sliderValueDisplay.textContent = value + suffix;
+      }
+   }
+
+   /**
     * Handle navigation within slider mode
     * @param {KeyboardEvent} evt - Keyboard event
     * @private
     */
    function handleSliderNavigation(evt) {
       var settingName = focusManager.sliderSetting;
-      var currentValue =
-         settingName === "backdrop-blur-home"
-            ? settings.backdropBlurHome
-            : settings.backdropBlurDetail;
+      if (!settingName) return;
+
+      // Get current value and constraints based on setting type
+      var currentValue, max, step;
+
+      if (settingName === "subtitlePositionAbsolute") {
+         currentValue = parseInt(settings.subtitlePositionAbsolute) || 90;
+         max = 100;
+         step = 1;
+      } else if (settingName === "backdrop-blur-home") {
+         currentValue = parseInt(settings.backdropBlurHome) || 0;
+         max = 5;
+         step = 1;
+      } else if (settingName === "backdrop-blur-detail") {
+         currentValue = parseInt(settings.backdropBlurDetail) || 0;
+         max = 5;
+         step = 1;
+      } else if (settingName === "subtitleOpacity") {
+         currentValue = parseInt(settings.subtitleOpacity) || 100;
+         max = 100;
+         step = 5;
+      } else {
+         return;
+      }
+
+      var newValue = currentValue;
+      var handled = false;
 
       switch (evt.keyCode) {
-         case KeyCodes.LEFT: // Left - decrease value
+         case KeyCodes.LEFT:
             evt.preventDefault();
-            if (currentValue > 0) {
-               var newValue = Math.max(0, currentValue - 1);
-               updateSliderDisplay(settingName, newValue);
-            }
+            newValue = Math.max(0, currentValue - step);
+            handled = true;
             break;
 
-         case KeyCodes.RIGHT: // Right - increase value
+         case KeyCodes.RIGHT:
             evt.preventDefault();
-            if (currentValue < 5) {
-               var newValue = Math.min(5, currentValue + 1);
-               updateSliderDisplay(settingName, newValue);
-            }
+            newValue = Math.min(max, currentValue + step);
+            handled = true;
             break;
 
-         case KeyCodes.UP: // Up - increase value
+         case KeyCodes.UP:
             evt.preventDefault();
-            if (currentValue < 5) {
-               var newValue = Math.min(5, currentValue + 1);
-               updateSliderDisplay(settingName, newValue);
-            }
+            // Larger step for absolute positioning
+            var upStep = (settingName === "subtitlePositionAbsolute") ? 5 : step;
+            newValue = Math.min(max, currentValue + upStep);
+            handled = true;
             break;
 
-         case KeyCodes.DOWN: // Down - decrease value
+         case KeyCodes.DOWN:
             evt.preventDefault();
-            if (currentValue > 0) {
-               var newValue = Math.max(0, currentValue - 1);
-               updateSliderDisplay(settingName, newValue);
-            }
+            // Larger step for absolute positioning
+            var downStep = (settingName === "subtitlePositionAbsolute") ? 5 : step;
+            newValue = Math.max(0, currentValue - downStep);
+            handled = true;
             break;
 
-         case KeyCodes.ENTER: // Enter - confirm and exit slider mode
+         case KeyCodes.ENTER:
             evt.preventDefault();
             exitSliderMode(settingName, currentValue);
-            break;
+            return;
 
-         case KeyCodes.BACKSPACE: // Back - cancel slider mode
+         case KeyCodes.BACKSPACE:
          case KeyCodes.ESCAPE:
             evt.preventDefault();
-            // Reset to original value
-            exitSliderMode(
-               settingName,
-               settingName === "backdrop-blur-home"
-                  ? settings.backdropBlurHome
-                  : settings.backdropBlurDetail
-            );
+            exitSliderMode(settingName, currentValue);
+            return;
+      }
+
+      // Update display if value changed
+      if (handled && newValue !== currentValue) {
+         updateSliderDisplay(settingName, newValue);
+      }
+   }
+
+   // ==================== Absolute Slider Logic ====================
+
+   // Dedicated state for absolute slider to ensure stability
+   var absoluteSliderState = {
+      active: false,
+      value: 90
+   };
+
+   function enterAbsoluteSliderMode(initialValue) {
+      absoluteSliderState.active = true;
+      absoluteSliderState.value = parseInt(initialValue);
+      if (isNaN(absoluteSliderState.value)) absoluteSliderState.value = 90;
+
+      focusManager.inAbsoluteSliderMode = true;
+
+      var settingItem = document.querySelector('[data-setting="subtitlePositionAbsolute"]');
+      if (settingItem) {
+         settingItem.classList.add("slider-active");
+         var valueDisplay = settingItem.querySelector(".setting-value");
+         var sliderContainer = settingItem.querySelector(".slider-container");
+         if (valueDisplay) valueDisplay.style.display = "none";
+         if (sliderContainer) sliderContainer.style.display = "flex";
+
+         updateAbsoluteSliderVisuals();
+      }
+      console.log('[Settings] Entered Absolute Slider Mode. Value:', absoluteSliderState.value);
+   }
+
+   function updateAbsoluteSliderVisuals() {
+      var settingItem = document.querySelector('[data-setting="subtitlePositionAbsolute"]');
+      if (!settingItem) return;
+
+      var fillElement = settingItem.querySelector(".slider-fill");
+      var sliderValueDisplay = settingItem.querySelector(".slider-value-display");
+
+      if (fillElement) fillElement.style.width = absoluteSliderState.value + "%";
+      if (sliderValueDisplay) sliderValueDisplay.textContent = absoluteSliderState.value + "%";
+
+      // Live preview update
+      settings.subtitlePositionAbsolute = absoluteSliderState.value;
+      updateSubtitlePreview();
+   }
+
+   function handleAbsoluteSliderNavigation(evt) {
+      console.log('[Settings] Absolute Nav Key:', evt.keyCode);
+      evt.preventDefault(); // Consume all keys in this mode
+
+      var step = 1;
+      var largeStep = 5;
+
+      switch (evt.keyCode) {
+         case KeyCodes.LEFT:
+            absoluteSliderState.value = Math.max(0, absoluteSliderState.value - step);
+            updateAbsoluteSliderVisuals();
+            break;
+         case KeyCodes.RIGHT:
+            absoluteSliderState.value = Math.min(100, absoluteSliderState.value + step);
+            updateAbsoluteSliderVisuals();
+            break;
+         case KeyCodes.UP:
+            absoluteSliderState.value = Math.min(100, absoluteSliderState.value + largeStep);
+            updateAbsoluteSliderVisuals();
+            break;
+         case KeyCodes.DOWN:
+            absoluteSliderState.value = Math.max(0, absoluteSliderState.value - largeStep);
+            updateAbsoluteSliderVisuals();
+            break;
+         case KeyCodes.ENTER:
+         case KeyCodes.BACKSPACE:
+         case KeyCodes.ESCAPE:
+            exitAbsoluteSliderMode();
             break;
       }
+   }
+
+   function exitAbsoluteSliderMode() {
+      absoluteSliderState.active = false;
+      focusManager.inAbsoluteSliderMode = false;
+
+      // Persist
+      settings.subtitlePositionAbsolute = absoluteSliderState.value;
+      saveSettings();
+      updateSettingValues(); // Updates the main text display
+
+      var settingItem = document.querySelector('[data-setting="subtitlePositionAbsolute"]');
+      if (settingItem) {
+         settingItem.classList.remove("slider-active");
+         var valueDisplay = settingItem.querySelector(".setting-value");
+         var sliderContainer = settingItem.querySelector(".slider-container");
+         if (valueDisplay) valueDisplay.style.display = "block";
+         if (sliderContainer) sliderContainer.style.display = "none";
+      }
+      console.log('[Settings] Exited Absolute Slider Mode');
+   }
+
+   // ==================== Opacity Slider Logic ====================
+
+   // Dedicated state for opacity slider
+   var opacitySliderState = {
+      active: false,
+      value: 100
+   };
+
+   function enterOpacitySliderMode(initialValue) {
+      opacitySliderState.active = true;
+      opacitySliderState.value = parseInt(initialValue);
+      if (isNaN(opacitySliderState.value)) opacitySliderState.value = 100;
+
+      focusManager.inOpacitySliderMode = true;
+
+      var settingItem = document.querySelector('[data-setting="subtitleOpacity"]');
+      if (settingItem) {
+         settingItem.classList.add("slider-active");
+         var valueDisplay = settingItem.querySelector(".setting-value");
+         var sliderContainer = settingItem.querySelector(".slider-container");
+         if (valueDisplay) valueDisplay.style.display = "none";
+         if (sliderContainer) sliderContainer.style.display = "flex";
+
+         updateOpacitySliderVisuals();
+      }
+      console.log('[Settings] Entered Opacity Slider Mode. Value:', opacitySliderState.value);
+   }
+
+   function updateOpacitySliderVisuals() {
+      var settingItem = document.querySelector('[data-setting="subtitleOpacity"]');
+      if (!settingItem) return;
+
+      var fillElement = settingItem.querySelector(".slider-fill");
+      var sliderValueDisplay = settingItem.querySelector(".slider-value-display");
+
+      // Opacity is 0-100, so maps directly to %
+      if (fillElement) fillElement.style.width = opacitySliderState.value + "%";
+      if (sliderValueDisplay) sliderValueDisplay.textContent = opacitySliderState.value + "%";
+
+      // Live preview update
+      settings.subtitleOpacity = opacitySliderState.value;
+      updateSubtitlePreview();
+   }
+
+   function handleOpacitySliderNavigation(evt) {
+      console.log('[Settings] Opacity Nav Key:', evt.keyCode);
+      evt.preventDefault(); // Consume all keys in this mode
+
+      var step = 5;
+
+      switch (evt.keyCode) {
+         case KeyCodes.LEFT:
+            opacitySliderState.value = Math.max(0, opacitySliderState.value - step);
+            updateOpacitySliderVisuals();
+            break;
+         case KeyCodes.RIGHT:
+            opacitySliderState.value = Math.min(100, opacitySliderState.value + step);
+            updateOpacitySliderVisuals();
+            break;
+         case KeyCodes.UP:
+            // Optional: larger jump or same
+            opacitySliderState.value = Math.min(100, opacitySliderState.value + step);
+            updateOpacitySliderVisuals();
+            break;
+         case KeyCodes.DOWN:
+            opacitySliderState.value = Math.max(0, opacitySliderState.value - step);
+            updateOpacitySliderVisuals();
+            break;
+         case KeyCodes.ENTER:
+         case KeyCodes.BACKSPACE:
+         case KeyCodes.ESCAPE:
+            exitOpacitySliderMode();
+            break;
+      }
+   }
+
+   function exitOpacitySliderMode() {
+      opacitySliderState.active = false;
+      focusManager.inOpacitySliderMode = false;
+
+      // Persist
+      settings.subtitleOpacity = opacitySliderState.value;
+      saveSettings();
+      updateSettingValues(); // Updates the main text display
+
+      var settingItem = document.querySelector('[data-setting="subtitleOpacity"]');
+      if (settingItem) {
+         settingItem.classList.remove("slider-active");
+         var valueDisplay = settingItem.querySelector(".setting-value");
+         var sliderContainer = settingItem.querySelector(".slider-container");
+         if (valueDisplay) valueDisplay.style.display = "block";
+         if (sliderContainer) sliderContainer.style.display = "none";
+      }
+      console.log('[Settings] Exited Opacity Slider Mode');
    }
 
    // ==================== Jellyseerr Functions ====================
@@ -4108,70 +4455,7 @@ var SettingsController = (function () {
     * Update subtitle preview text based on current settings
     * @private
     */
-   function updateSubtitlePreview() {
-      var container = document.getElementById("subtitlePreviewContainer");
-      var text = document.getElementById("subtitlePreviewText");
-      if (!container || !text) return;
 
-      // Apply font size
-      var sizes = {
-         'smaller': '2.2em',
-         'small': '2.8em',
-         'medium': '3.5em',
-         'large': '4.5em',
-         'extralarge': '5.5em'
-      };
-      text.style.fontSize =
-         sizes[settings.subtitleSize || "medium"] || sizes["medium"];
-
-      // Apply color
-      text.style.color = settings.subtitleColor || "#ffffff";
-
-      // Apply background/shadow
-      var bg = settings.subtitleBackground || "drop-shadow";
-      if (bg === "drop-shadow") {
-         text.style.textShadow =
-            "0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)";
-         text.style.background = "none";
-      } else if (bg === "background") {
-         text.style.textShadow = "none";
-         text.style.background = "rgba(0, 0, 0, 0.7)";
-      } else {
-         text.style.textShadow = "none";
-         text.style.background = "none";
-      }
-
-      // Apply position
-
-      // Apply position
-      var pos = settings.subtitlePosition || "bottom";
-
-      // Ensure container allows absolute positioning
-      container.style.position = 'relative';
-      container.style.display = 'block'; // Reset flex
-
-      // Reset all positioning
-      text.style.position = 'absolute';
-      text.style.margin = '0';
-      text.style.top = 'auto';
-      text.style.bottom = 'auto';
-      text.style.left = '0';
-      text.style.right = '0';
-      text.style.transform = 'none';
-
-      if (pos === 'top') {
-         text.style.top = '10%';
-      } else if (pos === 'bottom') {
-         text.style.bottom = '10%';
-      } else if (pos === 'bottom-low') {
-         text.style.bottom = '2%';
-      } else if (pos === 'bottom-high') {
-         text.style.bottom = '20%';
-      } else if (pos === 'middle') {
-         text.style.top = '50%';
-         text.style.transform = 'translateY(-50%)';
-      }
-   }
 
    return {
       init: init,

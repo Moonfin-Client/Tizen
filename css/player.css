@@ -945,3 +945,117 @@ body {
     opacity: 0 !important;
     visibility: hidden !important;
 }
+
+/* Modal Header with Icon Button */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header .modal-title {
+    margin: 0;
+}
+
+.modal-header-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-header-btn:hover,
+.modal-header-btn:focus {
+    background: rgba(0, 164, 220, 0.3);
+    border-color: #00a4dc;
+    transform: scale(1.1);
+    outline: none;
+}
+
+.modal-header-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Subtitle Settings Overlay */
+.subtitle-settings-modal {
+    min-width: 400px;
+}
+
+.subtitle-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subtitle-setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.subtitle-setting-item:hover,
+.subtitle-setting-item:focus {
+    background: rgba(0, 164, 220, 0.2);
+    border-color: #00a4dc;
+    outline: none;
+}
+
+.subtitle-setting-item .setting-label {
+    font-size: 22px;
+    color: #fff;
+}
+
+.subtitle-setting-item .setting-value {
+    font-size: 20px;
+    color: #00a4dc;
+    font-weight: 600;
+}
+
+.modal-hint {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+/* Player Subtitle Slider */
+.player-slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.player-slider-track {
+    width: 150px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.player-slider-fill {
+    height: 100%;
+    background: #00a4dc;
+    border-radius: 4px;
+    transition: width 0.1s ease;
+}
+
+.subtitle-setting-slider.focused .player-slider-track,
+.subtitle-setting-slider:focus .player-slider-track {
+    outline: 2px solid #00a4dc;
+}
