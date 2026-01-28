@@ -33,7 +33,7 @@ export const setAuth = (userId, token) => {
 };
 
 export const getAuthHeader = () => {
-	let header = `MediaBrowser Client="${APP_NAME}", Device="LG Smart TV", DeviceId="${deviceId}", Version="${APP_VERSION}"`;
+	let header = `MediaBrowser Client="${APP_NAME}", Device="Samsung Tizen TV", DeviceId="${deviceId}", Version="${APP_VERSION}"`;
 	if (accessToken) {
 		header += `, Token="${accessToken}"`;
 	}
