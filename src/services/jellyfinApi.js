@@ -168,8 +168,16 @@ export const api = {
 		body: data
 	}),
 
-	search: (query, limit = 150) =>
-		request(`/Users/${currentUser}/Items?searchTerm=${encodeURIComponent(query)}&Limit=${limit}&Recursive=true&IncludeItemTypes=Movie,Series,Episode,Person&Fields=PrimaryImageAspectRatio,ProductionYear`),
+	search: async (query, limit = 150) => {
+		const [itemsResult, peopleResult] = await Promise.all([
+			request(`/Users/${currentUser}/Items?searchTerm=${encodeURIComponent(query)}&Limit=${limit}&Recursive=true&IncludeItemTypes=Movie,Series,Episode&Fields=PrimaryImageAspectRatio,ProductionYear`),
+			request(`/Persons?searchTerm=${encodeURIComponent(query)}&Limit=${limit}&Fields=PrimaryImageAspectRatio`)
+		]);
+
+		return {
+			Items: [...(itemsResult.Items || []), ...(peopleResult.Items || [])]
+		};
+	},
 
 	getSeasons: (seriesId) =>
 		request(`/Shows/${seriesId}/Seasons?UserId=${currentUser}&Fields=PrimaryImageAspectRatio`),
