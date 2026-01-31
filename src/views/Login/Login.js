@@ -10,12 +10,33 @@ const SpottableInput = Spottable('input');
 const SpottableButton = Spottable('button');
 const SpottableDiv = Spottable('div');
 
-const Login = ({onLoggedIn}) => {
-	const {login, loginWithToken, isLoading, isAuthenticated} = useAuth();
+const Login = ({
+	onLoggedIn,
+	onServerAdded,
+	isAddingServer: isAddingServerProp = false,
+	isAddingUser = false,
+	currentServerUrl = null,
+	currentServerName = null,
+	pendingServerInfo = null
+}) => {
+	const {
+		login,
+		loginWithToken,
+		isLoading,
+		isAuthenticated,
+		isAddingServer: isAddingServerContext,
+		pendingServer: pendingServerContext,
+		completeAddServerFlow,
+		cancelAddServerFlow
+	} = useAuth();
 
-	const [step, setStep] = useState('server');
-	const [serverUrl, setServerUrl] = useState('');
-	const [serverInfo, setServerInfo] = useState(null);
+	const isAddingServer = isAddingServerProp || isAddingServerContext;
+	const isAddingToExisting = isAddingUser && currentServerUrl;
+	const pendingServer = pendingServerInfo || pendingServerContext;
+
+	const [step, setStep] = useState(isAddingToExisting ? 'connecting' : 'server');
+	const [serverUrl, setServerUrl] = useState(isAddingToExisting ? currentServerUrl : (pendingServer?.url || ''));
+	const [serverInfo, setServerInfo] = useState(isAddingToExisting ? {ServerName: currentServerName} : (pendingServer ? {ServerName: pendingServer.name} : null));
 	const [publicUsers, setPublicUsers] = useState([]);
 	const [selectedUser, setSelectedUser] = useState(null);
 	const [username, setUsername] = useState('');
@@ -26,30 +47,6 @@ const Login = ({onLoggedIn}) => {
 	const [error, setError] = useState(null);
 	const [status, setStatus] = useState(null);
 	const [isConnecting, setIsConnecting] = useState(false);
-
-	useEffect(() => {
-		if (isAuthenticated) {
-			onLoggedIn?.();
-		}
-	}, [isAuthenticated, onLoggedIn]);
-
-	useEffect(() => {
-		if (!isLoading && step === 'server') {
-			setTimeout(() => Spotlight.focus('[data-spotlight-id="server-input"]'), 100);
-		}
-	}, [isLoading, step]);
-
-	const handleServerUrlChange = useCallback((e) => {
-		setServerUrl(e.target.value);
-	}, []);
-
-	const handleUsernameChange = useCallback((e) => {
-		setUsername(e.target.value);
-	}, []);
-
-	const handlePasswordChange = useCallback((e) => {
-		setPassword(e.target.value);
-	}, []);
 
 	const handleConnect = useCallback(async () => {
 		if (!serverUrl.trim()) return;
@@ -89,6 +86,37 @@ const Login = ({onLoggedIn}) => {
 		}
 	}, [serverUrl]);
 
+	useEffect(() => {
+		if ((pendingServer?.url && step === 'server') || (isAddingToExisting && step === 'connecting')) {
+			handleConnect();
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	useEffect(() => {
+		if (isAuthenticated && !isAddingServer && !isAddingToExisting) {
+			onLoggedIn?.();
+		}
+	}, [isAuthenticated, onLoggedIn, isAddingServer, isAddingToExisting]);
+
+	useEffect(() => {
+		if (!isLoading && step === 'server') {
+			setTimeout(() => Spotlight.focus('[data-spotlight-id="server-input"]'), 100);
+		}
+	}, [isLoading, step]);
+
+	const handleServerUrlChange = useCallback((e) => {
+		setServerUrl(e.target.value);
+	}, []);
+
+	const handleUsernameChange = useCallback((e) => {
+		setUsername(e.target.value);
+	}, []);
+
+	const handlePasswordChange = useCallback((e) => {
+		setPassword(e.target.value);
+	}, []);
+
 	const handleUserSelect = useCallback((user) => {
 		setSelectedUser(user);
 		setUsername(user.Name);
@@ -102,11 +130,24 @@ const Login = ({onLoggedIn}) => {
 
 		setIsConnecting(true);
 		setError(null);
-		setStatus('Signing in...');
+		const isAdding = isAddingServer || isAddingToExisting;
+		setStatus(isAdding ? 'Adding user...' : 'Signing in...');
 
 		try {
-			await login(jellyfinApi.getServerUrl(), username, password);
-			onLoggedIn?.();
+			const result = await login(jellyfinApi.getServerUrl(), username, password, {
+				serverName: serverInfo?.ServerName,
+				isAddingNewServer: isAdding
+			});
+
+			if (isAdding) {
+				completeAddServerFlow?.();
+				setStatus('User added successfully!');
+				setTimeout(() => {
+					onServerAdded?.(result);
+				}, 1000);
+			} else {
+				onLoggedIn?.();
+			}
 		} catch (err) {
 			console.error('Login error:', err);
 			setError(err.message || 'Login failed. Check your credentials.');
@@ -114,11 +155,12 @@ const Login = ({onLoggedIn}) => {
 		} finally {
 			setIsConnecting(false);
 		}
-	}, [username, password, login, onLoggedIn]);
+	}, [username, password, login, onLoggedIn, isAddingServer, isAddingToExisting, serverInfo, completeAddServerFlow, onServerAdded]);
 
 	const handleBack = useCallback(() => {
 		setError(null);
 		setStatus(null);
+		const isAdding = isAddingServer || isAddingToExisting;
 		if (quickConnectInterval) {
 			clearInterval(quickConnectInterval);
 			setQuickConnectInterval(null);
@@ -131,12 +173,20 @@ const Login = ({onLoggedIn}) => {
 			setQuickConnectSecret(null);
 			setTimeout(() => Spotlight.focus('[data-spotlight-id="user-0"]'), 100);
 		} else if (step === 'manual' || step === 'users') {
+			if (isAdding) {
+				cancelAddServerFlow?.();
+				onServerAdded?.(null);
+				return;
+			}
 			setStep('server');
 			setServerInfo(null);
 			setPublicUsers([]);
 			setTimeout(() => Spotlight.focus('[data-spotlight-id="server-input"]'), 100);
+		} else if (step === 'server' && isAdding) {
+			cancelAddServerFlow?.();
+			onServerAdded?.(null);
 		}
-	}, [step, quickConnectInterval]);
+	}, [step, quickConnectInterval, isAddingServer, isAddingToExisting, cancelAddServerFlow, onServerAdded]);
 
 	const handleManualLogin = useCallback(() => {
 		setStep('manual');
@@ -152,6 +202,7 @@ const Login = ({onLoggedIn}) => {
 		setIsConnecting(true);
 		setError(null);
 		setStatus('Initiating Quick Connect...');
+		const isAdding = isAddingServer || isAddingToExisting;
 
 		try {
 			const result = await jellyfinApi.api.initiateQuickConnect();
@@ -166,11 +217,23 @@ const Login = ({onLoggedIn}) => {
 					if (state.Authenticated) {
 						clearInterval(intervalId);
 						setQuickConnectInterval(null);
-						setStatus('Quick Connect authorized! Signing in...');
+						setStatus(isAdding ? 'Quick Connect authorized! Adding user...' : 'Quick Connect authorized! Signing in...');
 
 						const authResult = await jellyfinApi.api.authenticateQuickConnect(result.Secret);
-						await loginWithToken(jellyfinApi.getServerUrl(), authResult);
-						onLoggedIn?.();
+						const loginResult = await loginWithToken(jellyfinApi.getServerUrl(), authResult, {
+							serverName: serverInfo?.ServerName,
+							isAddingNewServer: isAdding
+						});
+
+						if (isAdding) {
+							completeAddServerFlow?.();
+							setStatus('User added successfully!');
+							setTimeout(() => {
+								onServerAdded?.(loginResult);
+							}, 1000);
+						} else {
+							onLoggedIn?.();
+						}
 					}
 				} catch (err) {
 					console.error('Quick Connect poll error:', err);
@@ -186,7 +249,7 @@ const Login = ({onLoggedIn}) => {
 		} finally {
 			setIsConnecting(false);
 		}
-	}, [loginWithToken, onLoggedIn]);
+	}, [loginWithToken, onLoggedIn, isAddingServer, isAddingToExisting, serverInfo, completeAddServerFlow, onServerAdded]);
 
 	const cancelQuickConnect = useCallback(() => {
 		if (quickConnectInterval) {
@@ -284,7 +347,7 @@ const Login = ({onLoggedIn}) => {
 				<div className={css.contentWrapper}>
 					{step === 'server' && (
 						<div className={css.section}>
-							<h2>Connect to Server</h2>
+							<h2>{isAddingServer ? 'Add New Server' : 'Connect to Server'}</h2>
 							<div className={css.formGroup}>
 								<label>Server Address</label>
 								<SpottableInput
@@ -306,6 +369,15 @@ const Login = ({onLoggedIn}) => {
 									>
 										{isConnecting ? 'Connecting...' : 'Connect'}
 									</SpottableButton>
+									{isAddingServer && (
+										<SpottableButton
+											data-spotlight-id="cancel-add-btn"
+											className={`${css.btn} ${css.btnSecondary}`}
+											onClick={handleBack}
+										>
+											Cancel
+										</SpottableButton>
+									)}
 								</div>
 							</div>
 						</div>
@@ -313,8 +385,8 @@ const Login = ({onLoggedIn}) => {
 
 					{step === 'users' && (
 						<div className={css.section}>
-							<h2>Select User</h2>
-							<div className={css.serverName}>{serverInfo?.ServerName}</div>
+							<h1>{serverInfo?.ServerName || 'Jellyfin'}</h1>
+							<p className={css.subtitle}>Who&apos;s watching?</p>
 							<div className={css.userGrid}>
 								{publicUsers.map((user, index) => (
 									<SpottableDiv

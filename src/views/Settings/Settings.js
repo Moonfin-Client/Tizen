@@ -100,8 +100,21 @@ const BLUR_OPTIONS = [
 	{value: 40, label: 'Heavy'}
 ];
 
-const Settings = ({onBack, onLogout}) => {
-	const {user, serverUrl, logout, accessToken} = useAuth();
+const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
+	const {
+		user,
+		serverUrl,
+		serverName,
+		logout,
+		logoutAll,
+		accessToken,
+		servers,
+		activeServerInfo,
+		switchUser,
+		removeUser,
+		hasMultipleUsers,
+		startAddServerFlow
+	} = useAuth();
 	const {settings, updateSetting} = useSettings();
 	const {capabilities} = useDeviceInfo();
 	const jellyseerr = useJellyseerr();
@@ -109,6 +122,9 @@ const Settings = ({onBack, onLogout}) => {
 	const [activeCategory, setActiveCategory] = useState('general');
 	const [showHomeRowsModal, setShowHomeRowsModal] = useState(false);
 	const [tempHomeRows, setTempHomeRows] = useState([]);
+
+	const [showConfirmRemoveModal, setShowConfirmRemoveModal] = useState(false);
+	const [serverToRemove, setServerToRemove] = useState(null);
 
 	const [jellyseerrUrl, setJellyseerrUrl] = useState(jellyseerr.serverUrl || '');
 	const [jellyseerrStatus, setJellyseerrStatus] = useState('');
@@ -189,6 +205,58 @@ const Settings = ({onBack, onLogout}) => {
 		await logout();
 		onLogout?.();
 	}, [logout, onLogout]);
+
+	const handleLogoutAll = useCallback(async () => {
+		await logoutAll();
+		onLogout?.();
+	}, [logoutAll, onLogout]);
+
+	const handleAddUser = useCallback(() => {
+		onAddUser?.();
+	}, [onAddUser]);
+
+	const handleAddServer = useCallback(() => {
+		startAddServerFlow();
+		onAddServer?.();
+	}, [startAddServerFlow, onAddServer]);
+
+	const handleSwitchUser = useCallback(async (serverId, userId) => {
+		await switchUser(serverId, userId);
+	}, [switchUser]);
+
+	const handleSwitchUserClick = useCallback((e) => {
+		const serverId = e.currentTarget.dataset.serverId;
+		const userId = e.currentTarget.dataset.userId;
+		if (serverId && userId) {
+			handleSwitchUser(serverId, userId);
+		}
+	}, [handleSwitchUser]);
+
+	const handleRemoveUserClick = useCallback((e) => {
+		const serverId = e.currentTarget.dataset.serverId;
+		const userId = e.currentTarget.dataset.userId;
+		const username = e.currentTarget.dataset.username;
+		const userServerName = e.currentTarget.dataset.serverName;
+		if (serverId && userId) {
+			setServerToRemove({serverId, userId, username, serverName: userServerName});
+			setShowConfirmRemoveModal(true);
+		}
+	}, []);
+
+	const handleConfirmRemove = useCallback(async () => {
+		if (!serverToRemove) return;
+
+		const success = await removeUser(serverToRemove.serverId, serverToRemove.userId);
+		if (success) {
+			setShowConfirmRemoveModal(false);
+			setServerToRemove(null);
+		}
+	}, [serverToRemove, removeUser]);
+
+	const handleCancelRemove = useCallback(() => {
+		setShowConfirmRemoveModal(false);
+		setServerToRemove(null);
+	}, []);
 
 	const toggleSetting = useCallback((key) => {
 		updateSetting(key, !settings[key]);
@@ -555,17 +623,102 @@ const Settings = ({onBack, onLogout}) => {
 	const renderAccountPanel = () => (
 		<div className={css.panel}>
 			<h1>Account Settings</h1>
+
 			<div className={css.settingsGroup}>
-				<h2>User</h2>
-				<div className={css.infoItem}>
-					<span className={css.infoLabel}>Username</span>
-					<span className={css.infoValue}>{user?.Name || 'Not logged in'}</span>
-				</div>
-				<div className={css.infoItem}>
-					<span className={css.infoLabel}>Server</span>
-					<span className={css.infoValue}>{serverUrl || 'Not connected'}</span>
+				<h2>Current User</h2>
+				<div className={css.currentUserCard}>
+					{user?.PrimaryImageTag ? (
+						<img
+							src={`${serverUrl}/Users/${user.Id}/Images/Primary?tag=${user.PrimaryImageTag}&quality=90&maxHeight=150`}
+							alt={user?.Name}
+							className={css.userAvatarImage}
+						/>
+					) : (
+						<div className={css.userAvatar}>
+							{user?.Name?.charAt(0)?.toUpperCase() || '?'}
+						</div>
+					)}
+					<div className={css.userDetails}>
+						<div className={css.userName}>{user?.Name || 'Not logged in'}</div>
+						<div className={css.serverInfo}>
+							{serverName && <span className={css.serverName}>{serverName}</span>}
+							<span className={css.serverUrl}>{serverUrl || 'Not connected'}</span>
+						</div>
+					</div>
 				</div>
 			</div>
+
+			<div className={css.settingsGroup}>
+				<h2>Servers & Users {hasMultipleUsers && `(${servers.length})`}</h2>
+				<div className={css.serverList}>
+					{servers.map((server, index) => {
+						const isActive = activeServerInfo?.serverId === server.serverId &&
+							activeServerInfo?.userId === server.userId;
+						return (
+							<div
+								key={`${server.serverId}-${server.userId}`}
+								className={`${css.serverItem} ${isActive ? css.activeServer : ''}`}
+							>
+								<div className={css.serverItemInfo}>
+									<div className={css.serverItemUser}>
+										<span className={css.serverItemAvatar}>
+											{server.username?.charAt(0)?.toUpperCase() || '?'}
+										</span>
+										<span className={css.serverItemUsername}>{server.username}</span>
+									</div>
+									<div className={css.serverItemServer}>
+										{server.name} ({new URL(server.url).hostname})
+									</div>
+								</div>
+								<div className={css.serverItemActions}>
+									{!isActive && (
+										<SpottableButton
+											className={css.smallButton}
+											data-server-id={server.serverId}
+											data-user-id={server.userId}
+											onClick={handleSwitchUserClick}
+											spotlightId={`switch-user-${index}`}
+										>
+											Switch
+										</SpottableButton>
+									)}
+									{(servers.length > 1 || !isActive) && (
+										<SpottableButton
+											className={`${css.smallButton} ${css.dangerButton}`}
+											data-server-id={server.serverId}
+											data-user-id={server.userId}
+											data-server-name={server.name}
+											data-username={server.username}
+											onClick={handleRemoveUserClick}
+											spotlightId={`remove-user-${index}`}
+										>
+											Remove
+										</SpottableButton>
+									)}
+									{isActive && (
+										<span className={css.activeLabel}>Active</span>
+									)}
+								</div>
+							</div>
+						);
+					})}
+				</div>
+				<SpottableButton
+					className={css.addServerButton}
+					onClick={handleAddUser}
+					spotlightId="add-user-button"
+				>
+					+ Add User
+				</SpottableButton>
+				<SpottableButton
+					className={css.addServerButton}
+					onClick={handleAddServer}
+					spotlightId="add-server-button"
+				>
+					Change Server
+				</SpottableButton>
+			</div>
+
 			<div className={css.settingsGroup}>
 				<h2>Actions</h2>
 				<SpottableButton
@@ -573,8 +726,17 @@ const Settings = ({onBack, onLogout}) => {
 					onClick={handleLogout}
 					spotlightId="logout-button"
 				>
-					Sign Out
+					Sign Out Current User
 				</SpottableButton>
+				{hasMultipleUsers && (
+					<SpottableButton
+						className={`${css.actionButton} ${css.dangerButton}`}
+						onClick={handleLogoutAll}
+						spotlightId="logout-all-button"
+					>
+						Sign Out All Users
+					</SpottableButton>
+				)}
 			</div>
 		</div>
 	);
@@ -742,6 +904,48 @@ const Settings = ({onBack, onLogout}) => {
 		);
 	};
 
+	const renderConfirmRemoveModal = () => {
+		if (!serverToRemove) return null;
+
+		return (
+			<Popup
+				open={showConfirmRemoveModal}
+				onClose={handleCancelRemove}
+				position="center"
+				scrimType="translucent"
+				noAutoDismiss
+			>
+				<div className={css.popupContent}>
+					<h2 className={css.popupTitle}>Remove User</h2>
+					<p className={css.popupDescription}>
+						Are you sure you want to remove <strong>{serverToRemove.username}</strong> from
+						<strong> {serverToRemove.serverName}</strong>?
+					</p>
+					<p className={css.popupWarning}>
+						You will need to sign in again to use this account.
+					</p>
+					<div className={css.popupButtons}>
+						<Button
+							onClick={handleCancelRemove}
+							size="small"
+							spotlightId="cancel-remove"
+						>
+							Cancel
+						</Button>
+						<Button
+							onClick={handleConfirmRemove}
+							size="small"
+							className={css.dangerButton}
+							spotlightId="confirm-remove"
+						>
+							Remove
+						</Button>
+					</div>
+				</div>
+			</Popup>
+		);
+	};
+
 	const renderPanel = () => {
 		switch (activeCategory) {
 			case 'general': return renderGeneralPanel();
@@ -785,6 +989,7 @@ const Settings = ({onBack, onLogout}) => {
 			</ContentContainer>
 
 			{renderHomeRowsModal()}
+			{renderConfirmRemoveModal()}
 		</div>
 	);
 };

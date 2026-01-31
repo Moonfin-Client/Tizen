@@ -47,11 +47,13 @@ const PANELS = {
 	GENRE_BROWSE: 14,
 	RECORDINGS: 15,
 	JELLYSEERR_BROWSE: 16,
-	JELLYSEERR_PERSON: 17
+	JELLYSEERR_PERSON: 17,
+	ADD_SERVER: 18,
+	ADD_USER: 19
 };
 
 const AppContent = (props) => {
-	const {isAuthenticated, isLoading, logout} = useAuth();
+	const {isAuthenticated, isLoading, logout, serverUrl, serverName} = useAuth();
 	const [panelIndex, setPanelIndex] = useState(PANELS.LOGIN);
 	const [selectedItem, setSelectedItem] = useState(null);
 	const [selectedLibrary, setSelectedLibrary] = useState(null);
@@ -91,6 +93,11 @@ const AppContent = (props) => {
 	}, [panelIndex]);
 
 	const handleBack = useCallback(() => {
+		if (panelIndex === PANELS.ADD_SERVER || panelIndex === PANELS.ADD_USER) {
+			setPanelHistory([]);
+			setPanelIndex(PANELS.SETTINGS);
+			return;
+		}
 		if (panelHistory.length > 0) {
 			const prevPanel = panelHistory[panelHistory.length - 1];
 			setPanelHistory(prev => prev.slice(0, -1));
@@ -102,6 +109,9 @@ const AppContent = (props) => {
 
 	useEffect(() => {
 		const handleKeyDown = (e) => {
+			if (e.keyCode === 8 && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+				return;
+			}
 			// Handle back button - Tizen (10009), webOS (461), Browser Escape (27), Backspace (8)
 			if (isBackKey(e)) {
 				if (panelIndex === PANELS.BROWSE || panelIndex === PANELS.LOGIN) {
@@ -215,6 +225,26 @@ const AppContent = (props) => {
 		setPanelIndex(PANELS.LOGIN);
 	}, [logout]);
 
+	const handleAddServer = useCallback(() => {
+		setPanelHistory([]);
+		setPanelIndex(PANELS.ADD_SERVER);
+	}, []);
+
+	const handleAddUser = useCallback(() => {
+		setPanelHistory([]);
+		setPanelIndex(PANELS.ADD_USER);
+	}, []);
+
+	const handleServerAdded = useCallback((result) => {
+		if (!result) {
+			setPanelHistory([]);
+			setPanelIndex(PANELS.SETTINGS);
+			return;
+		}
+		setPanelHistory([]);
+		setPanelIndex(PANELS.BROWSE);
+	}, []);
+
 	const handleSelectJellyseerrItem = useCallback((item) => {
 		setJellyseerrItem(item);
 		navigateTo(PANELS.JELLYSEERR_DETAILS);
@@ -289,7 +319,25 @@ const AppContent = (props) => {
 			case PANELS.SEARCH:
 				return <Search onSelectItem={handleSelectItem} onSelectPerson={handleSelectPerson} onBack={handleBack} />;
 			case PANELS.SETTINGS:
-				return <Settings onBack={handleBack} onLogout={handleSwitchUser} />;
+				return <Settings onBack={handleBack} onLogout={handleSwitchUser} onAddServer={handleAddServer} onAddUser={handleAddUser} />;
+			case PANELS.ADD_SERVER:
+				return (
+					<Login
+						onLoggedIn={handleLoggedIn}
+						onServerAdded={handleServerAdded}
+						isAddingServer
+					/>
+				);
+			case PANELS.ADD_USER:
+				return (
+					<Login
+						onLoggedIn={handleLoggedIn}
+						onServerAdded={handleServerAdded}
+						isAddingUser
+						currentServerUrl={serverUrl}
+						currentServerName={serverName}
+					/>
+				);
 			case PANELS.PLAYER:
 				return playingItem ? (
 					<Player
