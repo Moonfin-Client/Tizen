@@ -93,7 +93,6 @@ const JellyseerrBrowse = ({browseType, item, mediaType: initialMediaType, onSele
 			setTotalCount(result.totalResults || 0);
 			currentPageRef.current = page;
 
-			// Set initial backdrop from first item with backdrop
 			if (!append && newItems.length > 0 && !backdropSetRef.current) {
 				const firstItemWithBackdrop = newItems.find(i => i.backdropPath);
 				if (firstItemWithBackdrop) {
@@ -214,6 +213,9 @@ const JellyseerrBrowse = ({browseType, item, mediaType: initialMediaType, onSele
 
 		const title = mediaItem.title || mediaItem.name;
 		const year = mediaItem.releaseDate?.substring(0, 4) || mediaItem.firstAirDate?.substring(0, 4);
+		const itemMediaType = mediaItem.media_type || mediaItem.mediaType || mediaType;
+		const status = mediaItem.mediaInfo?.status;
+
 		return (
 			<SpottableDiv
 				{...rest}
@@ -222,20 +224,32 @@ const JellyseerrBrowse = ({browseType, item, mediaType: initialMediaType, onSele
 				onFocus={updateBackdrop}
 				data-index={index}
 			>
-				{imageUrl ? (
-					<img
-						className={css.poster}
-						src={imageUrl}
-						alt={title}
-						loading="lazy"
-					/>
-				) : (
-					<div className={css.posterPlaceholder}>
-						<svg viewBox="0 0 24 24" className={css.placeholderIcon}>
-							<path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z" />
-						</svg>
-					</div>
-				)}
+				<div className={css.posterWrapper}>
+					{imageUrl ? (
+						<img
+							className={css.poster}
+							src={imageUrl}
+							alt={title}
+							loading="lazy"
+						/>
+					) : (
+						<div className={css.posterPlaceholder}>
+							<svg viewBox="0 0 24 24" className={css.placeholderIcon}>
+								<path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z" />
+							</svg>
+						</div>
+					)}
+					{itemMediaType && (
+						<div className={`${css.mediaTypeBadge} ${itemMediaType === 'movie' ? css.movieBadge : css.seriesBadge}`}>
+							{itemMediaType === 'movie' ? 'MOVIE' : 'SERIES'}
+						</div>
+					)}
+					{status && [3, 4, 5].includes(status) && (
+						<div className={`${css.availabilityBadge} ${css[`availability${status}`]}`}>
+							{status === 5 ? 'Available' : status === 4 ? 'Partial' : 'Processing'}
+						</div>
+					)}
+				</div>
 				<div className={css.itemInfo}>
 					<div className={css.itemName}>{title}</div>
 					{year && (
@@ -244,7 +258,7 @@ const JellyseerrBrowse = ({browseType, item, mediaType: initialMediaType, onSele
 				</div>
 			</SpottableDiv>
 		);
-	}, [handleItemClick, updateBackdrop, loadItems]);
+	}, [handleItemClick, updateBackdrop, loadItems, mediaType]);
 
 	const currentFilter = FILTER_OPTIONS.find(o => o.key === mediaType);
 

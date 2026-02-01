@@ -74,6 +74,8 @@ const JellyseerrPerson = ({personId, personName, onClose, onSelectItem, onBack})
 		const title = item.title || item.name;
 		const character = item.character;
 		const year = (item.releaseDate || item.release_date || item.firstAirDate || item.first_air_date)?.substring(0, 4);
+		const itemMediaType = item.mediaType || item.media_type || (item.title ? 'movie' : 'tv');
+		const status = item.mediaInfo?.status;
 
 		return (
 			<SpottableDiv
@@ -87,6 +89,16 @@ const JellyseerrPerson = ({personId, personName, onClose, onSelectItem, onBack})
 						<Image className={css.poster} src={posterUrl} sizing="fill" />
 					) : (
 						<div className={css.noPoster}>{title?.[0]}</div>
+					)}
+					{itemMediaType && (
+						<div className={`${css.mediaTypeBadge} ${itemMediaType === 'movie' ? css.movieBadge : css.seriesBadge}`}>
+							{itemMediaType === 'movie' ? 'MOVIE' : 'SERIES'}
+						</div>
+					)}
+					{status && [3, 4, 5].includes(status) && (
+						<div className={`${css.availabilityBadge} ${css[`availability${status}`]}`}>
+							{status === 5 ? 'Available' : status === 4 ? 'Partial' : 'Processing'}
+						</div>
 					)}
 				</div>
 				<div className={css.cardInfo}>
@@ -137,8 +149,6 @@ const JellyseerrPerson = ({personId, personName, onClose, onSelectItem, onBack})
 	const biography = details.biography || '';
 	const knownFor = details.knownForDepartment || '';
 
-	// Combine and sort appearances by popularity
-	// The Jellyseerr /person/{id} endpoint returns combinedCredits in the response
 	const cast = details.combinedCredits?.cast || details.credits?.cast || [];
 	const crew = details.combinedCredits?.crew || details.credits?.crew || [];
 	const appearances = [
@@ -151,7 +161,6 @@ const JellyseerrPerson = ({personId, personName, onClose, onSelectItem, onBack})
 		.sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
 		.slice(0, 50);
 
-	// Store appearances in ref for click handler
 	appearancesRef.current = appearances;
 
 	return (

@@ -59,6 +59,7 @@ const MediaCard = memo(function MediaCard({item, mediaType, onSelect, onFocus}) 
 	const posterUrl = jellyseerrApi.getImageUrl(item.poster_path || item.posterPath, 'w342');
 	const title = item.title || item.name;
 	const status = item.mediaInfo?.status;
+	const itemMediaType = item.media_type || item.mediaType || mediaType;
 
 	const handleClick = useCallback(() => {
 		onSelect?.(item, mediaType);
@@ -76,12 +77,14 @@ const MediaCard = memo(function MediaCard({item, mediaType, onSelect, onFocus}) 
 				) : (
 					<div className={css.noPoster}>{title?.[0]}</div>
 				)}
-				{status && (
-					<div className={`${css.statusBadge} ${css[`status${status}`]}`}>
-						{status === 5 ? 'Available' :
-						 status === 4 ? 'Partial' :
-						 status === 3 ? 'Processing' :
-						 status === 2 ? 'Pending' : ''}
+				{itemMediaType && (
+					<div className={`${css.mediaTypeBadge} ${itemMediaType === 'movie' ? css.movieBadge : css.seriesBadge}`}>
+						{itemMediaType === 'movie' ? 'MOVIE' : 'SERIES'}
+					</div>
+				)}
+				{status && [3, 4, 5].includes(status) && (
+					<div className={`${css.availabilityBadge} ${css[`availability${status}`]}`}>
+						{status === 5 ? 'Available' : status === 4 ? 'Partial' : 'Processing'}
 					</div>
 				)}
 			</div>

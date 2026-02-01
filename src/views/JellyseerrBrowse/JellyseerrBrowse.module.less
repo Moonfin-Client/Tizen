@@ -172,9 +172,17 @@
 	}
 }
 
-.poster {
+.posterWrapper {
+	position: relative;
 	width: 100%;
 	height: 270px;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.poster {
+	width: 100%;
+	height: 100%;
 	object-fit: cover;
 	border: 3px solid transparent;
 	border-radius: 8px;
@@ -277,4 +285,59 @@
 	color: white;
 	margin-bottom: 10px;
 	text-align: center;
+}
+
+.mediaTypeBadge {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	z-index: 2;
+	backdrop-filter: blur(8px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.movieBadge {
+	background: rgba(239, 68, 68, 0.9);
+	color: #fff;
+}
+
+.seriesBadge {
+	background: rgba(59, 130, 246, 0.9);
+	color: #fff;
+}
+
+.availabilityBadge {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	padding: 4px 10px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
+	z-index: 2;
+	backdrop-filter: blur(8px);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.availability5 {
+	background: rgba(34, 197, 94, 0.9);
+	color: #fff;
+}
+
+.availability4 {
+	background: rgba(234, 179, 8, 0.9);
+	color: #fff;
+}
+
+.availability3 {
+	background: rgba(168, 85, 247, 0.9);
+	color: #fff;
 }
