@@ -50,7 +50,7 @@ const NavBar = ({
 			}
 		};
 		updateClock();
-		const interval = setInterval(updateClock, 1000);
+		const interval = setInterval(updateClock, 60000);
 		return () => clearInterval(interval);
 	}, [settings.clockDisplay]);
 
