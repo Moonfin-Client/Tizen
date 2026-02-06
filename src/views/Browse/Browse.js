@@ -6,6 +6,7 @@ import {useSettings} from '../../context/SettingsContext';
 import MediaRow from '../../components/MediaRow';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import {getImageUrl, getBackdropId, getLogoUrl} from '../../utils/helpers';
+import {getFromStorage, saveToStorage} from '../../services/storage';
 
 import css from './Browse.module.less';
 
@@ -17,9 +18,16 @@ const DETAIL_GENRES_LIMIT = 2;
 const TRANSITION_DELAY_MS = 450;
 const PRELOAD_ADJACENT_SLIDES = 2;
 
+// Cache TTL in milliseconds (5 minutes for volatile data, 30 minutes for libraries)
+const CACHE_TTL_VOLATILE = 5 * 60 * 1000;
+const CACHE_TTL_LIBRARIES = 30 * 60 * 1000;
+const STORAGE_KEY_BROWSE = 'browse_cache';
+
+// In-memory cache for instant access
 let cachedRowData = null;
 let cachedLibraries = null;
 let cachedFeaturedItems = null;
+let cacheTimestamp = null;
 
 const EXCLUDED_COLLECTION_TYPES = ['playlists', 'livetv', 'boxsets', 'books', 'music', 'musicvideos', 'homevideos', 'photos'];
 
@@ -27,12 +35,10 @@ const SpottableDiv = Spottable('div');
 const SpottableButton = Spottable('button');
 
 const Browse = ({
-	onSelectItem,
-	onSelectLibrary
+	onSelectItem
 }) => {
-	const {api, serverUrl, isAuthenticated, accessToken} = useAuth();
+	const {api, serverUrl, accessToken} = useAuth();
 	const {settings} = useSettings();
-	const [libraries, setLibraries] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [featuredItems, setFeaturedItems] = useState([]);
 	const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
@@ -55,15 +61,15 @@ const Browse = ({
 		const enabledRowIds = homeRowsConfig.filter(r => r.enabled).map(r => r.id);
 
 		if (settings.mergeContinueWatchingNextUp) {
-			const resumeRow = allRowData.find(r => r.id === 'resume');
+			const mergeResumeRow = allRowData.find(r => r.id === 'resume');
 			const nextUpRow = allRowData.find(r => r.id === 'nextup');
 
 			let result = allRowData.filter(r => r.id !== 'resume' && r.id !== 'nextup');
 
-			if (resumeRow || nextUpRow) {
-				const resumeItems = resumeRow?.items || [];
+			if (mergeResumeRow || nextUpRow) {
+				const resumeItems = mergeResumeRow?.items || [];
 				const nextUpItems = nextUpRow?.items || [];
-				
+
 				// Track series lastPlayedDate from resume items
 				const seriesLastPlayedMap = new Map();
 				resumeItems.forEach(item => {
@@ -76,13 +82,13 @@ const Browse = ({
 						}
 					}
 				});
-				
+
 				// Create set of resume item IDs to avoid duplicates
-				const resumeItemIds = new Set(resumeItems.map(item => item.Id));
-				
+				const mergeResumeItemIds = new Set(resumeItems.map(item => item.Id));
+
 				// Filter next up items that aren't already in resume and inherit lastPlayedDate
 				const filteredNextUp = nextUpItems
-					.filter(item => !resumeItemIds.has(item.Id))
+					.filter(item => !mergeResumeItemIds.has(item.Id))
 					.map(item => {
 						const seriesLastPlayed = seriesLastPlayedMap.get(item.SeriesId);
 						if (seriesLastPlayed && !item.UserData?.LastPlayedDate) {
@@ -96,12 +102,12 @@ const Browse = ({
 						}
 						return item;
 					});
-				
+
 				// Combine and sort by lastPlayedDate (most recent first)
 				const combinedItems = [...resumeItems, ...filteredNextUp].sort((a, b) => {
 					const aLastPlayed = a.UserData?.LastPlayedDate;
 					const bLastPlayed = b.UserData?.LastPlayedDate;
-					
+
 					if (aLastPlayed && bLastPlayed) {
 						return bLastPlayed.localeCompare(aLastPlayed);
 					}
@@ -210,20 +216,143 @@ const Browse = ({
 		cachedRowData = null;
 		cachedLibraries = null;
 		cachedFeaturedItems = null;
+		cacheTimestamp = null;
 	}, [accessToken]);
+
+	// Listen for browse refresh events to clear caches and reload data
+	// This helps reduce memory pressure when navigating back to Browse
+	useEffect(() => {
+		const handleBrowseRefresh = () => {
+			console.log('[Browse] Received refresh event - clearing caches');
+			cachedRowData = null;
+			cachedLibraries = null;
+			cachedFeaturedItems = null;
+			cacheTimestamp = null;
+			preloadedImagesRef.current.clear();
+		};
+
+		window.addEventListener('moonfin:browseRefresh', handleBrowseRefresh);
+		return () => {
+			window.removeEventListener('moonfin:browseRefresh', handleBrowseRefresh);
+		};
+	}, []);
+
+	// Helper to check if cache is still valid
+	const isCacheValid = useCallback((timestamp, ttl) => {
+		if (!timestamp) return false;
+		return Date.now() - timestamp < ttl;
+	}, []);
+
+	// Save browse data to persistent storage
+	const saveBrowseCache = useCallback(async (rowData, libs, featured) => {
+		try {
+			const cacheData = {
+				rowData,
+				libraries: libs,
+				featuredItems: featured,
+				timestamp: Date.now(),
+				serverUrl
+			};
+			await saveToStorage(STORAGE_KEY_BROWSE, cacheData);
+		} catch (e) {
+			console.warn('[Browse] Failed to save cache:', e);
+		}
+	}, [serverUrl]);
+
+	// Load browse data from persistent storage
+	const loadBrowseCache = useCallback(async () => {
+		try {
+			const cached = await getFromStorage(STORAGE_KEY_BROWSE);
+			if (cached && cached.serverUrl === serverUrl) {
+				return cached;
+			}
+		} catch (e) {
+			console.warn('[Browse] Failed to load cache:', e);
+		}
+		return null;
+	}, [serverUrl]);
 
 	useEffect(() => {
 		const loadData = async () => {
-			if (cachedRowData && cachedLibraries && cachedFeaturedItems) {
-				setLibraries(cachedLibraries);
+			if (cachedRowData && cachedLibraries && cachedFeaturedItems && isCacheValid(cacheTimestamp, CACHE_TTL_VOLATILE)) {
+				console.log('[Browse] Using in-memory cache');
 				setAllRowData(cachedRowData);
 				setFeaturedItems(cachedFeaturedItems);
 				setIsLoading(false);
 				return;
 			}
 
-			setIsLoading(true);
+			const persistedCache = await loadBrowseCache();
+			const hasValidPersistedCache = persistedCache && isCacheValid(persistedCache.timestamp, CACHE_TTL_LIBRARIES);
 
+			// If we have valid persisted cache, show it immediately
+			if (hasValidPersistedCache) {
+				console.log('[Browse] Using persisted cache, will refresh in background');
+				setAllRowData(persistedCache.rowData);
+				setFeaturedItems(persistedCache.featuredItems);
+				cachedLibraries = persistedCache.libraries;
+				cachedRowData = persistedCache.rowData;
+				cachedFeaturedItems = persistedCache.featuredItems;
+				cacheTimestamp = persistedCache.timestamp;
+				setIsLoading(false);
+
+				// If volatile data is stale, refresh in background
+				if (!isCacheValid(persistedCache.timestamp, CACHE_TTL_VOLATILE)) {
+					console.log('[Browse] Volatile cache stale, refreshing in background');
+					refreshVolatileData(); // eslint-disable-line no-use-before-define
+				}
+				return;
+			}
+
+			// No valid cache - show loading and fetch everything
+			setIsLoading(true);
+			await fetchAllData(); // eslint-disable-line no-use-before-define
+		};
+
+		// Fetch volatile data (resume, next up) in background without showing loading
+		const refreshVolatileData = async () => {
+			try {
+				const [resumeItems, nextUp] = await Promise.all([
+					api.getResumeItems(),
+					api.getNextUp()
+				]);
+
+				// Update just the volatile rows while preserving the rest
+				setAllRowData(prev => {
+					const filtered = prev.filter(r => r.id !== 'resume' && r.id !== 'nextup');
+					const newRows = [];
+
+					if (resumeItems.Items?.length > 0) {
+						newRows.push({
+							id: 'resume',
+							title: 'Continue Watching',
+							items: resumeItems.Items,
+							type: 'landscape'
+						});
+					}
+
+					if (nextUp.Items?.length > 0) {
+						newRows.push({
+							id: 'nextup',
+							title: 'Next Up',
+							items: nextUp.Items,
+							type: 'landscape'
+						});
+					}
+
+					const updated = [...newRows, ...filtered];
+					cachedRowData = updated;
+					cacheTimestamp = Date.now();
+					saveBrowseCache(updated, cachedLibraries, cachedFeaturedItems);
+					return updated;
+				});
+			} catch (e) {
+				console.warn('[Browse] Background refresh failed:', e);
+			}
+		};
+
+		// Full data fetch
+		const fetchAllData = async () => {
 			try {
 				const [libResult, resumeItems, nextUp, userConfig, randomItems] = await Promise.all([
 					api.getLibraries(),
@@ -234,7 +363,6 @@ const Browse = ({
 				]);
 
 				const libs = libResult.Items || [];
-				setLibraries(libs);
 				cachedLibraries = libs;
 
 				const latestItemsExcludes = userConfig?.Configuration?.LatestItemsExcludes || [];
@@ -259,51 +387,6 @@ const Browse = ({
 					});
 				}
 
-				const eligibleLibraries = libs.filter(lib => {
-					if (EXCLUDED_COLLECTION_TYPES.includes(lib.CollectionType?.toLowerCase())) {
-						return false;
-					}
-					if (latestItemsExcludes.includes(lib.Id)) {
-						return false;
-					}
-					return true;
-				});
-
-				const latestResults = await Promise.all(
-					eligibleLibraries.map(lib =>
-						api.getLatest(lib.Id, 16)
-							.then(latest => ({lib, latest}))
-							.catch(() => null)
-					)
-				);
-
-				for (const result of latestResults) {
-					if (result && result.latest?.length > 0) {
-						rowData.push({
-							id: `latest-${result.lib.Id}`,
-							title: `Latest in ${result.lib.Name}`,
-							items: result.latest,
-							library: result.lib,
-							type: 'portrait',
-							isLatestRow: true
-						});
-					}
-				}
-
-				try {
-					const collectionsResult = await api.getCollections(20);
-					if (collectionsResult?.Items?.length > 0) {
-						rowData.push({
-							id: 'collections',
-							title: 'Collections',
-							items: collectionsResult.Items,
-							type: 'portrait'
-						});
-					}
-				} catch (e) {
-					console.warn('Failed to load collections:', e);
-				}
-
 				if (libs.length > 0) {
 					rowData.push({
 						id: 'library-tiles',
@@ -318,19 +401,103 @@ const Browse = ({
 					});
 				}
 
-				setAllRowData(rowData);
-				cachedRowData = rowData;
-
 				if (randomItems?.Items?.length > 0) {
-                    const filteredItems = randomItems.Items.filter(item => item.Type !== 'BoxSet');
-                    const shuffled = [...filteredItems].sort(() => Math.random() - 0.5);
-                    const featuredWithLogos = shuffled.map(item => ({
-                        ...item,
-                        LogoUrl: getLogoUrl(serverUrl, item, {maxWidth: 800, quality: 90})
-                    }));
-                    setFeaturedItems(featuredWithLogos);
-                    cachedFeaturedItems = featuredWithLogos;
-                }
+					const filteredItems = randomItems.Items.filter(item => item.Type !== 'BoxSet');
+					const shuffled = [...filteredItems].sort(() => Math.random() - 0.5);
+					const featuredWithLogos = shuffled.map(item => ({
+						...item,
+						LogoUrl: getLogoUrl(serverUrl, item, {maxWidth: 800, quality: 90})
+					}));
+					setFeaturedItems(featuredWithLogos);
+					cachedFeaturedItems = featuredWithLogos;
+				}
+
+				setAllRowData(rowData);
+				setIsLoading(false);
+
+				const eligibleLibraries = libs.filter(lib => {
+					if (EXCLUDED_COLLECTION_TYPES.includes(lib.CollectionType?.toLowerCase())) {
+						return false;
+					}
+					if (latestItemsExcludes.includes(lib.Id)) {
+						return false;
+					}
+					return true;
+				});
+
+				const [latestResults, collectionsResult] = await Promise.all([
+					Promise.all(
+						eligibleLibraries.map(lib =>
+							api.getLatest(lib.Id, 16)
+								.then(latest => ({lib, latest}))
+								.catch(() => null)
+						)
+					),
+					api.getCollections(20).catch(() => null)
+				]);
+
+				const completeRowData = [];
+
+				if (resumeItems.Items?.length > 0) {
+					completeRowData.push({
+						id: 'resume',
+						title: 'Continue Watching',
+						items: resumeItems.Items,
+						type: 'landscape'
+					});
+				}
+
+				if (nextUp.Items?.length > 0) {
+					completeRowData.push({
+						id: 'nextup',
+						title: 'Next Up',
+						items: nextUp.Items,
+						type: 'landscape'
+					});
+				}
+
+				for (const result of latestResults) {
+					if (result && result.latest?.length > 0) {
+						completeRowData.push({
+							id: `latest-${result.lib.Id}`,
+							title: `Latest in ${result.lib.Name}`,
+							items: result.latest,
+							library: result.lib,
+							type: 'portrait',
+							isLatestRow: true
+						});
+					}
+				}
+
+				if (collectionsResult?.Items?.length > 0) {
+					completeRowData.push({
+						id: 'collections',
+						title: 'Collections',
+						items: collectionsResult.Items,
+						type: 'portrait'
+					});
+				}
+
+				if (libs.length > 0) {
+					completeRowData.push({
+						id: 'library-tiles',
+						title: 'My Media',
+						items: libs.map(lib => ({
+							...lib,
+							Type: 'CollectionFolder',
+							isLibraryTile: true
+						})),
+						type: 'landscape',
+						isLibraryRow: true
+					});
+				}
+
+				setAllRowData(completeRowData);
+				cachedRowData = completeRowData;
+				cacheTimestamp = Date.now();
+
+				saveBrowseCache(completeRowData, libs, cachedFeaturedItems);
+
 			} catch (err) {
 				console.error('Failed to load browse data:', err);
 			} finally {
@@ -339,7 +506,7 @@ const Browse = ({
 		};
 
 		loadData();
-	}, [api, serverUrl, accessToken, settings.featuredContentType, settings.featuredItemCount]);
+	}, [api, serverUrl, accessToken, settings.featuredContentType, settings.featuredItemCount, isCacheValid, loadBrowseCache, saveBrowseCache]);
 
 	useEffect(() => {
 		if (featuredItems.length === 0) return;
@@ -414,30 +581,6 @@ const Browse = ({
 		onSelectItem?.(item);
 	}, [onSelectItem]);
 
-	const handleSelectLibrary = useCallback((library) => {
-		onSelectLibrary?.(library);
-	}, [onSelectLibrary]);
-
-	const handleHome = useCallback(() => {
-		if (settings.showFeaturedBar !== false) {
-			setBrowseMode('featured');
-			if (mainContentRef.current) {
-				mainContentRef.current.scrollTo({top: 0, behavior: 'smooth'});
-			}
-			setTimeout(() => {
-				Spotlight.focus('featured-banner');
-			}, FOCUS_DELAY_MS);
-		} else {
-			setBrowseMode('rows');
-			if (mainContentRef.current) {
-				mainContentRef.current.scrollTo({top: 0, behavior: 'smooth'});
-			}
-			setTimeout(() => {
-				Spotlight.focus('row-0');
-			}, FOCUS_DELAY_MS);
-		}
-	}, [settings.showFeaturedBar]);
-
 	const handleFeaturedPrev = useCallback(() => {
 		if (featuredItems.length <= 1) return;
 		setCurrentFeaturedIndex((prev) =>
@@ -489,11 +632,11 @@ const Browse = ({
 		}
 		focusItemTimeoutRef.current = setTimeout(() => {
 			setFocusedItem(item);
-				if (!item.BackdropImageTags?.length && !item.ParentBackdropImageTags?.length) {
-					api.getItem(item.Id).then(fullItem => {
-						setFocusedItem(fullItem);
-					}).catch(() => {});
-				}
+			if (!item.BackdropImageTags?.length && !item.ParentBackdropImageTags?.length) {
+				api.getItem(item.Id).then(fullItem => {
+					setFocusedItem(fullItem);
+				}).catch(() => {});
+			}
 		}, FOCUS_ITEM_DEBOUNCE_MS);
 	}, [api]);
 

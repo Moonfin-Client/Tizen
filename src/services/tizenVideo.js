@@ -388,6 +388,114 @@ export const avplaySetDrm = (drmType, operation, drmData) => {
 	webapis.avplay.setDrm(drmType, operation, drmData);
 };
 
+/**
+ * Release hardware video resources
+ * Critical on Tizen due to limited hardware decoder instances.
+ */
+export const cleanupVideoElement = (videoElement, options = {}) => {
+	if (!videoElement) {
+		console.log('[tizenVideo] No video element to cleanup');
+		return false;
+	}
+
+	try {
+		console.log('[tizenVideo] Cleaning up video element resources');
+		console.log('[tizenVideo] Cleanup called from:', new Error().stack);
+
+		if (!videoElement.paused) {
+			videoElement.pause();
+		}
+
+		// Clear source and call load() to release hardware decoder
+		videoElement.removeAttribute('src');
+		if (videoElement.srcObject) {
+			videoElement.srcObject = null;
+		}
+		videoElement.load();
+
+		if (options.removeFromDOM && videoElement.parentNode) {
+			videoElement.parentNode.removeChild(videoElement);
+		}
+
+		console.log('[tizenVideo] Video element cleanup complete');
+		return true;
+	} catch (err) {
+		console.error('[tizenVideo] Error during video cleanup:', err);
+		return false;
+	}
+};
+
+/**
+ * Handle visibility changes for app suspend/resume.
+ * Uses webkit prefix for Tizen 4 compatibility.
+ */
+export const setupVisibilityHandler = (onHidden, onVisible) => {
+	let hidden, visibilityChange;
+
+	if (typeof document.hidden !== 'undefined') {
+		hidden = 'hidden';
+		visibilityChange = 'visibilitychange';
+	} else if (typeof document.webkitHidden !== 'undefined') {
+		hidden = 'webkitHidden';
+		visibilityChange = 'webkitvisibilitychange';
+	} else {
+		console.warn('[tizenVideo] Visibility API not supported');
+		return () => {};
+	}
+
+	const handleVisibilityChange = () => {
+		if (document[hidden]) {
+			console.log('[tizenVideo] App hidden/suspended - triggering cleanup');
+			onHidden?.();
+		} else {
+			console.log('[tizenVideo] App visible - resuming');
+			onVisible?.();
+		}
+	};
+
+	document.addEventListener(visibilityChange, handleVisibilityChange, true);
+
+	// Listen to both variants for maximum compatibility
+	const altVisibilityChange = visibilityChange === 'visibilitychange'
+		? 'webkitvisibilitychange'
+		: 'visibilitychange';
+
+	if (visibilityChange !== altVisibilityChange) {
+		document.addEventListener(altVisibilityChange, handleVisibilityChange, true);
+	}
+
+	console.log('[tizenVideo] Visibility handler registered');
+
+	// Return cleanup function
+	return () => {
+		document.removeEventListener(visibilityChange, handleVisibilityChange, true);
+		document.removeEventListener(altVisibilityChange, handleVisibilityChange, true);
+		console.log('[tizenVideo] Visibility handler removed');
+	};
+};
+
+/**
+ * Handle tizenRelaunch event (app re-launched while already running).
+ */
+export const setupTizenLifecycle = (onRelaunch) => {
+	if (!isTizen()) {
+		return () => {};
+	}
+
+	const handleRelaunch = (event) => {
+		console.log('[tizenVideo] tizenRelaunch event received', event?.detail);
+		onRelaunch?.(event?.detail);
+	};
+
+	document.addEventListener('tizenRelaunch', handleRelaunch, true);
+	console.log('[tizenVideo] tizen lifecycle handler registered');
+
+	return () => {
+		document.removeEventListener('tizenRelaunch', handleRelaunch, true);
+		console.log('[tizenVideo] tizen lifecycle handler removed');
+	};
+}
+
 export default {
 	isTizen,
 	getTizenVersion,

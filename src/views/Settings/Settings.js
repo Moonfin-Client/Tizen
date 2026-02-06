@@ -71,15 +71,6 @@ const BITRATE_OPTIONS = [
 	{value: 5000000, label: '5 Mbps'}
 ];
 
-const CAROUSEL_SPEED_OPTIONS = [
-	{value: 5000, label: '5 seconds'},
-	{value: 8000, label: '8 seconds'},
-	{value: 10000, label: '10 seconds'},
-	{value: 15000, label: '15 seconds'},
-	{value: 20000, label: '20 seconds'},
-	{value: 0, label: 'Disabled'}
-];
-
 const FEATURED_CONTENT_TYPE_OPTIONS = [
 	{value: 'both', label: 'Movies & TV Shows'},
 	{value: 'movies', label: 'Movies Only'},
@@ -271,12 +262,6 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		updateSetting('maxBitrate', BITRATE_OPTIONS[nextIndex].value);
 	}, [settings.maxBitrate, updateSetting]);
 
-	const cycleCarouselSpeed = useCallback(() => {
-		const currentIndex = CAROUSEL_SPEED_OPTIONS.findIndex(o => o.value === settings.carouselSpeed);
-		const nextIndex = (currentIndex + 1) % CAROUSEL_SPEED_OPTIONS.length;
-		updateSetting('carouselSpeed', CAROUSEL_SPEED_OPTIONS[nextIndex].value);
-	}, [settings.carouselSpeed, updateSetting]);
-
 	const cycleFeaturedContentType = useCallback(() => {
 		const currentIndex = FEATURED_CONTENT_TYPE_OPTIONS.findIndex(o => o.value === settings.featuredContentType);
 		const nextIndex = (currentIndex + 1) % FEATURED_CONTENT_TYPE_OPTIONS.length;
@@ -407,10 +392,6 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		return option?.label || 'Auto';
 	};
 
-	const getCarouselSpeedLabel = () => {
-		const option = CAROUSEL_SPEED_OPTIONS.find(o => o.value === settings.carouselSpeed);
-		return option?.label || '8 seconds';
-	};
 
 	const getFeaturedContentTypeLabel = () => {
 		const option = FEATURED_CONTENT_TYPE_OPTIONS.find(o => o.value === settings.featuredContentType);
@@ -521,9 +502,6 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 				)}
 				{renderSettingItem('Item Count', 'Number of items in featured carousel',
 					getFeaturedItemCountLabel(), cycleFeaturedItemCount, 'setting-featuredItemCount'
-				)}
-				{renderSettingItem('Carousel Speed', 'Time between carousel slides',
-					getCarouselSpeedLabel(), cycleCarouselSpeed, 'setting-carouselSpeed'
 				)}
 			</div>
 		</div>
