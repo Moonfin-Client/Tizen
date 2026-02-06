@@ -379,6 +379,30 @@ export const getRequests = async (filter = 'all', take = 20, skip = 0) => {
 	return request(`/request?filter=${filter}&take=${take}&skip=${skip}`);
 };
 
+export const getMyRequests = async (requestedByUserId, take = 50, skip = 0) => {
+	console.log('[jellyseerrApi] getMyRequests called:', {requestedByUserId, take, skip});
+	const result = await request(`/request?filter=all&requestedBy=${requestedByUserId}&take=${take}&skip=${skip}&sort=modified`);
+	console.log('[jellyseerrApi] getMyRequests result:', result?.results?.length || 0, 'requests');
+	return result;
+};
+
+export const REQUEST_STATUS = {
+	PENDING: 1,
+	APPROVED: 2,
+	DECLINED: 3,
+	AVAILABLE: 4
+};
+
+export const getRequestStatusText = (status) => {
+	switch (status) {
+		case REQUEST_STATUS.PENDING: return 'Pending';
+		case REQUEST_STATUS.APPROVED: return 'Approved';
+		case REQUEST_STATUS.DECLINED: return 'Declined';
+		case REQUEST_STATUS.AVAILABLE: return 'Available';
+		default: return 'Unknown';
+	}
+};
+
 export const requestMovie = async (tmdbId, options = {}) => {
 	const body = {
 		mediaType: 'movie',
@@ -501,6 +525,9 @@ export default {
 	getPerson,
 	getMediaStatus,
 	getRequests,
+	getMyRequests,
+	REQUEST_STATUS,
+	getRequestStatusText,
 	requestMovie,
 	requestTv,
 	cancelRequest,

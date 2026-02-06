@@ -360,51 +360,64 @@
 
 // Cast Section
 .castSection {
-	margin-bottom: 32px;
+	margin-bottom: 20px;
+	overflow: visible;
 }
 
-.castList {
-	display: flex;
-	gap: 20px;
+.castScroller {
 	overflow-x: auto;
-	padding-bottom: 12px;
+	overflow-y: visible;
+	padding-left: 60px;
+	padding-right: 60px;
 	scrollbar-width: none;
+	margin-left: -60px;
+	margin-right: -60px;
 
 	&::-webkit-scrollbar {
 		display: none;
 	}
 }
 
+.castList {
+	display: flex;
+	padding: 20px 0;
+	width: max-content;
+
+	> * + * {
+		margin-left: 30px;
+	}
+}
+
 .castCard {
-	flex-shrink: 0;
-	width: 130px;
-	text-align: center;
-	cursor: pointer;
-	transition: all 0.2s;
-	outline: none;
-	padding: 8px;
-	border-radius: 8px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	min-width: 200px;
+	max-width: 200px;
+	cursor: pointer;
+	transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+	outline: none;
 
 	&:focus {
-		transform: scale(1.1);
-		background: #374151;
+		outline: none;
+		transform: scale(1.08);
+		z-index: 10;
 
-		.castPhoto {
+		.castPhotoContainer {
 			border-color: #ffffff;
 		}
 	}
 }
 
 .castPhotoContainer {
-	width: 100px;
-	height: 100px;
+	width: 180px;
+	height: 180px;
 	border-radius: 50%;
 	overflow: hidden;
-	margin-bottom: 8px;
-	background: #1f2937;
+	margin-bottom: 14px;
+	background: rgba(255, 255, 255, 0.1);
+	border: 4px solid transparent;
+	transition: border-color 0.2s;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -412,14 +425,9 @@
 }
 
 .castPhoto {
-	width: 100px;
-	height: 100px;
-	min-width: 100px;
-	min-height: 100px;
+	width: 100%;
+	height: 100%;
 	object-fit: cover;
-	border: 2px solid transparent;
-	border-radius: 50%;
-	transition: border-color 0.2s;
 }
 
 .castPhotoPlaceholder {
@@ -428,33 +436,38 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 36px;
-	color: #6b7280;
-	background: #1f2937;
+	font-size: 56px;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.5);
+	background: rgba(255, 255, 255, 0.1);
 }
 
 .castName {
-	font-size: 14px;
-	font-weight: 600;
-	margin: 0 0 4px 0;
-	color: #ffffff;
+	font-size: 16px;
+	font-weight: 500;
+	color: white;
+	text-align: center;
+	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	margin: 0;
 }
 
 .castCharacter {
-	font-size: 12px;
-	color: #9ca3af;
-	margin: 0;
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.6);
+	text-align: center;
+	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	margin: 0;
 }
 
 .recommendationsSection {
-	margin-bottom: 32px;
-	padding: 16px 0;
+	margin-bottom: 20px;
+	padding: 0;
 	overflow: visible;
 }
 
@@ -462,7 +475,7 @@
 	display: flex;
 	overflow-x: auto;
 	overflow-y: visible;
-	padding: 16px 8px;
+	padding: 20px 0;
 	scrollbar-width: none;
 
 	&::-webkit-scrollbar {
@@ -476,7 +489,7 @@
 
 .recommendationCard {
 	flex-shrink: 0;
-	width: 200px;
+	width: 240px;
 	cursor: pointer;
 	transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
 	outline: none;
@@ -493,39 +506,41 @@
 
 .recommendationPoster {
 	width: 100%;
-	height: 300px;
+	height: 360px;
 	object-fit: cover;
 	border-radius: 8px;
-	border: 3px solid transparent;
+	border: 4px solid transparent;
 	transition: border-color 0.2s ease;
 }
 
 .recommendationNoPoster {
 	width: 100%;
-	height: 300px;
-	background: #1f2937;
+	height: 360px;
+	background: #2a2a4e;
 	border-radius: 8px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 48px;
-	color: #4b5563;
+	font-size: 64px;
+	color: #666;
+	border: 4px solid transparent;
 }
 
 .recommendationTitle {
-	padding: 8px 4px;
-	font-size: 14px;
+	padding: 10px 0;
+	font-size: 16px;
 	font-weight: 500;
 	color: #ffffff;
 	text-align: center;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	max-width: 240px;
 }
 
 .similarSection {
-	margin-bottom: 32px;
-	padding: 16px 0;
+	margin-bottom: 20px;
+	padding: 0;
 	overflow: visible;
 }
 

@@ -44,6 +44,7 @@ const MOVIE_STUDIOS = [
 ];
 
 const ROW_CONFIGS = [
+	{id: 'myRequests', title: 'My Requests', type: 'request'},
 	{id: 'trending', title: 'Trending Now', type: 'media', fetchFn: 'trending'},
 	{id: 'popularMovies', title: 'Popular Movies', type: 'media', fetchFn: 'trendingMovies'},
 	{id: 'popularTv', title: 'Popular TV Shows', type: 'media', fetchFn: 'trendingTv'},
@@ -147,6 +148,78 @@ const StudioCard = memo(function StudioCard({studio, onSelect}) {
 	);
 });
 
+// Request card component - shows user's requests with status
+const RequestCard = memo(function RequestCard({request, onSelect, onFocus}) {
+	const media = request.media;
+	const posterUrl = media?.posterPath ? jellyseerrApi.getImageUrl(media.posterPath, 'w342') : null;
+	const title = media?.title || media?.name || 'Unknown';
+	const status = request.status;
+	const mediaType = request.type;
+
+	const getStatusClass = () => {
+		switch (status) {
+			case 1: return css.requestStatusPending;
+			case 2: return css.requestStatusApproved;
+			case 3: return css.requestStatusDeclined;
+			case 4: return css.requestStatusAvailable;
+			default: return css.requestStatusPending;
+		}
+	};
+
+	const getStatusText = () => {
+		switch (status) {
+			case 1: return '⏳ Pending';
+			case 2: return '✓ Approved';
+			case 3: return '✗ Declined';
+			case 4: return '✓ Available';
+			default: return 'Unknown';
+		}
+	};
+
+	const handleClick = useCallback(() => {
+		const item = {
+			id: media?.tmdbId,
+			tmdbId: media?.tmdbId,
+			title: media?.title,
+			name: media?.name,
+			poster_path: media?.posterPath,
+			backdrop_path: media?.backdropPath,
+			overview: media?.overview,
+			media_type: mediaType,
+			mediaType: mediaType
+		};
+		onSelect?.(item, mediaType);
+	}, [media, mediaType, onSelect]);
+
+	const handleFocus = useCallback(() => {
+		onFocus?.({
+			backdrop_path: media?.backdropPath,
+			title: media?.title || media?.name,
+			overview: media?.overview
+		});
+	}, [media, onFocus]);
+
+	return (
+		<SpottableDiv className={css.requestCard} onClick={handleClick} onFocus={handleFocus}>
+			<div className={css.requestPosterContainer}>
+				{posterUrl ? (
+					<img className={css.requestPoster} src={posterUrl} alt={title} loading="lazy" />
+				) : (
+					<div className={css.noPoster}>{title?.[0]}</div>
+				)}
+				{mediaType && (
+					<div className={`${css.mediaTypeBadge} ${mediaType === 'movie' ? css.movieBadge : css.seriesBadge}`}>
+						{mediaType === 'movie' ? 'MOVIE' : 'SERIES'}
+					</div>
+				)}
+				<div className={`${css.requestStatusBadge} ${getStatusClass()}`}>
+					{getStatusText()}
+				</div>
+			</div>
+		</SpottableDiv>
+	);
+});
+
 // Memoized row component
 const DiscoverRow = memo(function DiscoverRow({
 	config,
@@ -177,7 +250,7 @@ const DiscoverRow = memo(function DiscoverRow({
 	}, [rowIndex, onNavigateUp, onNavigateDown]);
 
 	const handleFocus = useCallback((e) => {
-		const card = e.target.closest(`.${css.mediaCard}, .${css.genreCard}, .${css.networkCard}`);
+		const card = e.target.closest(`.${css.mediaCard}, .${css.genreCard}, .${css.networkCard}, .${css.requestCard}`);
 		const scroller = scrollerRef.current;
 		if (card && scroller) {
 			const cardRect = card.getBoundingClientRect();
@@ -190,7 +263,7 @@ const DiscoverRow = memo(function DiscoverRow({
 			}
 
 			// Check if near end to load more
-			const cards = scroller.querySelectorAll(`.${css.mediaCard}, .${css.genreCard}, .${css.networkCard}`);
+			const cards = scroller.querySelectorAll(`.${css.mediaCard}, .${css.genreCard}, .${css.networkCard}, .${css.requestCard}`);
 			const cardIndex = Array.from(cards).indexOf(card);
 			if (cardIndex >= cards.length - 3) {
 				onLoadMore?.(config.id);
@@ -206,6 +279,15 @@ const DiscoverRow = memo(function DiscoverRow({
 
 	const renderCards = useMemo(() => {
 		switch (config.type) {
+			case 'request':
+				return items.map(item => (
+					<RequestCard
+						key={item.id}
+						request={item}
+						onSelect={onSelectItem}
+						onFocus={onFocusItem}
+					/>
+				));
 			case 'genre':
 				return items.map(item => (
 					<GenreCard
@@ -292,7 +374,11 @@ const JellyseerrDiscover = ({onSelectItem, onSelectGenre, onSelectNetwork, onSel
 			if (!isAuthenticated) return;
 			setIsLoading(true);
 			try {
+				const currentUser = await jellyseerrApi.getUser().catch(() => null);
+				console.log('[JellyseerrDiscover] Current user:', currentUser?.id, currentUser?.username);
+
 				const [
+					myRequestsData,
 					trendingData,
 					moviesData,
 					tvData,
@@ -301,6 +387,7 @@ const JellyseerrDiscover = ({onSelectItem, onSelectGenre, onSelectNetwork, onSel
 					upcomingMoviesData,
 					upcomingTvData
 				] = await Promise.all([
+					currentUser?.id ? jellyseerrApi.getMyRequests(currentUser.id, 50).catch((e) => { console.error('[JellyseerrDiscover] myRequests error:', e); return {results: []}; }) : {results: []},
 					jellyseerrApi.trending().catch(() => ({results: []})),
 					jellyseerrApi.trendingMovies(1).catch(() => ({results: []})),
 					jellyseerrApi.trendingTv(1).catch(() => ({results: []})),
@@ -310,8 +397,10 @@ const JellyseerrDiscover = ({onSelectItem, onSelectGenre, onSelectNetwork, onSel
 					jellyseerrApi.upcomingTv(1).catch(() => ({results: []}))
 				]);
 
-				// Store only first 9 items, track if there's more
+				console.log('[JellyseerrDiscover] My requests loaded:', myRequestsData.results?.length || 0);
+
 				setRows({
+					myRequests: myRequestsData.results || [],
 					trending: (trendingData.results || []).slice(0, ITEMS_PER_PAGE),
 					popularMovies: (moviesData.results || []).slice(0, ITEMS_PER_PAGE),
 					popularTv: (tvData.results || []).slice(0, ITEMS_PER_PAGE),

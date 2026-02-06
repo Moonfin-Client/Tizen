@@ -22,7 +22,8 @@ const CastSectionContainer = SpotlightContainerDecorator({
 	enterTo: 'last-focused'
 }, 'div');
 const KeywordsSectionContainer = SpotlightContainerDecorator({
-	enterTo: 'last-focused'
+	enterTo: 'last-focused',
+	restrict: 'self-only'
 }, 'div');
 
 const STATUS = {
@@ -1037,6 +1038,7 @@ const JellyseerrDetails = ({mediaType, mediaId, onClose, onSelectItem, onSelectP
 
 	const handleKeywordsSectionKeyDown = useCallback((e) => {
 		if (e.keyCode === 38) {
+			// Up arrow - navigate to previous section
 			e.preventDefault();
 			e.stopPropagation();
 			const simFocused = Spotlight.focus('details-row-1');
@@ -1049,10 +1051,6 @@ const JellyseerrDetails = ({mediaType, mediaId, onClose, onSelectItem, onSelectP
 					}
 				}
 			}
-		} else if (e.keyCode === 40) {
-			e.preventDefault();
-			e.stopPropagation();
-			Spotlight.focus('seasons-section');
 		}
 	}, []);
 
@@ -1352,10 +1350,12 @@ const JellyseerrDetails = ({mediaType, mediaId, onClose, onSelectItem, onSelectP
 						onKeyDown={handleCastSectionKeyDown}
 					>
 						<h2 className={css.sectionTitle}>Cast</h2>
-						<div className={css.castList}>
-							{details.credits.cast.slice(0, 10).map(person => (
-								<CastCard key={person.id} person={person} onSelect={handleSelectCast} />
-							))}
+						<div className={css.castScroller}>
+							<div className={css.castList}>
+								{details.credits.cast.slice(0, 10).map(person => (
+									<CastCard key={person.id} person={person} onSelect={handleSelectCast} />
+								))}
+							</div>
 						</div>
 					</CastSectionContainer>
 				)}
@@ -1400,21 +1400,6 @@ const JellyseerrDetails = ({mediaType, mediaId, onClose, onSelectItem, onSelectP
 							))}
 						</div>
 					</KeywordsSectionContainer>
-				)}
-
-				{/* Seasons Section for TV */}
-				{mediaType === 'tv' && details.seasons?.length > 0 && (
-					<div className={css.seasonsSection}>
-						<h2 className={css.sectionTitle}>Seasons</h2>
-						<div className={css.seasonsList}>
-							{details.seasons.filter(s => s.seasonNumber > 0).map(season => (
-								<div key={season.id} className={css.seasonItem}>
-									<span className={css.seasonName}>{season.name}</span>
-									<span className={css.seasonEpisodes}>{season.episodeCount} episodes</span>
-								</div>
-							))}
-						</div>
-					</div>
 				)}
 			</div>
 		</div>
