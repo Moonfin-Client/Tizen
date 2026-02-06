@@ -105,6 +105,13 @@ const SUBTITLE_POSITION_OPTIONS = [
 	{value: 'higher', label: 'Higher', offset: 35}
 ];
 
+const SEEK_STEP_OPTIONS = [
+	{value: 5, label: '5 seconds'},
+	{value: 10, label: '10 seconds'},
+	{value: 20, label: '20 seconds'},
+	{value: 30, label: '30 seconds'}
+];
+
 const UI_OPACITY_OPTIONS = [
 	{value: 50, label: '50%'},
 	{value: 65, label: '65%'},
@@ -338,6 +345,12 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		updateSetting('subtitlePosition', SUBTITLE_POSITION_OPTIONS[nextIndex].value);
 	}, [settings.subtitlePosition, updateSetting]);
 
+	const cycleSeekStep = useCallback(() => {
+		const currentIndex = SEEK_STEP_OPTIONS.findIndex(o => o.value === settings.seekStep);
+		const nextIndex = (currentIndex + 1) % SEEK_STEP_OPTIONS.length;
+		updateSetting('seekStep', SEEK_STEP_OPTIONS[nextIndex].value);
+	}, [settings.seekStep, updateSetting]);
+
 	const cycleUiOpacity = useCallback(() => {
 		const currentIndex = UI_OPACITY_OPTIONS.findIndex(o => o.value === settings.uiOpacity);
 		const nextIndex = (currentIndex + 1) % UI_OPACITY_OPTIONS.length;
@@ -482,6 +495,11 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		return option?.label || 'Bottom';
 	};
 
+	const getSeekStepLabel = () => {
+		const option = SEEK_STEP_OPTIONS.find(o => o.value === settings.seekStep);
+		return option?.label || '10 seconds';
+	};
+
 	const getUiOpacityLabel = () => {
 		const option = UI_OPACITY_OPTIONS.find(o => o.value === settings.uiOpacity);
 		return option?.label || '85%';
@@ -559,6 +577,9 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 				{renderToggleItem('Auto Play Next', 'Automatically play the next episode', 'autoPlay')}
 				{renderSettingItem('Maximum Bitrate', 'Limit streaming quality',
 					getBitrateLabel(), cycleBitrate, 'setting-bitrate'
+				)}
+				{renderSettingItem('Seek Step', 'Seconds to skip when seeking',
+					getSeekStepLabel(), cycleSeekStep, 'setting-seekStep'
 				)}
 			</div>
 			<div className={css.settingsGroup}>

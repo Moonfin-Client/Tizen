@@ -17,6 +17,7 @@ const defaultSettings = {
 	subtitleMode: 'default',
 	subtitleSize: 'medium',
 	subtitlePosition: 'bottom',
+	seekStep: 10,
 	skipIntro: true,
 	skipCredits: false,
 	autoPlay: true,
