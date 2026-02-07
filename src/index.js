@@ -2,7 +2,6 @@
 import {createRoot, hydrateRoot} from 'react-dom/client';
 
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 import {registerKeys, ESSENTIAL_KEY_NAMES} from './utils/tizenKeys';
 
 // Polyfill Element.prototype.scrollTo for older Tizen browsers
@@ -44,5 +43,3 @@ if (typeof window !== 'undefined') {
 }
 
 export default appElement;
-
-reportWebVitals();

@@ -69,8 +69,7 @@
 		"@enact/ui": "^4.8.0",
 		"prop-types": "^15.8.1",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
-		"web-vitals": "^3.5.1"
+		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
 		"eslint-config-enact-proxy": "^1.0.7"
