@@ -39,7 +39,7 @@
 }
 
 .subtitleText {
-	background: rgba(0, 0, 0, 0.75);
+
 	color: #fff;
 	font-size: 36px;
 	font-weight: 500;
@@ -122,6 +122,7 @@
 		opacity: 0;
 		transform: translateX(40px);
 	}
+
 	to {
 		opacity: 1;
 		transform: translateX(0);
@@ -427,8 +428,13 @@
 }
 
 @keyframes fadeIn {
-	from { opacity: 0; }
-	to { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
 }
 
 .modalContent {
@@ -455,6 +461,7 @@
 		transform: translateY(30px);
 		opacity: 0;
 	}
+
 	to {
 		transform: translateY(0);
 		opacity: 1;
@@ -472,7 +479,7 @@
 .trackList {
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	padding: 10px;
 }
 
 .trackItem {
@@ -486,6 +493,7 @@
 	cursor: pointer;
 	transition: all 0.3s ease;
 	outline: none;
+	margin-bottom: 15px;
 }
 
 .trackItem:hover,
@@ -538,6 +546,7 @@
 	cursor: pointer;
 	border: 2px solid rgba(255, 255, 255, 0.15);
 	outline: none;
+	margin-bottom: 15px;
 }
 
 .chapterItem:hover,
@@ -753,7 +762,7 @@
 	text-align: center;
 }
 
-.error > * + * {
+.error>*+* {
 	margin-top: 24px;
 }
 
@@ -777,6 +786,146 @@
 	color: rgba(255, 255, 255, 0.6);
 }
 
+/* Offset Modal */
+.offsetModal {
+	width: 600px;
+	height: auto;
+	padding: 40px;
+}
+
+.offsetControls {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 40px;
+}
+
+.offsetBtn {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.1);
+	border: 2px solid rgba(255, 255, 255, 0.2);
+	color: #fff;
+	font-size: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.offsetBtn:hover,
+.offsetBtn:focus {
+	background: rgba(0, 164, 220, 0.3);
+	border-color: var(--accent-color, #00a4dc);
+	transform: scale(1.1);
+}
+
+.offsetBtn:not(:last-child) {
+	margin-right: 20px;
+}
+
+.offsetDisplay {
+	margin-right: 20px;
+}
+
+.offsetDisplay {
+	font-size: 48px;
+	font-weight: 700;
+	color: #fff;
+	min-width: 200px;
+	text-align: center;
+}
+
+.offsetActions {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+.actionBtn {
+	padding: 15px 30px;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	border: 2px solid rgba(255, 255, 255, 0.2);
+	color: #fff;
+	font-size: 20px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.actionBtn:hover,
+.actionBtn:focus {
+	background: rgba(0, 164, 220, 0.3);
+	border-color: var(--accent-color, #00a4dc);
+}
+
+.closeBtn {
+	background: transparent;
+	border: none;
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 18px;
+	cursor: pointer;
+	padding: 10px 20px;
+	border-radius: 4px;
+}
+
+.closeBtn:hover,
+.closeBtn:focus {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.1);
+}
+
+/* Settings Modal */
+.settingsModal {
+	width: 700px;
+	height: 80vh;
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.settingItem {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 30px;
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 10px;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	margin: 5px 10px 15px 10px;
+}
+
+.divider {
+	height: 1px;
+	background: rgba(255, 255, 255, 0.1);
+	margin: 10px 0;
+	width: 100%;
+}
+
+.settingItem:hover,
+.settingItem:focus {
+	background: rgba(0, 164, 220, 0.3);
+	border-color: var(--accent-color, #00a4dc);
+	transform: scale(1.02);
+}
+
+.settingLabel {
+	font-size: 24px;
+	color: #fff;
+	font-weight: 500;
+}
+
+.settingValue {
+	font-size: 24px;
+	color: var(--accent-color, #00a4dc);
+	font-weight: 700;
+}
+
 /* Buffering indicator */
 .bufferingIndicator {
 	position: absolute;
@@ -785,4 +934,39 @@
 	transform: translate(-50%, -50%);
 	z-index: 1001;
 	pointer-events: none;
+}
+
+.sliderItem {
+	padding: 15px 30px;
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 10px;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+	margin: 5px 10px 15px 10px;
+	transition: all 0.2s ease;
+}
+
+.sliderItem:focus-within {
+	background: rgba(0, 164, 220, 0.15);
+	border-color: var(--accent-color, #00a4dc);
+}
+
+.sliderLabel {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+	font-size: 24px;
+	color: #fff;
+	font-weight: 500;
+}
+
+.sliderValue {
+	color: var(--accent-color, #00a4dc);
+	font-weight: 700;
+}
+
+.settingsSlider {
+	width: 100%;
+	--slider-active-bg-color: var(--accent-color, #00a4dc);
+	--slider-knob-bg-color: #fff;
 }

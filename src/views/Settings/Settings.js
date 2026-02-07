@@ -1,16 +1,17 @@
-import {useCallback, useState, useEffect} from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Spottable from '@enact/spotlight/Spottable';
 import SpotlightContainerDecorator from '@enact/spotlight/SpotlightContainerDecorator';
 import Spotlight from '@enact/spotlight';
 import Popup from '@enact/sandstone/Popup';
 import Button from '@enact/sandstone/Button';
-import {useAuth} from '../../context/AuthContext';
-import {useSettings, DEFAULT_HOME_ROWS} from '../../context/SettingsContext';
-import {useJellyseerr} from '../../context/JellyseerrContext';
-import {useDeviceInfo} from '../../hooks/useDeviceInfo';
+import Slider from '@enact/sandstone/Slider';
+import { useAuth } from '../../context/AuthContext';
+import { useSettings, DEFAULT_HOME_ROWS } from '../../context/SettingsContext';
+import { useJellyseerr } from '../../context/JellyseerrContext';
+import { useDeviceInfo } from '../../hooks/useDeviceInfo';
 import JellyseerrIcon from '../../components/icons/JellyseerrIcon';
 import serverLogger from '../../services/serverLogger';
-import {isBackKey} from '../../utils/tizenKeys';
+import { isBackKey } from '../../utils/tizenKeys';
 
 import css from './Settings.module.less';
 
@@ -18,8 +19,8 @@ const SpottableDiv = Spottable('div');
 const SpottableButton = Spottable('button');
 const SpottableInput = Spottable('input');
 
-const SidebarContainer = SpotlightContainerDecorator({enterTo: 'last-focused'}, 'div');
-const ContentContainer = SpotlightContainerDecorator({enterTo: 'last-focused'}, 'div');
+const SidebarContainer = SpotlightContainerDecorator({ enterTo: 'last-focused' }, 'div');
+const ContentContainer = SpotlightContainerDecorator({ enterTo: 'last-focused' }, 'div');
 
 const IconGeneral = () => (
 	<svg viewBox="0 0 24 24" fill="currentColor">
@@ -52,93 +53,154 @@ const IconAbout = () => (
 );
 
 const CATEGORIES = [
-	{id: 'general', label: 'General', Icon: IconGeneral},
-	{id: 'playback', label: 'Playback', Icon: IconPlayback},
-	{id: 'display', label: 'Display', Icon: IconDisplay},
-	{id: 'jellyseerr', label: 'Jellyseerr', Icon: JellyseerrIcon},
-	{id: 'account', label: 'Account', Icon: IconAccount},
-	{id: 'about', label: 'About', Icon: IconAbout}
+	{ id: 'general', label: 'General', Icon: IconGeneral },
+	{ id: 'playback', label: 'Playback', Icon: IconPlayback },
+	{ id: 'display', label: 'Display', Icon: IconDisplay },
+	{ id: 'jellyseerr', label: 'Jellyseerr', Icon: JellyseerrIcon },
+	{ id: 'account', label: 'Account', Icon: IconAccount },
+	{ id: 'about', label: 'About', Icon: IconAbout }
 ];
 
 const BITRATE_OPTIONS = [
-	{value: 0, label: 'Auto (No limit)'},
-	{value: 120000000, label: '120 Mbps'},
-	{value: 80000000, label: '80 Mbps'},
-	{value: 60000000, label: '60 Mbps'},
-	{value: 40000000, label: '40 Mbps'},
-	{value: 20000000, label: '20 Mbps'},
-	{value: 10000000, label: '10 Mbps'},
-	{value: 5000000, label: '5 Mbps'}
+	{ value: 0, label: 'Auto (No limit)' },
+	{ value: 120000000, label: '120 Mbps' },
+	{ value: 80000000, label: '80 Mbps' },
+	{ value: 60000000, label: '60 Mbps' },
+	{ value: 40000000, label: '40 Mbps' },
+	{ value: 20000000, label: '20 Mbps' },
+	{ value: 10000000, label: '10 Mbps' },
+	{ value: 5000000, label: '5 Mbps' }
 ];
 
 const CONTENT_TYPE_OPTIONS = [
-	{value: 'both', label: 'Movies & TV Shows'},
-	{value: 'movies', label: 'Movies Only'},
-	{value: 'tv', label: 'TV Shows Only'}
+	{ value: 'both', label: 'Movies & TV Shows' },
+	{ value: 'movies', label: 'Movies Only' },
+	{ value: 'tv', label: 'TV Shows Only' }
 ];
 
 const FEATURED_ITEM_COUNT_OPTIONS = [
-	{value: 5, label: '5 items'},
-	{value: 10, label: '10 items'},
-	{value: 15, label: '15 items'}
+	{ value: 5, label: '5 items' },
+	{ value: 10, label: '10 items' },
+	{ value: 15, label: '15 items' }
 ];
 
 const BLUR_OPTIONS = [
-	{value: 0, label: 'Off'},
-	{value: 10, label: 'Light'},
-	{value: 20, label: 'Medium'},
-	{value: 30, label: 'Strong'},
-	{value: 40, label: 'Heavy'}
+	{ value: 0, label: 'Off' },
+	{ value: 10, label: 'Light' },
+	{ value: 20, label: 'Medium' },
+	{ value: 30, label: 'Strong' },
+	{ value: 40, label: 'Heavy' }
 ];
 
 const SUBTITLE_SIZE_OPTIONS = [
-	{value: 'small', label: 'Small', fontSize: 28},
-	{value: 'medium', label: 'Medium', fontSize: 36},
-	{value: 'large', label: 'Large', fontSize: 44},
-	{value: 'xlarge', label: 'Extra Large', fontSize: 52}
+	{ value: 'small', label: 'Small', fontSize: 28 },
+	{ value: 'medium', label: 'Medium', fontSize: 36 },
+	{ value: 'large', label: 'Large', fontSize: 44 },
+	{ value: 'xlarge', label: 'Extra Large', fontSize: 52 }
+];
+
+const SUBTITLE_BACKGROUND_OPTIONS = [
+	{ value: 0, label: 'None' },
+	{ value: 25, label: 'Light (25%)' },
+	{ value: 50, label: 'Medium (50%)' },
+	{ value: 75, label: 'Dark (75%)' },
+	{ value: 90, label: 'Very Dark (90%)' },
+	{ value: 100, label: 'Solid Black' }
+];
+
+
+
+const SUBTITLE_COLOR_OPTIONS = [
+	{ value: '#ffffff', label: 'White' },
+	{ value: '#ffff00', label: 'Yellow' },
+	{ value: '#00ffff', label: 'Cyan' },
+	{ value: '#ff00ff', label: 'Magenta' },
+	{ value: '#00ff00', label: 'Green' },
+	{ value: '#ff0000', label: 'Red' },
+	{ value: '#808080', label: 'Grey' },
+	{ value: '#404040', label: 'Dark Grey' }
 ];
 
 const SUBTITLE_POSITION_OPTIONS = [
-	{value: 'bottom', label: 'Bottom', offset: 10},
-	{value: 'lower', label: 'Lower', offset: 15},
-	{value: 'middle', label: 'Middle', offset: 25},
-	{value: 'higher', label: 'Higher', offset: 35}
+	{ value: 'bottom', label: 'Bottom', offset: 10 },
+	{ value: 'lower', label: 'Lower', offset: 15 },
+	{ value: 'middle', label: 'Middle', offset: 25 },
+	{ value: 'higher', label: 'Higher', offset: 35 },
+	{ value: 'absolute', label: 'Absolute', offset: 0 }
+];
+
+const SUBTITLE_SHADOW_COLOR_OPTIONS = [
+	{ value: '#000000', label: 'Black' },
+	{ value: '#ffffff', label: 'White' },
+	{ value: '#808080', label: 'Grey' },
+	{ value: '#404040', label: 'Dark Grey' },
+	{ value: '#ff0000', label: 'Red' },
+	{ value: '#00ff00', label: 'Green' },
+	{ value: '#0000ff', label: 'Blue' }
+];
+
+const SUBTITLE_BACKGROUND_COLOR_OPTIONS = [
+	{ value: '#000000', label: 'Black' },
+	{ value: '#ffffff', label: 'White' },
+	{ value: '#808080', label: 'Grey' },
+	{ value: '#404040', label: 'Dark Grey' },
+	{ value: '#000080', label: 'Navy' }
+];
+
+const SUBTITLE_OPACITY_OPTIONS = [
+	{ value: 100, label: '100%' },
+	{ value: 90, label: '90%' },
+	{ value: 80, label: '80%' },
+	{ value: 70, label: '70%' },
+	{ value: 60, label: '60%' },
+	{ value: 50, label: '50%' },
+	{ value: 25, label: '25%' }
+];
+
+const SUBTITLE_ABSOLUTE_POSITION_OPTIONS = [
+	{ value: 95, label: '95% (Bottom)' },
+	{ value: 90, label: '90%' },
+	{ value: 85, label: '85%' },
+	{ value: 80, label: '80%' },
+	{ value: 70, label: '70%' },
+	{ value: 50, label: '50% (Middle)' },
+	{ value: 20, label: '20% (Top)' }
 ];
 
 const SEEK_STEP_OPTIONS = [
-	{value: 5, label: '5 seconds'},
-	{value: 10, label: '10 seconds'},
-	{value: 20, label: '20 seconds'},
-	{value: 30, label: '30 seconds'}
+	{ value: 5, label: '5 seconds' },
+	{ value: 10, label: '10 seconds' },
+	{ value: 20, label: '20 seconds' },
+	{ value: 30, label: '30 seconds' }
 ];
 
 const UI_OPACITY_OPTIONS = [
-	{value: 50, label: '50%'},
-	{value: 65, label: '65%'},
-	{value: 75, label: '75%'},
-	{value: 85, label: '85%'},
-	{value: 95, label: '95%'}
+	{ value: 50, label: '50%' },
+	{ value: 65, label: '65%' },
+	{ value: 75, label: '75%' },
+	{ value: 85, label: '85%' },
+	{ value: 95, label: '95%' }
 ];
 
 const UI_COLOR_OPTIONS = [
-	{value: 'dark', label: 'Dark Gray', rgb: '40, 40, 40'},
-	{value: 'black', label: 'Black', rgb: '0, 0, 0'},
-	{value: 'charcoal', label: 'Charcoal', rgb: '54, 54, 54'},
-	{value: 'slate', label: 'Slate', rgb: '47, 54, 64'},
-	{value: 'navy', label: 'Navy', rgb: '20, 30, 48'},
-	{value: 'midnight', label: 'Midnight Blue', rgb: '25, 25, 65'},
-	{value: 'ocean', label: 'Ocean', rgb: '20, 50, 70'},
-	{value: 'teal', label: 'Teal', rgb: '0, 60, 60'},
-	{value: 'forest', label: 'Forest', rgb: '25, 50, 35'},
-	{value: 'olive', label: 'Olive', rgb: '50, 50, 25'},
-	{value: 'purple', label: 'Purple', rgb: '48, 25, 52'},
-	{value: 'plum', label: 'Plum', rgb: '60, 30, 60'},
-	{value: 'wine', label: 'Wine', rgb: '60, 20, 30'},
-	{value: 'maroon', label: 'Maroon', rgb: '50, 20, 20'},
-	{value: 'brown', label: 'Brown', rgb: '50, 35, 25'}
+	{ value: 'dark', label: 'Dark Gray', rgb: '40, 40, 40' },
+	{ value: 'black', label: 'Black', rgb: '0, 0, 0' },
+	{ value: 'charcoal', label: 'Charcoal', rgb: '54, 54, 54' },
+	{ value: 'slate', label: 'Slate', rgb: '47, 54, 64' },
+	{ value: 'navy', label: 'Navy', rgb: '20, 30, 48' },
+	{ value: 'midnight', label: 'Midnight Blue', rgb: '25, 25, 65' },
+	{ value: 'ocean', label: 'Ocean', rgb: '20, 50, 70' },
+	{ value: 'teal', label: 'Teal', rgb: '0, 60, 60' },
+	{ value: 'forest', label: 'Forest', rgb: '25, 50, 35' },
+	{ value: 'olive', label: 'Olive', rgb: '50, 50, 25' },
+	{ value: 'purple', label: 'Purple', rgb: '48, 25, 52' },
+	{ value: 'plum', label: 'Plum', rgb: '60, 30, 60' },
+	{ value: 'wine', label: 'Wine', rgb: '60, 20, 30' },
+	{ value: 'maroon', label: 'Maroon', rgb: '50, 20, 20' },
+	{ value: 'brown', label: 'Brown', rgb: '50, 35, 25' }
 ];
 
-const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
+const Settings = ({ onBack, onLogout, onAddServer, onAddUser }) => {
 	const {
 		user,
 		serverUrl,
@@ -154,8 +216,8 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		hasMultipleServers,
 		startAddServerFlow
 	} = useAuth();
-	const {settings, updateSetting} = useSettings();
-	const {capabilities} = useDeviceInfo();
+	const { settings, updateSetting } = useSettings();
+	const { capabilities } = useDeviceInfo();
 	const jellyseerr = useJellyseerr();
 
 	const [activeCategory, setActiveCategory] = useState('general');
@@ -206,7 +268,7 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 						setServerVersion(data.Version);
 					}
 				})
-				.catch(() => {});
+				.catch(() => { });
 		}
 	}, [serverUrl, accessToken]);
 
@@ -277,7 +339,7 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		const username = e.currentTarget.dataset.username;
 		const userServerName = e.currentTarget.dataset.serverName;
 		if (serverId && userId) {
-			setServerToRemove({serverId, userId, username, serverName: userServerName});
+			setServerToRemove({ serverId, userId, username, serverName: userServerName });
 			setShowConfirmRemoveModal(true);
 		}
 	}, []);
@@ -352,6 +414,18 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		updateSetting('subtitlePosition', SUBTITLE_POSITION_OPTIONS[nextIndex].value);
 	}, [settings.subtitlePosition, updateSetting]);
 
+	const cycleSubtitleOpacity = useCallback(() => {
+		const currentIndex = SUBTITLE_OPACITY_OPTIONS.findIndex(o => o.value === settings.subtitleOpacity);
+		const nextIndex = (currentIndex + 1) % SUBTITLE_OPACITY_OPTIONS.length;
+		updateSetting('subtitleOpacity', SUBTITLE_OPACITY_OPTIONS[nextIndex].value);
+	}, [settings.subtitleOpacity, updateSetting]);
+
+	const cycleSubtitleAbsolutePosition = useCallback(() => {
+		const currentIndex = SUBTITLE_ABSOLUTE_POSITION_OPTIONS.findIndex(o => o.value === settings.subtitlePositionAbsolute);
+		const nextIndex = (currentIndex + 1) % SUBTITLE_ABSOLUTE_POSITION_OPTIONS.length;
+		updateSetting('subtitlePositionAbsolute', SUBTITLE_ABSOLUTE_POSITION_OPTIONS[nextIndex].value);
+	}, [settings.subtitlePositionAbsolute, updateSetting]);
+
 	const cycleSeekStep = useCallback(() => {
 		const currentIndex = SEEK_STEP_OPTIONS.findIndex(o => o.value === settings.seekStep);
 		const nextIndex = (currentIndex + 1) % SEEK_STEP_OPTIONS.length;
@@ -369,6 +443,37 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		const nextIndex = (currentIndex + 1) % UI_COLOR_OPTIONS.length;
 		updateSetting('uiColor', UI_COLOR_OPTIONS[nextIndex].value);
 	}, [settings.uiColor, updateSetting]);
+
+	const cycleSubtitleBackground = useCallback(() => {
+		const currentIndex = SUBTITLE_BACKGROUND_OPTIONS.findIndex(o => o.value === settings.subtitleBackground);
+		// Default to 75 if not found
+		const index = currentIndex === -1 ? 3 : currentIndex;
+		const nextIndex = (index + 1) % SUBTITLE_BACKGROUND_OPTIONS.length;
+		updateSetting('subtitleBackground', SUBTITLE_BACKGROUND_OPTIONS[nextIndex].value);
+	}, [settings.subtitleBackground, updateSetting]);
+
+	const cycleSubtitleColor = useCallback(() => {
+		const currentIndex = SUBTITLE_COLOR_OPTIONS.findIndex(o => o.value === settings.subtitleColor);
+		// Default to white if not found
+		const index = currentIndex === -1 ? 0 : currentIndex;
+		const nextIndex = (index + 1) % SUBTITLE_COLOR_OPTIONS.length;
+		updateSetting('subtitleColor', SUBTITLE_COLOR_OPTIONS[nextIndex].value);
+		updateSetting('subtitleColor', SUBTITLE_COLOR_OPTIONS[nextIndex].value);
+	}, [settings.subtitleColor, updateSetting]);
+
+	const cycleSubtitleShadowColor = useCallback(() => {
+		const currentIndex = SUBTITLE_SHADOW_COLOR_OPTIONS.findIndex(o => o.value === settings.subtitleShadowColor);
+		const index = currentIndex === -1 ? 0 : currentIndex;
+		const nextIndex = (index + 1) % SUBTITLE_SHADOW_COLOR_OPTIONS.length;
+		updateSetting('subtitleShadowColor', SUBTITLE_SHADOW_COLOR_OPTIONS[nextIndex].value);
+	}, [settings.subtitleShadowColor, updateSetting]);
+
+	const cycleSubtitleBackgroundColor = useCallback(() => {
+		const currentIndex = SUBTITLE_BACKGROUND_COLOR_OPTIONS.findIndex(o => o.value === settings.subtitleBackgroundColor);
+		const index = currentIndex === -1 ? 0 : currentIndex;
+		const nextIndex = (index + 1) % SUBTITLE_BACKGROUND_COLOR_OPTIONS.length;
+		updateSetting('subtitleBackgroundColor', SUBTITLE_BACKGROUND_COLOR_OPTIONS[nextIndex].value);
+	}, [settings.subtitleBackgroundColor, updateSetting]);
 
 	const openHomeRowsModal = useCallback(() => {
 		setTempHomeRows([...(settings.homeRows || DEFAULT_HOME_ROWS)].sort((a, b) => a.order - b.order));
@@ -391,7 +496,7 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 
 	const toggleHomeRow = useCallback((rowId) => {
 		setTempHomeRows(prev => prev.map(row =>
-			row.id === rowId ? {...row, enabled: !row.enabled} : row
+			row.id === rowId ? { ...row, enabled: !row.enabled } : row
 		));
 	}, []);
 
@@ -507,6 +612,36 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 		return option?.label || 'Bottom';
 	};
 
+	const getSubtitleOpacityLabel = () => {
+		const option = SUBTITLE_OPACITY_OPTIONS.find(o => o.value === settings.subtitleOpacity);
+		return option?.label || '100%';
+	};
+
+	const getSubtitleAbsolutePositionLabel = () => {
+		const option = SUBTITLE_ABSOLUTE_POSITION_OPTIONS.find(o => o.value === settings.subtitlePositionAbsolute);
+		return option?.label || '90%';
+	};
+
+	const getSubtitleBackgroundLabel = () => {
+		const option = SUBTITLE_BACKGROUND_OPTIONS.find(o => o.value === settings.subtitleBackground);
+		return option?.label || 'Dark (75%)';
+	};
+
+	const getSubtitleColorLabel = () => {
+		const option = SUBTITLE_COLOR_OPTIONS.find(o => o.value === settings.subtitleColor);
+		return option?.label || 'White';
+	};
+
+	const getSubtitleShadowColorLabel = () => {
+		const option = SUBTITLE_SHADOW_COLOR_OPTIONS.find(o => o.value === settings.subtitleShadowColor);
+		return option?.label || 'Black';
+	};
+
+	const getSubtitleBackgroundColorLabel = () => {
+		const option = SUBTITLE_BACKGROUND_COLOR_OPTIONS.find(o => o.value === settings.subtitleBackgroundColor);
+		return option?.label || 'Black';
+	};
+
 	const getSeekStepLabel = () => {
 		const option = SEEK_STEP_OPTIONS.find(o => o.value === settings.seekStep);
 		return option?.label || '10 seconds';
@@ -611,6 +746,103 @@ const Settings = ({onBack, onLogout, onAddServer, onAddUser}) => {
 				{renderSettingItem('Subtitle Position', 'Vertical position of subtitles',
 					getSubtitlePositionLabel(), cycleSubtitlePosition, 'setting-subtitlePosition'
 				)}
+				{settings.subtitlePosition === 'absolute' && (
+					<div className={css.sliderItem}>
+						<div className={css.sliderLabel}>
+							<span>Absolute Position</span>
+							<span className={css.sliderValue}>{settings.subtitlePositionAbsolute}%</span>
+						</div>
+						<Slider
+							min={0}
+							max={100}
+							step={5}
+							value={settings.subtitlePositionAbsolute}
+							onChange={(e) => updateSetting('subtitlePositionAbsolute', e.value)}
+							className={css.settingsSlider}
+							tooltip={false}
+							spotlightId="setting-subtitlePositionAbsolute"
+						/>
+					</div>
+				)}
+				<div className={css.sliderItem}>
+					<div className={css.sliderLabel}>
+						<span>Text Opacity</span>
+						<span className={css.sliderValue}>{settings.subtitleOpacity}%</span>
+					</div>
+					<Slider
+						min={0}
+						max={100}
+						step={5}
+						value={settings.subtitleOpacity}
+						onChange={(e) => updateSetting('subtitleOpacity', e.value)}
+						className={css.settingsSlider}
+						tooltip={false}
+						spotlightId="setting-subtitleOpacity"
+					/>
+				</div>
+				{renderSettingItem('Text Color', 'Color of subtitle text',
+					getSubtitleColorLabel(), cycleSubtitleColor, 'setting-subtitleColor'
+				)}
+
+				<div className={css.divider} />
+
+				{renderSettingItem('Shadow Color', 'Color of subtitle shadow',
+					getSubtitleShadowColorLabel(), cycleSubtitleShadowColor, 'setting-subtitleShadowColor'
+				)}
+				<div className={css.sliderItem}>
+					<div className={css.sliderLabel}>
+						<span>Shadow Opacity</span>
+						<span className={css.sliderValue}>{settings.subtitleShadowOpacity}%</span>
+					</div>
+					<Slider
+						min={0}
+						max={100}
+						step={5}
+						value={settings.subtitleShadowOpacity}
+						onChange={(e) => updateSetting('subtitleShadowOpacity', e.value)}
+						className={css.settingsSlider}
+						tooltip={false}
+						spotlightId="setting-subtitleShadowOpacity"
+					/>
+				</div>
+				<div className={css.sliderItem}>
+					<div className={css.sliderLabel}>
+						<span>Shadow Size (Blur)</span>
+						<span className={css.sliderValue}>{settings.subtitleShadowBlur ? settings.subtitleShadowBlur.toFixed(1) : '0.1'}</span>
+					</div>
+					<Slider
+						min={0}
+						max={1}
+						step={0.1}
+						value={settings.subtitleShadowBlur || 0.1}
+						onChange={(e) => updateSetting('subtitleShadowBlur', e.value)}
+						className={css.settingsSlider}
+						tooltip={false}
+						spotlightId="setting-subtitleShadowBlur"
+					/>
+				</div>
+
+				<div className={css.divider} />
+
+				{renderSettingItem('Background Color', 'Color of subtitle background',
+					getSubtitleBackgroundColorLabel(), cycleSubtitleBackgroundColor, 'setting-subtitleBackgroundColor'
+				)}
+				<div className={css.sliderItem}>
+					<div className={css.sliderLabel}>
+						<span>Background Opacity</span>
+						<span className={css.sliderValue}>{settings.subtitleBackground}%</span>
+					</div>
+					<Slider
+						min={0}
+						max={100}
+						step={5}
+						value={settings.subtitleBackground}
+						onChange={(e) => updateSetting('subtitleBackground', e.value)}
+						className={css.settingsSlider}
+						tooltip={false}
+						spotlightId="setting-subtitleBackground"
+					/>
+				</div>
 			</div>
 			<div className={css.settingsGroup}>
 				<h2>Transcoding</h2>

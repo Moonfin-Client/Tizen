@@ -1,8 +1,8 @@
 /**
  * Tizen Video Service - Hardware-accelerated video playback using AVPlay APIs
  */
-/* global webapis, tizen, navigator */
-import {detectTizenVersion as _detectTizenVersion} from './deviceProfile';
+/* global webapis, tizen */
+import { detectTizenVersion as _detectTizenVersion } from './deviceProfile';
 
 let isAVPlayAvailable = false;
 
@@ -267,7 +267,7 @@ export const setDisplayWindow = async (rect) => {
 };
 
 export const registerAppStateObserver = (onForeground, onBackground) => {
-	if (typeof document === 'undefined') return () => {};
+	if (typeof document === 'undefined') return () => { };
 
 	const handleVisibilityChange = () => {
 		if (document.hidden) {
@@ -475,7 +475,7 @@ export const setupVisibilityHandler = (onHidden, onVisible) => {
 		visibilityChange = 'webkitvisibilitychange';
 	} else {
 		console.warn('[tizenVideo] Visibility API not supported');
-		return () => {};
+		return () => { };
 	}
 
 	const handleVisibilityChange = () => {
@@ -514,7 +514,7 @@ export const setupVisibilityHandler = (onHidden, onVisible) => {
  */
 export const setupTizenLifecycle = (onRelaunch) => {
 	if (!isTizen()) {
-		return () => {};
+		return () => { };
 	}
 
 	const handleRelaunch = (event) => {

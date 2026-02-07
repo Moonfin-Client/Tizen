@@ -1,0 +1,4530 @@
+diff --git a/css/player.css b/css/player.css
+index 86deceb..b32872c 100644
+--- a/css/player.css
++++ b/css/player.css
+@@ -944,4 +944,193 @@ body {
+     display: none !important;
+     opacity: 0 !important;
+     visibility: hidden !important;
++}
++
++/* Modal Header with Icon Button */
++.modal-header {
++    display: flex;
++    justify-content: space-between;
++    align-items: center;
++    margin-bottom: 20px;
++}
++
++.modal-header .modal-title {
++    margin: 0;
++}
++
++.modal-header-btn {
++    background: rgba(255, 255, 255, 0.1);
++    border: 2px solid rgba(255, 255, 255, 0.2);
++    border-radius: 50%;
++    width: 48px;
++    height: 48px;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    cursor: pointer;
++    transition: all 0.2s ease;
++}
++
++.modal-header-btn:hover,
++.modal-header-btn:focus {
++    background: rgba(0, 164, 220, 0.3);
++    border-color: #00a4dc;
++    transform: scale(1.1);
++    outline: none;
++}
++
++.modal-header-icon {
++    width: 24px;
++    height: 24px;
++}
++
++/* Subtitle Settings Overlay */
++.subtitle-settings-modal {
++    min-width: 400px;
++}
++
++.subtitle-settings-list {
++    display: flex;
++    flex-direction: column;
++    gap: 10px;
++}
++
++.subtitle-setting-item {
++    display: flex;
++    justify-content: space-between;
++    align-items: center;
++    padding: 15px 20px;
++    background: rgba(255, 255, 255, 0.05);
++    border-radius: 8px;
++    border: 2px solid transparent;
++    transition: all 0.2s ease;
++}
++
++.subtitle-setting-item:hover,
++.subtitle-setting-item:focus {
++    background: rgba(0, 164, 220, 0.2);
++    border-color: #00a4dc;
++    outline: none;
++}
++
++.subtitle-setting-item .setting-label {
++    font-size: 22px;
++    color: #fff;
++}
++
++.subtitle-setting-item .setting-value {
++    font-size: 20px;
++    color: #00a4dc;
++    font-weight: 600;
++}
++
++.modal-hint {
++    text-align: center;
++    color: rgba(255, 255, 255, 0.6);
++    font-size: 16px;
++    margin-top: 20px;
++}
++
++/* Player Subtitle Slider */
++.player-slider-container {
++    display: flex;
++    align-items: center;
++    gap: 15px;
++    flex: 1;
++    justify-content: flex-end;
++}
++
++.player-slider-track {
++    width: 150px;
++    height: 8px;
++    background: rgba(255, 255, 255, 0.2);
++    border-radius: 4px;
++    overflow: hidden;
++}
++
++.player-slider-fill {
++    height: 100%;
++    background: #00a4dc;
++    border-radius: 4px;
++    transition: width 0.1s ease;
++}
++
++.subtitle-setting-slider.focused .player-slider-track,
++.subtitle-setting-slider:focus .player-slider-track {
++    outline: 2px solid #00a4dc;
++}
++
++/* Subtitle Offset Modal Specifics */
++.subtitle-offset-content {
++    display: flex;
++    flex-direction: column;
++    align-items: center;
++    padding: 30px 20px;
++    gap: 30px;
++}
++
++.offset-value-display {
++    font-size: 64px;
++    font-weight: 700;
++    color: #fff;
++    text-align: center;
++    font-variant-numeric: tabular-nums;
++}
++
++.offset-slider-container {
++    width: 100%;
++    margin-top: 10px;
++    justify-content: center;
++}
++
++.offset-slider-container .player-slider-track {
++    width: 80%;
++    height: 12px;
++    background: rgba(255, 255, 255, 0.2);
++    position: relative;
++    border-radius: 6px;
++}
++
++.offset-slider-container .player-slider-fill {
++    transition: width 0.05s linear;
++    /* Faster transition for responsive feeling */
++    border-radius: 6px;
++}
++
++.slider-center-marker {
++    position: absolute;
++    left: 50%;
++    top: -4px;
++    bottom: -4px;
++    width: 2px;
++    background: rgba(255, 255, 255, 0.5);
++    z-index: 2;
++    transform: translateX(-50%);
++}
++
++.offset-labels {
++    display: flex;
++    justify-content: space-between;
++    width: 80%;
++    color: rgba(255, 255, 255, 0.5);
++    font-size: 18px;
++    margin-top: -15px;
++    /* Pull closer to slider */
++}
++
++/* Modal Stacking */
++.track-modal.transparent-overlay {
++    background: rgba(0, 0, 0, 0.4);
++    /* Lighter overlay when stacking */
++    backdrop-filter: blur(2px);
++}
++
++.modal-header-btn.active {
++    background: rgba(0, 164, 220, 0.3);
++    border-color: #00a4dc;
++}
++
++.modal-header-btn.active .modal-header-icon {
++    filter: brightness(1);
++    /* Ensure icon stays bright */
+ }
+\ No newline at end of file
+diff --git a/details.html b/details.html
+index c4eee6e..40cce3a 100644
+--- a/details.html
++++ b/details.html
+@@ -27,9 +27,7 @@
+       <script src="js/details.js" charset="utf-8"></script>
+    </head>
+    <body>
+-      Navbar will be loaded by navbar.js -->
+-
+-      <!-- 
++    <!-- Navbar will be loaded by navbar.js -->
+     <!-- Backdrop Background -->
+       <div class="backdrop-container">
+          <img id="backdropImage" class="backdrop-image" src="" alt="" />
+diff --git a/favorites.html b/favorites.html
+index ff94c68..30bcc69 100644
+--- a/favorites.html
++++ b/favorites.html
+@@ -1,167 +1,167 @@
+ <!DOCTYPE html>
+ <html lang="en">
+-   <head>
+-      <meta charset="UTF-8" />
+-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-      <title>Favorites - Jellyfin</title>
+-      <link rel="stylesheet" href="css/legacy-compat.css" />
+-      <link rel="stylesheet" href="css/navbar.css" />
+-      <link rel="stylesheet" href="css/browse.css" />
+-      <style>
+-         body {
+-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+-            margin: 0;
+-            padding: 0;
+-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+-            color: white;
+-            overflow-x: hidden;
+-         }
+-
+-         .content-container {
+-            margin-top: 120px;
+-            padding: 0 48px 48px;
+-         }
+-
+-         .page-title {
+-            font-size: 48px;
+-            font-weight: 600;
+-            margin-bottom: 40px;
+-            color: white;
+-         }
+-
+-         .loading-container {
+-            display: flex;
+-            justify-content: center;
+-            align-items: center;
+-            min-height: 400px;
+-         }
+-
+-         .loading-spinner {
+-            width: 60px;
+-            height: 60px;
+-            border: 4px solid rgba(255, 255, 255, 0.1);
+-            border-top: 4px solid #00a4dc;
+-            border-radius: 50%;
+-            animation: spin 1s linear infinite;
+-         }
+-
+-         @keyframes spin {
+-            0% {
+-               transform: rotate(0deg);
+-            }
+-            100% {
+-               transform: rotate(360deg);
+-            }
+-         }
+-
+-         .error-message {
+-            text-align: center;
+-            padding: 40px;
+-            font-size: 24px;
+-            color: rgba(255, 255, 255, 0.6);
+-         }
+-
+-         .favorites-row {
+-            margin-bottom: 48px;
+-         }
+-
+-         .favorites-row-title {
+-            font-size: 32px;
+-            font-weight: 600;
+-            margin-bottom: 20px;
+-            color: white;
+-         }
+-
+-         .items-container {
+-            display: flex;
+-            gap: 16px;
+-            overflow: visible;
+-            padding-bottom: 20px;
+-            padding-top: 20px;
+-            scroll-behavior: smooth;
+-            scrollbar-width: none;
+-         }
+-
+-         .items-container::-webkit-scrollbar {
+-            display: none;
+-         }
+-
+-         .item-card {
+-            flex: 0 0 200px;
+-            position: relative;
+-            cursor: pointer;
+-            transition: transform 0.2s, box-shadow 0.2s;
+-         }
+-
+-         .item-card:focus {
+-            outline: none;
+-            transform: scale(1.1);
+-            z-index: 10;
+-         }
+-
+-         .item-card:hover {
+-            transform: scale(1.1);
+-            z-index: 10;
+-         }
+-
+-         .item-poster {
+-            width: 200px;
+-            height: 300px;
+-            object-fit: cover;
+-            border-radius: 8px;
+-            background: rgba(255, 255, 255, 0.05);
+-         }
+-
+-         .item-info {
+-            margin-top: 12px;
+-         }
+-
+-         .item-name {
+-            font-size: 18px;
+-            font-weight: 500;
+-            margin-bottom: 4px;
+-            white-space: nowrap;
+-            overflow: hidden;
+-            text-overflow: ellipsis;
+-         }
+-
+-         .item-year {
+-            font-size: 14px;
+-            color: rgba(255, 255, 255, 0.6);
+-         }
+-      </style>
+-   </head>
+-   <body>
+-      <!-- Navbar will be loaded here -->
+-
+-      <div class="content-container">
+-         <h1 class="page-title">Favorites</h1>
+-
+-         <div class="loading-container" id="loadingContainer">
+-            <div class="loading-spinner"></div>
+-         </div>
+-
+-         <div id="favoritesContainer"></div>
+ 
+-         <div
+-            class="error-message"
+-            id="errorMessage"
+-            style="display: none"
+-         ></div>
++<head>
++   <meta charset="UTF-8" />
++   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++   <title>Favorites - Jellyfin</title>
++   <link rel="stylesheet" href="css/legacy-compat.css" />
++   <link rel="stylesheet" href="css/navbar.css" />
++   <link rel="stylesheet" href="css/browse.css" />
++   <style>
++      body {
++         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
++         margin: 0;
++         padding: 0;
++         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
++         color: white;
++         overflow-x: hidden;
++      }
++
++      .content-container {
++         margin-top: 120px;
++         padding: 0 48px 48px;
++      }
++
++      .page-title {
++         font-size: 48px;
++         font-weight: 600;
++         margin-bottom: 40px;
++         color: white;
++      }
++
++      .loading-container {
++         display: flex;
++         justify-content: center;
++         align-items: center;
++         min-height: 400px;
++      }
++
++      .loading-spinner {
++         width: 60px;
++         height: 60px;
++         border: 4px solid rgba(255, 255, 255, 0.1);
++         border-top: 4px solid #00a4dc;
++         border-radius: 50%;
++         animation: spin 1s linear infinite;
++      }
++
++      @keyframes spin {
++         0% {
++            transform: rotate(0deg);
++         }
++
++         100% {
++            transform: rotate(360deg);
++         }
++      }
++
++      .error-message {
++         text-align: center;
++         padding: 40px;
++         font-size: 24px;
++         color: rgba(255, 255, 255, 0.6);
++      }
++
++      .favorites-row {
++         margin-bottom: 48px;
++      }
++
++      .favorites-row-title {
++         font-size: 32px;
++         font-weight: 600;
++         margin-bottom: 20px;
++         color: white;
++      }
++
++      .items-container {
++         display: flex;
++         gap: 16px;
++         overflow: visible;
++         padding-bottom: 20px;
++         padding-top: 20px;
++         scroll-behavior: smooth;
++         scrollbar-width: none;
++      }
++
++      .items-container::-webkit-scrollbar {
++         display: none;
++      }
++
++      .item-card {
++         flex: 0 0 200px;
++         position: relative;
++         cursor: pointer;
++         transition: transform 0.2s;
++      }
++
++      .item-card:focus {
++         outline: none;
++         transform: scale(1.1);
++         z-index: 10;
++      }
++
++      .item-card:hover {
++         transform: scale(1.1);
++         z-index: 10;
++      }
++
++      .item-poster {
++         width: 200px;
++         height: 300px;
++         object-fit: cover;
++         border-radius: 8px;
++         background: rgba(255, 255, 255, 0.05);
++      }
++
++      .item-info {
++         margin-top: 12px;
++      }
++
++      .item-name {
++         font-size: 18px;
++         font-weight: 500;
++         margin-bottom: 4px;
++         white-space: nowrap;
++         overflow: hidden;
++         text-overflow: ellipsis;
++      }
++
++      .item-year {
++         font-size: 14px;
++         color: rgba(255, 255, 255, 0.6);
++      }
++   </style>
++</head>
++
++<body>
++   <!-- Navbar will be loaded here -->
++
++   <div class="content-container">
++      <h1 class="page-title">Favorites</h1>
++
++      <div class="loading-container" id="loadingContainer">
++         <div class="loading-spinner"></div>
+       </div>
+ 
+-      <script src="js/app-version.js"></script>
+-      <script src="js/tizen-adapter.js"></script>
+-      <script src="js/polyfills.js"></script>
+-      <script src="js/storage.js"></script>
+-      <script src="js/accent-color.js"></script>
+-      <script src="js/ajax.js"></script>
+-      <script src="js/keycodes.js"></script>
+-      <script src="js/image-helper.js"></script>
+-      <script src="js/jellyfin-api.js"></script>
+-      <script src="js/multi-server.js" charset="utf-8"></script>
+-      <script src="js/connection-pool.js" charset="utf-8"></script>
+-      <script src="js/navbar.js"></script>
+-      <script src="js/favorites.js"></script>
+-   </body>
+-</html>
++      <div id="favoritesContainer"></div>
++
++      <div class="error-message" id="errorMessage" style="display: none"></div>
++   </div>
++
++   <script src="js/app-version.js"></script>
++   <script src="js/tizen-adapter.js"></script>
++   <script src="js/polyfills.js"></script>
++   <script src="js/storage.js"></script>
++   <script src="js/accent-color.js"></script>
++   <script src="js/ajax.js"></script>
++   <script src="js/keycodes.js"></script>
++   <script src="js/image-helper.js"></script>
++   <script src="js/jellyfin-api.js"></script>
++   <script src="js/multi-server.js" charset="utf-8"></script>
++   <script src="js/connection-pool.js" charset="utf-8"></script>
++   <script src="js/navbar.js"></script>
++   <script src="js/favorites.js"></script>
++</body>
++
++</html>
+\ No newline at end of file
+diff --git a/genres.html b/genres.html
+index 797f69d..c7c6bc7 100644
+--- a/genres.html
++++ b/genres.html
+@@ -1,166 +1,166 @@
+ <!DOCTYPE html>
+ <html lang="en">
+-   <head>
+-      <meta charset="UTF-8" />
+-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-      <title>Genres - Jellyfin</title>
+-      <link rel="stylesheet" href="css/legacy-compat.css" />
+-      <link rel="stylesheet" href="css/navbar.css" />
+-      <link rel="stylesheet" href="css/browse.css" />
+-      <style>
+-         body {
+-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+-            margin: 0;
+-            padding: 0;
+-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+-            color: white;
+-            overflow-x: hidden;
+-         }
+-
+-         .content-container {
+-            margin-top: 120px;
+-            padding: 0 48px 48px;
+-         }
+-
+-         .page-title {
+-            font-size: 48px;
+-            font-weight: 600;
+-            margin-bottom: 40px;
+-            color: white;
+-         }
+-
+-         .loading-container {
+-            display: flex;
+-            justify-content: center;
+-            align-items: center;
+-            min-height: 400px;
+-         }
+-
+-         .loading-spinner {
+-            width: 60px;
+-            height: 60px;
+-            border: 4px solid rgba(255, 255, 255, 0.1);
+-            border-top: 4px solid #00a4dc;
+-            border-radius: 50%;
+-            animation: spin 1s linear infinite;
+-         }
+-
+-         @keyframes spin {
+-            0% {
+-               transform: rotate(0deg);
+-            }
+-            100% {
+-               transform: rotate(360deg);
+-            }
+-         }
+-
+-         .error-message {
+-            text-align: center;
+-            padding: 40px;
+-            font-size: 24px;
+-            color: rgba(255, 255, 255, 0.6);
+-         }
+-
+-         .genre-row {
+-            margin-bottom: 48px;
+-         }
+-
+-         .genre-row-title {
+-            font-size: 32px;
+-            font-weight: 600;
+-            margin-bottom: 20px;
+-            color: white;
+-         }
+-
+-         .items-container {
+-            display: flex;
+-            gap: 16px;
+-            overflow: visible;
+-            padding-bottom: 20px;
+-            padding-top: 20px;
+-            scroll-behavior: smooth;
+-            scrollbar-width: none;
+-         }
+-
+-         .items-container::-webkit-scrollbar {
+-            display: none;
+-         }
+-
+-         .item-card {
+-            flex: 0 0 200px;
+-            position: relative;
+-            cursor: pointer;
+-            transition: transform 0.2s, box-shadow 0.2s;
+-         }
+-
+-         .item-card:focus {
+-            outline: none;
+-            transform: scale(1.1);
+-            z-index: 10;
+-         }
+ 
+-         .item-card:hover {
+-            transform: scale(1.1);
+-            z-index: 10;
+-         }
++<head>
++   <meta charset="UTF-8" />
++   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++   <title>Genres - Jellyfin</title>
++   <link rel="stylesheet" href="css/legacy-compat.css" />
++   <link rel="stylesheet" href="css/navbar.css" />
++   <link rel="stylesheet" href="css/browse.css" />
++   <style>
++      body {
++         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
++         margin: 0;
++         padding: 0;
++         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
++         color: white;
++         overflow-x: hidden;
++      }
++
++      .content-container {
++         margin-top: 120px;
++         padding: 0 48px 48px;
++      }
++
++      .page-title {
++         font-size: 48px;
++         font-weight: 600;
++         margin-bottom: 40px;
++         color: white;
++      }
++
++      .loading-container {
++         display: flex;
++         justify-content: center;
++         align-items: center;
++         min-height: 400px;
++      }
++
++      .loading-spinner {
++         width: 60px;
++         height: 60px;
++         border: 4px solid rgba(255, 255, 255, 0.1);
++         border-top: 4px solid #00a4dc;
++         border-radius: 50%;
++         animation: spin 1s linear infinite;
++      }
++
++      @keyframes spin {
++         0% {
++            transform: rotate(0deg);
++         }
++
++         100% {
++            transform: rotate(360deg);
++         }
++      }
++
++      .error-message {
++         text-align: center;
++         padding: 40px;
++         font-size: 24px;
++         color: rgba(255, 255, 255, 0.6);
++      }
++
++      .genre-row {
++         margin-bottom: 48px;
++      }
++
++      .genre-row-title {
++         font-size: 32px;
++         font-weight: 600;
++         margin-bottom: 20px;
++         color: white;
++      }
++
++      .items-container {
++         display: flex;
++         gap: 16px;
++         overflow: visible;
++         padding-bottom: 20px;
++         padding-top: 20px;
++         scroll-behavior: smooth;
++         scrollbar-width: none;
++      }
++
++      .items-container::-webkit-scrollbar {
++         display: none;
++      }
++
++      .item-card {
++         flex: 0 0 200px;
++         position: relative;
++         cursor: pointer;
++         transition: transform 0.2s;
++      }
++
++      .item-card:focus {
++         outline: none;
++         transform: scale(1.1);
++         z-index: 10;
++      }
++
++      .item-card:hover {
++         transform: scale(1.1);
++         z-index: 10;
++      }
++
++      .item-poster {
++         width: 200px;
++         height: 300px;
++         object-fit: cover;
++         border-radius: 8px;
++         background: rgba(255, 255, 255, 0.05);
++      }
++
++      .item-info {
++         margin-top: 12px;
++      }
++
++      .item-name {
++         font-size: 18px;
++         font-weight: 500;
++         margin-bottom: 4px;
++         white-space: nowrap;
++         overflow: hidden;
++         text-overflow: ellipsis;
++      }
++
++      .item-year {
++         font-size: 14px;
++         color: rgba(255, 255, 255, 0.6);
++      }
++   </style>
++</head>
++
++<body>
++   <!-- Navbar will be loaded here -->
++
++   <div class="content-container">
++      <div class="loading-container" id="loadingContainer">
++         <div class="loading-spinner"></div>
++      </div>
+ 
+-         .item-poster {
+-            width: 200px;
+-            height: 300px;
+-            object-fit: cover;
+-            border-radius: 8px;
+-            background: rgba(255, 255, 255, 0.05);
+-         }
++      <div id="genresContainer"></div>
+ 
+-         .item-info {
+-            margin-top: 12px;
+-         }
++      <div class="error-message" id="errorMessage" style="display: none"></div>
++   </div>
+ 
+-         .item-name {
+-            font-size: 18px;
+-            font-weight: 500;
+-            margin-bottom: 4px;
+-            white-space: nowrap;
+-            overflow: hidden;
+-            text-overflow: ellipsis;
+-         }
++   <script src="js/app-version.js"></script>
++   <script src="js/tizen-adapter.js"></script>
++   <script src="js/polyfills.js"></script>
++   <script src="js/storage.js"></script>
++   <script src="js/accent-color.js"></script>
++   <script src="js/ajax.js"></script>
++   <script src="js/keycodes.js"></script>
++   <script src="js/image-helper.js"></script>
++   <script src="js/jellyfin-api.js"></script>
++   <script src="js/multi-server.js" charset="utf-8"></script>
++   <script src="js/connection-pool.js" charset="utf-8"></script>
+ 
+-         .item-year {
+-            font-size: 14px;
+-            color: rgba(255, 255, 255, 0.6);
+-         }
+-      </style>
+-   </head>
+-   <body>
+-      <!-- Navbar will be loaded here -->
+-
+-      <div class="content-container">
+-         <div class="loading-container" id="loadingContainer">
+-            <div class="loading-spinner"></div>
+-         </div>
+-
+-         <div id="genresContainer"></div>
+-
+-         <div
+-            class="error-message"
+-            id="errorMessage"
+-            style="display: none"
+-         ></div>
+-      </div>
++   <script src="js/navbar.js"></script>
++   <script src="js/genres.js"></script>
++</body>
+ 
+-      <script src="js/app-version.js"></script>
+-      <script src="js/tizen-adapter.js"></script>
+-      <script src="js/polyfills.js"></script>
+-      <script src="js/storage.js"></script>
+-      <script src="js/accent-color.js"></script>
+-      <script src="js/ajax.js"></script>
+-      <script src="js/keycodes.js"></script>
+-      <script src="js/image-helper.js"></script>
+-      <script src="js/jellyfin-api.js"></script>
+-      <script src="js/multi-server.js" charset="utf-8"></script>
+-      <script src="js/connection-pool.js" charset="utf-8"></script>
+-
+-      <script src="js/navbar.js"></script>
+-      <script src="js/genres.js"></script>
+-   </body>
+-</html>
++</html>
+\ No newline at end of file
+diff --git a/js/offset_overlay_stub.js b/js/offset_overlay_stub.js
+new file mode 100644
+index 0000000..ead6bce
+--- /dev/null
++++ b/js/offset_overlay_stub.js
+@@ -0,0 +1,132 @@
++
++// ==================== Subtitle Offset Overlay ====================
++
++let subtitleOffsetState = {
++    active: false,
++    offset: 0.0,
++    focused: false // True if slider is focused, though we mainly just focus the slider container
++};
++
++/**
++ * Show the subtitle offset overlay
++ */
++function showSubtitleOffsetOverlay() {
++    console.log('[Player] Showing subtitle offset overlay');
++
++    // Close subtitle modal first
++    if (elements.subtitleModal) elements.subtitleModal.style.display = 'none';
++
++    // Show overlay
++    const overlay = document.getElementById('subtitleOffsetOverlay');
++    if (overlay) overlay.style.display = 'flex';
++
++    subtitleOffsetState.active = true;
++    activeModal = 'subtitleOffset';
++
++    // Highlight button if visible (it's hidden now, but good practice)
++    // Actually per user request: "changing the buttons color"
++    // Since the button is in the subtitle modal which is now hidden, we can't really see it.
++    // But we can ensure when we return, it's focused.
++
++    // Restore previous offset if set
++    if (window.subtitleManager) {
++        subtitleOffsetState.offset = window.subtitleManager.offset || 0;
++    }
++
++    updateSubtitleOffsetDisplay();
++
++    // Focus slider
++    // We'll focus the close button or a hidden input? 
++    // User said "window in middle... slider... close button at top left"
++    // Let's focus the "close" button first or the slider?
++    // Usually better to focus the primary action -> The slider.
++    // But div isn't naturally focusable easily without tabindex. 
++    // The HTML has tabindex on tracks, let's assume we can focus a container or handle keys globally when active.
++
++    // Let's focus the close button as a fallback anchor, but handle Left/Right for slider globally in this modal.
++    const closeBtn = document.getElementById('closeSubtitleOffsetBtn');
++    if (closeBtn) closeBtn.focus();
++}
++
++/**
++ * Hide the subtitle offset overlay
++ */
++function hideSubtitleOffsetOverlay() {
++    console.log('[Player] Hiding subtitle offset overlay');
++
++    const overlay = document.getElementById('subtitleOffsetOverlay');
++    if (overlay) overlay.style.display = 'none';
++
++    subtitleOffsetState.active = false;
++    activeModal = null; // Will likely return to subtitle modal or none?
++
++    // User usually wants to go back to where they were -> Subtitle Modal
++    showSubtitleTrackSelector();
++
++    // Focus the offset button
++    setTimeout(() => {
++        const offsetBtn = document.getElementById('subtitleOffsetBtn');
++        if (offsetBtn) offsetBtn.focus();
++    }, 100);
++}
++
++/**
++ * Update visual display of offset
++ */
++function updateSubtitleOffsetDisplay() {
++    const valueEl = document.getElementById('subtitleOffsetValue');
++    const fillEl = document.getElementById('subtitleOffsetSliderFill');
++
++    if (valueEl) {
++        const sign = subtitleOffsetState.offset > 0 ? '+' : '';
++        valueEl.textContent = `${sign}${subtitleOffsetState.offset.toFixed(1)}s`;
++    }
++
++    if (fillEl) {
++        // Map -30..30 to 0..100%
++        // Range is 60. 
++        // -30 -> 0%
++        // 0 -> 50%
++        // 30 -> 100%
++        // Pct = (Val - (-30)) / 60 * 100 = (Val + 30) / 60 * 100
++        const pct = ((subtitleOffsetState.offset + 30) / 60) * 100;
++        fillEl.style.width = `${Math.max(0, Math.min(100, pct))}%`;
++    }
++}
++
++/**
++ * Handle keys for offset overlay
++ */
++function handleSubtitleOffsetKeyDown(evt) {
++    switch (evt.keyCode) {
++        case KeyCodes.LEFT:
++            evt.preventDefault();
++            subtitleOffsetState.offset = Math.max(-30, subtitleOffsetState.offset - 0.1);
++            // Snap to 0 if close
++            if (Math.abs(subtitleOffsetState.offset) < 0.05) subtitleOffsetState.offset = 0;
++            updateSubtitleOffsetDisplay();
++            if (window.subtitleManager) window.subtitleManager.setOffset(subtitleOffsetState.offset);
++            break;
++
++        case KeyCodes.RIGHT:
++            evt.preventDefault();
++            subtitleOffsetState.offset = Math.min(30, subtitleOffsetState.offset + 0.1);
++            if (Math.abs(subtitleOffsetState.offset) < 0.05) subtitleOffsetState.offset = 0;
++            updateSubtitleOffsetDisplay();
++            if (window.subtitleManager) window.subtitleManager.setOffset(subtitleOffsetState.offset);
++            break;
++
++        case KeyCodes.BACK:
++        case KeyCodes.ESC:
++            evt.preventDefault();
++            hideSubtitleOffsetOverlay();
++            break;
++
++        case KeyCodes.ENTER:
++            // If on close button, close
++            if (document.activeElement && document.activeElement.id === 'closeSubtitleOffsetBtn') {
++                hideSubtitleOffsetOverlay();
++            }
++            break;
++    }
++}
+diff --git a/js/player.js b/js/player.js
+index f8c8432..680f86e 100644
+--- a/js/player.js
++++ b/js/player.js
+@@ -336,6 +336,9 @@ var PlayerController = (function () {
+          trickplayThumb: document.getElementById("trickplayThumb"),
+          trickplayChapterName: document.getElementById("trickplayChapterName"),
+          trickplayTime: document.getElementById("trickplayTime"),
++         // Subtitle Settings elements
++         subtitleSettingsBtn: document.getElementById("subtitleSettingsBtn"),
++         subtitleSettingsOverlay: document.getElementById("subtitleSettingsOverlay"),
+       };
+ 
+       videoPlayer = elements.videoPlayer;
+@@ -472,6 +475,16 @@ var PlayerController = (function () {
+             }
+          });
+       }
++
++      // Subtitle Settings button (in subtitle modal header)
++      if (elements.subtitleSettingsBtn) {
++         elements.subtitleSettingsBtn.addEventListener("click", showSubtitleSettingsOverlay);
++      }
++
++      // Subtitle Offset button
++      if (elements.subtitleOffsetBtn) {
++         elements.subtitleOffsetBtn.addEventListener("click", showSubtitleOffsetOverlay);
++      }
+    }
+ 
+    async function ensurePlayerAdapter(options = {}) {
+@@ -762,6 +775,18 @@ var PlayerController = (function () {
+          return;
+       }
+ 
++      // Special handling for subtitle settings overlay
++      if (activeModal === "subtitleSettings") {
++         handleSubtitleSettingsKeyDown(evt);
++         return;
++      }
++
++      // Special handling for subtitle offset overlay
++      if (activeModal === "subtitleOffset") {
++         handleSubtitleOffsetKeyDown(evt);
++         return;
++      }
++
+       // Standard modal navigation for other modals
+       currentModalFocusIndex = TrackSelector.handleModalKeyDown(
+          evt,
+@@ -2325,6 +2350,11 @@ var PlayerController = (function () {
+          if (icon) icon.src = "assets/pause.png";
+       }
+       showControls();
++
++      // Ensure focus if not already on a control
++      if (elements.playPauseBtn && document.activeElement && !document.activeElement.classList.contains("control-btn")) {
++         elements.playPauseBtn.focus();
++      }
+    }
+ 
+    /**
+@@ -2347,6 +2377,11 @@ var PlayerController = (function () {
+          if (icon) icon.src = "assets/play.png";
+       }
+       showControls();
++
++      // Ensure focus if not already on a control
++      if (elements.playPauseBtn && document.activeElement && !document.activeElement.classList.contains("control-btn")) {
++         elements.playPauseBtn.focus();
++      }
+    }
+ 
+    /**
+@@ -3252,10 +3287,64 @@ var PlayerController = (function () {
+          selectSubtitleTrack
+       );
+ 
++      // Add settings button at the START
++      if (elements.subtitleSettingsBtn) {
++         modalFocusableItems.unshift(elements.subtitleSettingsBtn);
++
++         // Add shortcut: DOWN from settings returns to last focused item (or selected)
++         elements.subtitleSettingsBtn.addEventListener('keydown', function (evt) {
++            if (evt.keyCode === KeyCodes.DOWN) {
++               evt.preventDefault();
++               evt.stopPropagation();
++
++               // Default to currently selected track (+2 offset logic from below: 1 for settings, 1 for "None")
++               // But usually we want the last focused one. 
++               // For now let's reuse currentModalFocusIndex logic if we can, or just go to current selection.
++               var targetIndex = currentSubtitleIndex + 2;
++               if (targetIndex < 1) targetIndex = 1; // "None" or first track
++
++               // If we have a stored last index, use it (optional enhancement, but user asked for "return to previous focus")
++               // Since we don't track "last focused" separately easily without global state, 
++               // valid behavior is returning to the *currently selected* track, or the top if none.
++               // However, the user said "previous focus". 
++               // Let's rely on currentModalFocusIndex being updated when we navigate *to* the settings button.
++
++               currentModalFocusIndex = targetIndex;
++               if (modalFocusableItems[currentModalFocusIndex]) {
++                  modalFocusableItems[currentModalFocusIndex].focus();
++                  modalFocusableItems[currentModalFocusIndex].classList.add("focused");
++               }
++            }
++         });
++      }
++
++      // Add shortcut: RIGHT from any track item -> focus settings
++      modalFocusableItems.forEach(function (item, index) {
++         if (item === elements.subtitleSettingsBtn) return;
++
++         item.addEventListener('keydown', function (evt) {
++            if (evt.keyCode === KeyCodes.RIGHT) {
++               // Only if settings button exists
++               if (elements.subtitleSettingsBtn) {
++                  evt.preventDefault();
++                  evt.stopPropagation();
++
++                  // Focus settings
++                  currentModalFocusIndex = 0; // Settings is at 0
++                  elements.subtitleSettingsBtn.focus();
++               }
++            }
++         });
++      });
++
+       modalOpenerButton = elements.subtitleBtn; // Store the button that opened this modal
+       activeModal = "subtitle";
+       elements.subtitleModal.style.display = "flex";
+-      currentModalFocusIndex = currentSubtitleIndex + 1; // +1 because of "None" option
++
++      // +1 for "None" option, +1 for settings button at start = +2
++      currentModalFocusIndex = currentSubtitleIndex + 2;
++      if (currentModalFocusIndex < 1) currentModalFocusIndex = 1; // At least start at "None"
++
+       if (modalFocusableItems[currentModalFocusIndex]) {
+          modalFocusableItems[currentModalFocusIndex].focus();
+       }
+@@ -3265,6 +3354,398 @@ var PlayerController = (function () {
+     * Select audio track by index
+     * @param {number} index - Track index
+     */
++
++   // ==================== In-Player Subtitle Settings ====================
++
++   // State for in-player subtitle settings
++   var subtitleSettingsState = {
++      active: false,
++      focusIndex: 0,
++      settings: null // Loaded from storage
++   };
++
++   /**
++    * Show the in-player subtitle settings overlay
++    */
++   function showSubtitleSettingsOverlay() {
++      console.log('[Player] Showing subtitle settings overlay');
++
++      // Close subtitle modal first
++      elements.subtitleModal.style.display = 'none';
++
++      // Load current settings from storage
++      loadSubtitleSettingsForPlayer();
++
++      // Show overlay
++      elements.subtitleSettingsOverlay.style.display = 'flex';
++      subtitleSettingsState.active = true;
++      subtitleSettingsState.focusIndex = 0;
++      activeModal = 'subtitleSettings';
++
++      // Focus first item
++      var items = elements.subtitleSettingsOverlay.querySelectorAll('.subtitle-setting-item');
++      if (items[0]) items[0].focus();
++
++      updateSubtitleSettingsDisplay();
++   }
++
++   /**
++    * Hide the subtitle settings overlay and save changes
++    */
++   function hideSubtitleSettingsOverlay() {
++      console.log('[Player] Hiding subtitle settings overlay');
++      elements.subtitleSettingsOverlay.style.display = 'none';
++      subtitleSettingsState.active = false;
++      activeModal = null;
++
++      // Re-apply settings to SubtitleManager
++      if (window.subtitleManager) {
++         window.subtitleManager.loadSettings();
++         window.subtitleManager.applyStyles();
++      }
++
++      // WORKAROUND: Deselect and reselect the current subtitle track to force refresh
++      // This triggers a full reload of the subtitle with new settings
++      if (currentSubtitleIndex >= 0) {
++         console.log('[Player] Forcing subtitle refresh by toggling track');
++         var savedIndex = currentSubtitleIndex;
++
++         // Deselect (set to none)
++         selectSubtitleTrack(-1);
++
++         // Reselect after a small delay to ensure deselection completes
++         setTimeout(function () {
++            selectSubtitleTrack(savedIndex);
++         }, 100);
++      }
++
++      // Return focus to subtitle button
++      if (elements.subtitleBtn) elements.subtitleBtn.focus();
++   }
++
++   /**
++    * Load subtitle settings from storage for in-player editing
++    */
++   function loadSubtitleSettingsForPlayer() {
++      try {
++         var stored = window.storage.getUserPreference('jellyfin_settings', null);
++         if (stored) {
++            subtitleSettingsState.settings = JSON.parse(stored);
++         } else {
++            subtitleSettingsState.settings = {};
++         }
++      } catch (e) {
++         console.error('[Player] Error loading subtitle settings:', e);
++         subtitleSettingsState.settings = {};
++      }
++   }
++
++   /**
++    * Save subtitle settings to storage
++    */
++   function saveSubtitleSettingsFromPlayer() {
++      try {
++         window.storage.setUserPreference('jellyfin_settings', JSON.stringify(subtitleSettingsState.settings));
++      } catch (e) {
++         console.error('[Player] Error saving subtitle settings:', e);
++      }
++   }
++
++   /**
++    * Update the subtitle settings overlay display values
++    */
++   function updateSubtitleSettingsDisplay() {
++      var s = subtitleSettingsState.settings;
++
++      var sizeEl = document.getElementById('playerSubSize');
++      var colorEl = document.getElementById('playerSubColor');
++      var opacityEl = document.getElementById('playerSubOpacity');
++      var positionEl = document.getElementById('playerSubPosition');
++      var backgroundEl = document.getElementById('playerSubBackground');
++      var absolutePositionItem = document.getElementById('playerAbsolutePositionItem');
++      var absolutePositionEl = document.getElementById('playerSubAbsolutePosition');
++      var absoluteSliderFill = document.getElementById('playerAbsoluteSliderFill');
++
++      // Size
++      var sizeLabels = { smaller: 'Smaller', small: 'Small', medium: 'Medium', large: 'Large', extralarge: 'Extra Large' };
++      if (sizeEl) sizeEl.textContent = sizeLabels[s.subtitleSize || 'medium'] || 'Medium';
++
++      // Color
++      var colorLabels = { '#ffffff': 'White', '#ffff00': 'Yellow', '#000000': 'Black', '#00ffff': 'Cyan', '#0000ff': 'Blue', '#808080': 'Gray', '#404040': 'Dark Gray' };
++      if (colorEl) colorEl.textContent = colorLabels[s.subtitleColor || '#ffffff'] || 'White';
++
++      // Opacity
++      if (opacityEl) opacityEl.textContent = (s.subtitleOpacity !== undefined ? s.subtitleOpacity : 100) + '%';
++      var opacitySliderFill = document.getElementById('playerOpacitySliderFill');
++      if (opacitySliderFill) opacitySliderFill.style.width = (s.subtitleOpacity !== undefined ? s.subtitleOpacity : 100) + '%';
++
++      // Position
++      var posLabels = { bottom: 'Bottom', 'bottom-low': 'Bottom (Low)', 'bottom-extra-low': 'Bottom (Extra Low)', 'bottom-high': 'Bottom (High)', top: 'Top', middle: 'Middle', absolute: 'Absolute' };
++      if (positionEl) positionEl.textContent = posLabels[s.subtitlePosition || 'bottom'] || 'Bottom';
++
++      // Show/hide absolute position slider based on position selection
++      if (absolutePositionItem) {
++         if (s.subtitlePosition === 'absolute') {
++            absolutePositionItem.style.display = 'flex';
++            var absValue = parseInt(s.subtitlePositionAbsolute) || 90;
++            if (absolutePositionEl) absolutePositionEl.textContent = absValue + '%';
++            if (absoluteSliderFill) absoluteSliderFill.style.width = absValue + '%';
++         } else {
++            absolutePositionItem.style.display = 'none';
++         }
++      }
++
++      // Background
++      var bgLabels = { 'drop-shadow': 'Drop Shadow', background: 'Background', none: 'None' };
++      if (backgroundEl) backgroundEl.textContent = bgLabels[s.subtitleBackground || 'drop-shadow'] || 'Drop Shadow';
++   }
++
++   /**
++    * Handle keyboard navigation within subtitle settings overlay
++    * @param {KeyboardEvent} evt
++    */
++   function handleSubtitleSettingsKeyDown(evt) {
++      var items = elements.subtitleSettingsOverlay.querySelectorAll('.subtitle-setting-item');
++
++      switch (evt.keyCode) {
++         case KeyCodes.UP:
++            evt.preventDefault();
++            if (subtitleSettingsState.focusIndex > 0) {
++               subtitleSettingsState.focusIndex--;
++               items[subtitleSettingsState.focusIndex].focus();
++            }
++            break;
++
++         case KeyCodes.DOWN:
++            evt.preventDefault();
++            if (subtitleSettingsState.focusIndex < items.length - 1) {
++               subtitleSettingsState.focusIndex++;
++               items[subtitleSettingsState.focusIndex].focus();
++            }
++            break;
++
++         case KeyCodes.ENTER:
++         case KeyCodes.RIGHT:
++            evt.preventDefault();
++            cycleSubtitleSetting(items[subtitleSettingsState.focusIndex].dataset.setting, 1);
++            break;
++
++         case KeyCodes.LEFT:
++            evt.preventDefault();
++            cycleSubtitleSetting(items[subtitleSettingsState.focusIndex].dataset.setting, -1);
++            break;
++
++         case KeyCodes.BACK:
++         case KeyCodes.ESC:
++            evt.preventDefault();
++            hideSubtitleSettingsOverlay();
++            break;
++      }
++   }
++
++   /**
++    * Cycle through values for a subtitle setting
++    * @param {string} settingName - The setting to cycle
++    * @param {number} direction - 1 for forward, -1 for backward
++    */
++   function cycleSubtitleSetting(settingName, direction) {
++      var s = subtitleSettingsState.settings;
++
++      switch (settingName) {
++         case 'size':
++            var sizes = ['smaller', 'small', 'medium', 'large', 'extralarge'];
++            var sizeIdx = sizes.indexOf(s.subtitleSize || 'medium');
++            sizeIdx = (sizeIdx + direction + sizes.length) % sizes.length;
++            s.subtitleSize = sizes[sizeIdx];
++            break;
++
++         case 'color':
++            var colors = ['#ffffff', '#ffff00', '#000000', '#00ffff', '#0000ff', '#808080', '#404040'];
++            var colorIdx = colors.indexOf(s.subtitleColor || '#ffffff');
++            colorIdx = (colorIdx + direction + colors.length) % colors.length;
++            s.subtitleColor = colors[colorIdx];
++            break;
++
++         case 'opacity':
++            // Slider: adjust value by step of 5
++            var val = parseInt(s.subtitleOpacity);
++            if (isNaN(val)) val = 100;
++            val = val + (direction * 5);
++            val = Math.max(0, Math.min(100, val));
++            s.subtitleOpacity = val;
++            break;
++
++         case 'position':
++            var positions = ['bottom', 'bottom-low', 'bottom-extra-low', 'bottom-high', 'top', 'middle', 'absolute'];
++            var posIdx = positions.indexOf(s.subtitlePosition || 'bottom');
++            posIdx = (posIdx + direction + positions.length) % positions.length;
++            s.subtitlePosition = positions[posIdx];
++            break;
++
++         case 'absolutePosition':
++            // Slider: adjust value by step
++            var absVal = parseInt(s.subtitlePositionAbsolute) || 90;
++            absVal = absVal + (direction * 1); // Step of 1
++            absVal = Math.max(0, Math.min(100, absVal));
++            s.subtitlePositionAbsolute = absVal;
++            break;
++
++         case 'background':
++            var bgs = ['drop-shadow', 'background', 'none'];
++            var bgIdx = bgs.indexOf(s.subtitleBackground || 'drop-shadow');
++            bgIdx = (bgIdx + direction + bgs.length) % bgs.length;
++            s.subtitleBackground = bgs[bgIdx];
++            break;
++      }
++
++      // Save and update
++      saveSubtitleSettingsFromPlayer();
++      updateSubtitleSettingsDisplay();
++
++      // Apply live to SubtitleManager
++      if (window.subtitleManager) {
++         window.subtitleManager.loadSettings();
++         window.subtitleManager.applyStyles();
++      }
++   }
++
++   // ==================== Subtitle Offset Overlay ====================
++
++   let subtitleOffsetState = {
++      active: false,
++      offset: 0.0
++   };
++
++   /**
++    * Show the subtitle offset overlay
++    */
++   function showSubtitleOffsetOverlay() {
++      console.log('[Player] Showing subtitle offset overlay');
++
++      // Keep subtitle modal open behind it (visual stacking)
++      // if (elements.subtitleModal) elements.subtitleModal.style.display = 'none';
++
++      // Show overlay with transparent background
++      const overlay = document.getElementById('subtitleOffsetOverlay');
++      if (overlay) {
++         overlay.style.display = 'flex';
++         overlay.classList.add('transparent-overlay');
++      }
++
++      // Highlight the offset button
++      if (elements.subtitleOffsetBtn) {
++         elements.subtitleOffsetBtn.classList.add('active');
++      }
++
++      subtitleOffsetState.active = true;
++      activeModal = 'subtitleOffset';
++
++      // Restore previous offset if set
++      if (window.subtitleManager) {
++         subtitleOffsetState.offset = window.subtitleManager.offset || 0;
++      }
++
++      updateSubtitleOffsetDisplay();
++
++      // Focus close button initially
++      const closeBtn = document.getElementById('closeSubtitleOffsetBtn');
++      if (closeBtn) closeBtn.focus();
++   }
++
++   /**
++    * Hide the subtitle offset overlay
++    */
++   function hideSubtitleOffsetOverlay() {
++      console.log('[Player] Hiding subtitle offset overlay');
++
++      const overlay = document.getElementById('subtitleOffsetOverlay');
++      if (overlay) {
++         overlay.style.display = 'none';
++         overlay.classList.remove('transparent-overlay');
++      }
++
++      // Remove highlight
++      if (elements.subtitleOffsetBtn) {
++         elements.subtitleOffsetBtn.classList.remove('active');
++      }
++
++      subtitleOffsetState.active = false;
++      activeModal = null;
++
++      // Check if subtitle modal is still visible
++      if (elements.subtitleModal && elements.subtitleModal.style.display !== 'none') {
++         // Return control to subtitle modal
++         activeModal = 'subtitle';
++      } else {
++         // Fallback
++         showSubtitleTrackSelector();
++      }
++
++      // Focus the offset button
++      setTimeout(() => {
++         const offsetBtn = document.getElementById('subtitleOffsetBtn');
++         if (offsetBtn) offsetBtn.focus();
++      }, 100);
++   }
++
++   /**
++    * Update visual display of offset
++    */
++   function updateSubtitleOffsetDisplay() {
++      const valueEl = document.getElementById('subtitleOffsetValue');
++      const fillEl = document.getElementById('subtitleOffsetSliderFill');
++
++      if (valueEl) {
++         const sign = subtitleOffsetState.offset > 0 ? '+' : '';
++         valueEl.textContent = `${sign}${subtitleOffsetState.offset.toFixed(1)}s`;
++      }
++
++      if (fillEl) {
++         // Map -30..30 to 0..100%
++         // Range is 60. -30 -> 0%, 0 -> 50%, 30 -> 100%
++         const pct = ((subtitleOffsetState.offset + 30) / 60) * 100;
++         fillEl.style.width = `${Math.max(0, Math.min(100, pct))}%`;
++      }
++   }
++
++   /**
++    * Handle keys for offset overlay
++    */
++   function handleSubtitleOffsetKeyDown(evt) {
++      switch (evt.keyCode) {
++         case KeyCodes.LEFT:
++            evt.preventDefault();
++            subtitleOffsetState.offset = Math.max(-30, subtitleOffsetState.offset - 0.1);
++            if (Math.abs(subtitleOffsetState.offset) < 0.05) subtitleOffsetState.offset = 0;
++            updateSubtitleOffsetDisplay();
++            if (window.subtitleManager) window.subtitleManager.setOffset(subtitleOffsetState.offset);
++            break;
++
++         case KeyCodes.RIGHT:
++            evt.preventDefault();
++            subtitleOffsetState.offset = Math.min(30, subtitleOffsetState.offset + 0.1);
++            if (Math.abs(subtitleOffsetState.offset) < 0.05) subtitleOffsetState.offset = 0;
++            updateSubtitleOffsetDisplay();
++            if (window.subtitleManager) window.subtitleManager.setOffset(subtitleOffsetState.offset);
++            break;
++
++         case KeyCodes.BACK:
++         case KeyCodes.ESC:
++            evt.preventDefault();
++            hideSubtitleOffsetOverlay();
++            break;
++
++         case KeyCodes.ENTER:
++            // If on close button, close
++            if (document.activeElement && document.activeElement.id === 'closeSubtitleOffsetBtn') {
++               hideSubtitleOffsetOverlay();
++            }
++            break;
++      }
++   }
++
++   // ==================== Track Selection Functions ====================
++
+    function selectAudioTrack(index) {
+       console.log("[Player] Selecting audio track:", index);
+ 
+diff --git a/js/settings.js b/js/settings.js
+index bad4a7d..10e6829 100644
+--- a/js/settings.js
++++ b/js/settings.js
+@@ -56,6 +56,8 @@ var SettingsController = (function () {
+       // Backdrop blur settings
+       backdropBlurHome: 3,
+       backdropBlurDetail: 3,
++      // Subtitle settings
++      subtitleOpacity: 100,
+       // Jellyseerr settings
+       jellyseerrEnabled: false,
+       jellyseerrUrl: "",
+@@ -343,7 +345,9 @@ var SettingsController = (function () {
+          subtitleSize: "medium",
+          subtitleColor: "#ffffff",
+          subtitlePosition: "bottom",
++         subtitlePositionAbsolute: 90,
+          subtitleBackground: "drop-shadow",
++         subtitleOpacity: 100,
+       };
+ 
+       for (var key in defaults) {
+@@ -592,17 +596,39 @@ var SettingsController = (function () {
+ 
+       var subtitleColorValue = document.getElementById("subtitleColorValue");
+       if (subtitleColorValue) {
+-         var colorMap = { "#ffffff": "White", "#ffff00": "Yellow", "#000000": "Black", "#00ffff": "Cyan", "#0000ff": "Blue" };
++         var colorMap = { "#ffffff": "White", "#ffff00": "Yellow", "#000000": "Black", "#00ffff": "Cyan", "#0000ff": "Blue", "#808080": "Gray", "#404040": "Dark Gray" };
+          subtitleColorValue.textContent = colorMap[settings.subtitleColor] || "White";
+       }
+ 
++      var subtitleOpacityValue = document.getElementById("subtitleOpacityValue");
++      if (subtitleOpacityValue) {
++         subtitleOpacityValue.textContent = (settings.subtitleOpacity || 100) + "%";
++      }
++
+       var subtitlePositionValue = document.getElementById("subtitlePositionValue");
+       if (subtitlePositionValue) {
+          var pos = settings.subtitlePosition || "bottom";
+          var displayPos = pos.charAt(0).toUpperCase() + pos.slice(1);
+          if (pos === "bottom-low") displayPos = "Bottom (Low)";
+          if (pos === "bottom-high") displayPos = "Bottom (High)";
++         if (pos === "bottom-extra-low") displayPos = "Bottom (Extra Low)";
++         if (pos === "absolute") displayPos = "Absolute";
+          subtitlePositionValue.textContent = displayPos;
++
++         // Toggle visibility of absolute position slider
++         var absItem = document.getElementById("subtitlePositionAbsoluteItem");
++         if (absItem) {
++            if (pos === "absolute") {
++               absItem.style.display = "flex";
++            } else {
++               absItem.style.display = "none";
++            }
++         }
++      }
++
++      var subtitlePositionAbsoluteValue = document.getElementById("subtitlePositionAbsoluteValue");
++      if (subtitlePositionAbsoluteValue) {
++         subtitlePositionAbsoluteValue.textContent = (settings.subtitlePositionAbsolute || 90) + "%";
+       }
+ 
+ 
+@@ -621,31 +647,42 @@ var SettingsController = (function () {
+    }
+ 
+    function updateSubtitlePreview() {
+-      var previewContainer = document.getElementById('subtitlePreviewText');
+-      if (!previewContainer) return;
++      var container = document.getElementById("subtitlePreviewContainer");
++      var text = document.getElementById("subtitlePreviewText");
++      if (!container || !text) return;
+ 
+-      // Apply styles mapping from SubtitleManager
+-      var s = previewContainer.style;
++      var s = text.style; // Manipulate text style directly
+ 
+-      // Size
+-      var sizes = {
++      // 1. Size
++      // Scale down slightly for settings preview to fit
++      var sizesVal = {
+          'smaller': '1.8em',
+          'small': '2.2em',
+          'medium': '2.8em',
+          'large': '3.6em',
+          'extralarge': '4.6em'
+       };
+-      // Scale down slightly for settings preview to fit
+-      var val = sizes[settings.subtitleSize || 'medium'] || sizes['medium'];
+-      s.fontSize = "calc(" + val + " * 0.6)";
++      var val = sizesVal[settings.subtitleSize || 'medium'] || sizesVal['medium'];
++      s.fontSize = val;
++
++      // 2. Color & Opacity
++      var opacityVal = (settings.subtitleOpacity !== undefined ? settings.subtitleOpacity : 100);
++      var hexColor = settings.subtitleColor || '#ffffff';
+ 
+-      // Color
+-      s.color = settings.subtitleColor || '#ffffff';
++      // Convert hex to rgb
++      var r = parseInt(hexColor.slice(1, 3), 16);
++      var g = parseInt(hexColor.slice(3, 5), 16);
++      var b = parseInt(hexColor.slice(5, 7), 16);
+ 
+-      // Background
++      var rgbaColor = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + (opacityVal / 100) + ')';
++      s.color = rgbaColor;
++
++      // 3. Background / Shadow
+       var bg = settings.subtitleBackground || 'drop-shadow';
++      var shadowOpacity = opacityVal / 100;
++
+       if (bg === 'drop-shadow') {
+-         s.textShadow = '0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)';
++         s.textShadow = '0px 0px 8px rgba(0, 0, 0, ' + shadowOpacity + '), 0px 0px 4px rgba(0, 0, 0, ' + shadowOpacity + ')';
+          s.background = 'none';
+       } else if (bg === 'background') {
+          s.textShadow = 'none';
+@@ -655,19 +692,36 @@ var SettingsController = (function () {
+          s.background = 'none';
+       }
+ 
+-      // Position (in preview box)
++      // 4. Position
+       var pos = settings.subtitlePosition || 'bottom';
++
++      // Reset positioning
++      s.position = 'absolute';
++      s.margin = '0';
++      s.left = '0';
++      s.right = '0';
++      s.padding = '2px 5px';
++      s.width = 'auto';
++      s.transform = 'none';
++      s.top = 'auto'; // default
++      s.bottom = 'auto'; // default
++
+       if (pos === 'top') {
+-         previewContainer.style.bottom = 'auto';
+-         previewContainer.style.top = '10px';
++         s.top = '10%';
++      } else if (pos === 'bottom') {
++         s.bottom = '10%';
++      } else if (pos === 'bottom-low') {
++         s.bottom = '2%';
++      } else if (pos === 'bottom-high') {
++         s.bottom = '20%';
++      } else if (pos === 'bottom-extra-low') {
++         s.bottom = '0px';
+       } else if (pos === 'middle') {
+-         previewContainer.style.bottom = '50%';
+-         previewContainer.style.top = 'auto';
+-         previewContainer.style.transform = 'translateY(50%)';
+-      } else {
+-         previewContainer.style.bottom = '10px';
+-         previewContainer.style.top = 'auto';
+-         previewContainer.style.transform = 'none';
++         s.top = '50%';
++         s.transform = 'translateY(-50%)';
++      } else if (pos === 'absolute') {
++         var absTop = settings.subtitlePositionAbsolute !== undefined ? settings.subtitlePositionAbsolute : 90;
++         s.top = absTop + '%';
+       }
+    }
+ 
+@@ -1148,6 +1202,18 @@ var SettingsController = (function () {
+     * @private
+     */
+    function handleContentNavigation(evt) {
++      // If in absolute slider mode, handle it specifically
++      if (focusManager.inAbsoluteSliderMode) {
++         handleAbsoluteSliderNavigation(evt);
++         return;
++      }
++
++      // If in opacity slider mode, handle it specifically
++      if (focusManager.inOpacitySliderMode) {
++         handleOpacitySliderNavigation(evt);
++         return;
++      }
++
+       // If in slider mode, handle slider navigation
+       if (focusManager.inSliderMode) {
+          handleSliderNavigation(evt);
+@@ -1433,17 +1499,22 @@ var SettingsController = (function () {
+             break;
+ 
+          case "subtitleColor":
+-            var colors = ["#ffffff", "#ffff00", "#000000", "#00ffff", "#0000ff"];
++            var colors = ["#ffffff", "#ffff00", "#000000", "#00ffff", "#0000ff", "#808080", "#404040"];
+             var currentColorIndex = colors.indexOf(settings.subtitleColor || "#ffffff");
+             var nextColorIndex = (currentColorIndex + 1) % colors.length;
+             settings.subtitleColor = colors[nextColorIndex];
++            settings.subtitleColor = colors[nextColorIndex];
+             saveSettings();
+             updateSettingValues();
+             updateSubtitlePreview();
+             break;
+ 
++         case "subtitleOpacity":
++            enterOpacitySliderMode(settings.subtitleOpacity || 100);
++            break;
++
+          case "subtitlePosition":
+-            var positions = ["bottom", "bottom-low", "bottom-high", "top", "middle"];
++            var positions = ["bottom", "bottom-low", "bottom-extra-low", "bottom-high", "top", "middle", "absolute"];
+             var currentPosIndex = positions.indexOf(settings.subtitlePosition || "bottom");
+             var nextPosIndex = (currentPosIndex + 1) % positions.length;
+             settings.subtitlePosition = positions[nextPosIndex];
+@@ -1452,6 +1523,10 @@ var SettingsController = (function () {
+             updateSubtitlePreview();
+             break;
+ 
++         case "subtitlePositionAbsolute":
++            enterAbsoluteSliderMode(settings.subtitlePositionAbsolute || 90);
++            break;
++
+          case "subtitleBackground":
+             var backgrounds = ["drop-shadow", "background", "none"];
+             var currentBgIndex = backgrounds.indexOf(settings.subtitleBackground || "drop-shadow");
+@@ -2318,12 +2393,13 @@ var SettingsController = (function () {
+    }
+ 
+    /**
+-    * Enter slider mode for blur settings
++    * Enter slider mode for settings
+     * @param {string} settingName - The setting name
+     * @param {number} currentValue - The current value
+     * @private
+     */
+    function enterSliderMode(settingName, currentValue) {
++      console.log('[Settings] enterSliderMode Name:', settingName, 'Value:', currentValue);
+       focusManager.inSliderMode = true;
+       focusManager.sliderSetting = settingName;
+ 
+@@ -2333,7 +2409,13 @@ var SettingsController = (function () {
+       if (!settingItem) return;
+ 
+       // Initialize slider with current value
+-      var percentage = (currentValue / 5) * 100;
++      var percentage = 0;
++      if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
++         percentage = currentValue; // Already 0-100
++      } else {
++         percentage = (currentValue / 5) * 100; // 0-5 mapping
++      }
++
+       var fillElement = settingItem.querySelector(".slider-fill");
+       var sliderValueDisplay = settingItem.querySelector(
+          ".slider-value-display"
+@@ -2343,7 +2425,11 @@ var SettingsController = (function () {
+          fillElement.style.width = percentage + "%";
+       }
+       if (sliderValueDisplay) {
+-         sliderValueDisplay.textContent = currentValue;
++         var suffix = "";
++         if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
++            suffix = "%";
++         }
++         sliderValueDisplay.textContent = currentValue + suffix;
+       }
+ 
+       // Hide the value display, show the slider
+@@ -2366,15 +2452,20 @@ var SettingsController = (function () {
+       focusManager.inSliderMode = false;
+       focusManager.sliderSetting = null;
+ 
+-      // Update the setting based on which blur control
++      // Update the setting based on which control
+       if (settingName === "backdrop-blur-home") {
+          settings.backdropBlurHome = newValue;
+       } else if (settingName === "backdrop-blur-detail") {
+          settings.backdropBlurDetail = newValue;
++      } else if (settingName === "subtitlePositionAbsolute") {
++         settings.subtitlePositionAbsolute = newValue;
++      } else if (settingName === "subtitleOpacity") {
++         settings.subtitleOpacity = newValue;
+       }
+ 
+       saveSettings();
+       updateSettingValues();
++      updateSubtitlePreview(); // Update preview for subtitles
+ 
+       var settingItem = document.querySelector(
+          '[data-setting="' + settingName + '"]'
+@@ -2391,6 +2482,53 @@ var SettingsController = (function () {
+       settingItem.classList.remove("slider-active");
+    }
+ 
++   /**
++    * Update slider display during navigation
++    * @param {string} settingName 
++    * @param {number} value 
++    */
++   function updateSliderDisplay(settingName, value) {
++      // Ensure value is a number
++      value = parseInt(value);
++
++      // Update in-memory setting for live preview
++      if (settingName === "subtitlePositionAbsolute") {
++         settings.subtitlePositionAbsolute = value;
++         updateSubtitlePreview();
++      } else if (settingName === "backdrop-blur-home") {
++         settings.backdropBlurHome = value;
++      } else if (settingName === "backdrop-blur-detail") {
++         settings.backdropBlurDetail = value;
++      } else if (settingName === "subtitleOpacity") {
++         settings.subtitleOpacity = value;
++         updateSubtitlePreview();
++      }
++
++      var settingItem = document.querySelector('[data-setting="' + settingName + '"]');
++      if (!settingItem) return;
++
++      var percentage = 0;
++      if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
++         percentage = value; // 0-100 maps directly to percentage
++      } else {
++         percentage = (value / 5) * 100; // 0-5 maps to 0-100%
++      }
++
++      var fillElement = settingItem.querySelector(".slider-fill");
++      var sliderValueDisplay = settingItem.querySelector(".slider-value-display");
++
++      if (fillElement) {
++         fillElement.style.width = percentage + "%";
++      }
++      if (sliderValueDisplay) {
++         var suffix = "";
++         if (settingName === "subtitlePositionAbsolute" || settingName === "subtitleOpacity") {
++            suffix = "%";
++         }
++         sliderValueDisplay.textContent = value + suffix;
++      }
++   }
++
+    /**
+     * Handle navigation within slider mode
+     * @param {KeyboardEvent} evt - Keyboard event
+@@ -2398,63 +2536,272 @@ var SettingsController = (function () {
+     */
+    function handleSliderNavigation(evt) {
+       var settingName = focusManager.sliderSetting;
+-      var currentValue =
+-         settingName === "backdrop-blur-home"
+-            ? settings.backdropBlurHome
+-            : settings.backdropBlurDetail;
++      if (!settingName) return;
++
++      // Get current value and constraints based on setting type
++      var currentValue, max, step;
++
++      if (settingName === "subtitlePositionAbsolute") {
++         currentValue = parseInt(settings.subtitlePositionAbsolute) || 90;
++         max = 100;
++         step = 1;
++      } else if (settingName === "backdrop-blur-home") {
++         currentValue = parseInt(settings.backdropBlurHome) || 0;
++         max = 5;
++         step = 1;
++      } else if (settingName === "backdrop-blur-detail") {
++         currentValue = parseInt(settings.backdropBlurDetail) || 0;
++         max = 5;
++         step = 1;
++      } else if (settingName === "subtitleOpacity") {
++         currentValue = parseInt(settings.subtitleOpacity) || 100;
++         max = 100;
++         step = 5;
++      } else {
++         return;
++      }
++
++      var newValue = currentValue;
++      var handled = false;
+ 
+       switch (evt.keyCode) {
+-         case KeyCodes.LEFT: // Left - decrease value
++         case KeyCodes.LEFT:
+             evt.preventDefault();
+-            if (currentValue > 0) {
+-               var newValue = Math.max(0, currentValue - 1);
+-               updateSliderDisplay(settingName, newValue);
+-            }
++            newValue = Math.max(0, currentValue - step);
++            handled = true;
+             break;
+ 
+-         case KeyCodes.RIGHT: // Right - increase value
++         case KeyCodes.RIGHT:
+             evt.preventDefault();
+-            if (currentValue < 5) {
+-               var newValue = Math.min(5, currentValue + 1);
+-               updateSliderDisplay(settingName, newValue);
+-            }
++            newValue = Math.min(max, currentValue + step);
++            handled = true;
+             break;
+ 
+-         case KeyCodes.UP: // Up - increase value
++         case KeyCodes.UP:
+             evt.preventDefault();
+-            if (currentValue < 5) {
+-               var newValue = Math.min(5, currentValue + 1);
+-               updateSliderDisplay(settingName, newValue);
+-            }
++            // Larger step for absolute positioning
++            var upStep = (settingName === "subtitlePositionAbsolute") ? 5 : step;
++            newValue = Math.min(max, currentValue + upStep);
++            handled = true;
+             break;
+ 
+-         case KeyCodes.DOWN: // Down - decrease value
++         case KeyCodes.DOWN:
+             evt.preventDefault();
+-            if (currentValue > 0) {
+-               var newValue = Math.max(0, currentValue - 1);
+-               updateSliderDisplay(settingName, newValue);
+-            }
++            // Larger step for absolute positioning
++            var downStep = (settingName === "subtitlePositionAbsolute") ? 5 : step;
++            newValue = Math.max(0, currentValue - downStep);
++            handled = true;
+             break;
+ 
+-         case KeyCodes.ENTER: // Enter - confirm and exit slider mode
++         case KeyCodes.ENTER:
+             evt.preventDefault();
+             exitSliderMode(settingName, currentValue);
+-            break;
++            return;
+ 
+-         case KeyCodes.BACKSPACE: // Back - cancel slider mode
++         case KeyCodes.BACKSPACE:
+          case KeyCodes.ESCAPE:
+             evt.preventDefault();
+-            // Reset to original value
+-            exitSliderMode(
+-               settingName,
+-               settingName === "backdrop-blur-home"
+-                  ? settings.backdropBlurHome
+-                  : settings.backdropBlurDetail
+-            );
++            exitSliderMode(settingName, currentValue);
++            return;
++      }
++
++      // Update display if value changed
++      if (handled && newValue !== currentValue) {
++         updateSliderDisplay(settingName, newValue);
++      }
++   }
++
++   // ==================== Absolute Slider Logic ====================
++
++   // Dedicated state for absolute slider to ensure stability
++   var absoluteSliderState = {
++      active: false,
++      value: 90
++   };
++
++   function enterAbsoluteSliderMode(initialValue) {
++      absoluteSliderState.active = true;
++      absoluteSliderState.value = parseInt(initialValue);
++      if (isNaN(absoluteSliderState.value)) absoluteSliderState.value = 90;
++
++      focusManager.inAbsoluteSliderMode = true;
++
++      var settingItem = document.querySelector('[data-setting="subtitlePositionAbsolute"]');
++      if (settingItem) {
++         settingItem.classList.add("slider-active");
++         var valueDisplay = settingItem.querySelector(".setting-value");
++         var sliderContainer = settingItem.querySelector(".slider-container");
++         if (valueDisplay) valueDisplay.style.display = "none";
++         if (sliderContainer) sliderContainer.style.display = "flex";
++
++         updateAbsoluteSliderVisuals();
++      }
++      console.log('[Settings] Entered Absolute Slider Mode. Value:', absoluteSliderState.value);
++   }
++
++   function updateAbsoluteSliderVisuals() {
++      var settingItem = document.querySelector('[data-setting="subtitlePositionAbsolute"]');
++      if (!settingItem) return;
++
++      var fillElement = settingItem.querySelector(".slider-fill");
++      var sliderValueDisplay = settingItem.querySelector(".slider-value-display");
++
++      if (fillElement) fillElement.style.width = absoluteSliderState.value + "%";
++      if (sliderValueDisplay) sliderValueDisplay.textContent = absoluteSliderState.value + "%";
++
++      // Live preview update
++      settings.subtitlePositionAbsolute = absoluteSliderState.value;
++      updateSubtitlePreview();
++   }
++
++   function handleAbsoluteSliderNavigation(evt) {
++      console.log('[Settings] Absolute Nav Key:', evt.keyCode);
++      evt.preventDefault(); // Consume all keys in this mode
++
++      var step = 1;
++      var largeStep = 5;
++
++      switch (evt.keyCode) {
++         case KeyCodes.LEFT:
++            absoluteSliderState.value = Math.max(0, absoluteSliderState.value - step);
++            updateAbsoluteSliderVisuals();
++            break;
++         case KeyCodes.RIGHT:
++            absoluteSliderState.value = Math.min(100, absoluteSliderState.value + step);
++            updateAbsoluteSliderVisuals();
++            break;
++         case KeyCodes.UP:
++            absoluteSliderState.value = Math.min(100, absoluteSliderState.value + largeStep);
++            updateAbsoluteSliderVisuals();
++            break;
++         case KeyCodes.DOWN:
++            absoluteSliderState.value = Math.max(0, absoluteSliderState.value - largeStep);
++            updateAbsoluteSliderVisuals();
++            break;
++         case KeyCodes.ENTER:
++         case KeyCodes.BACKSPACE:
++         case KeyCodes.ESCAPE:
++            exitAbsoluteSliderMode();
++            break;
++      }
++   }
++
++   function exitAbsoluteSliderMode() {
++      absoluteSliderState.active = false;
++      focusManager.inAbsoluteSliderMode = false;
++
++      // Persist
++      settings.subtitlePositionAbsolute = absoluteSliderState.value;
++      saveSettings();
++      updateSettingValues(); // Updates the main text display
++
++      var settingItem = document.querySelector('[data-setting="subtitlePositionAbsolute"]');
++      if (settingItem) {
++         settingItem.classList.remove("slider-active");
++         var valueDisplay = settingItem.querySelector(".setting-value");
++         var sliderContainer = settingItem.querySelector(".slider-container");
++         if (valueDisplay) valueDisplay.style.display = "block";
++         if (sliderContainer) sliderContainer.style.display = "none";
++      }
++      console.log('[Settings] Exited Absolute Slider Mode');
++   }
++
++   // ==================== Opacity Slider Logic ====================
++
++   // Dedicated state for opacity slider
++   var opacitySliderState = {
++      active: false,
++      value: 100
++   };
++
++   function enterOpacitySliderMode(initialValue) {
++      opacitySliderState.active = true;
++      opacitySliderState.value = parseInt(initialValue);
++      if (isNaN(opacitySliderState.value)) opacitySliderState.value = 100;
++
++      focusManager.inOpacitySliderMode = true;
++
++      var settingItem = document.querySelector('[data-setting="subtitleOpacity"]');
++      if (settingItem) {
++         settingItem.classList.add("slider-active");
++         var valueDisplay = settingItem.querySelector(".setting-value");
++         var sliderContainer = settingItem.querySelector(".slider-container");
++         if (valueDisplay) valueDisplay.style.display = "none";
++         if (sliderContainer) sliderContainer.style.display = "flex";
++
++         updateOpacitySliderVisuals();
++      }
++      console.log('[Settings] Entered Opacity Slider Mode. Value:', opacitySliderState.value);
++   }
++
++   function updateOpacitySliderVisuals() {
++      var settingItem = document.querySelector('[data-setting="subtitleOpacity"]');
++      if (!settingItem) return;
++
++      var fillElement = settingItem.querySelector(".slider-fill");
++      var sliderValueDisplay = settingItem.querySelector(".slider-value-display");
++
++      // Opacity is 0-100, so maps directly to %
++      if (fillElement) fillElement.style.width = opacitySliderState.value + "%";
++      if (sliderValueDisplay) sliderValueDisplay.textContent = opacitySliderState.value + "%";
++
++      // Live preview update
++      settings.subtitleOpacity = opacitySliderState.value;
++      updateSubtitlePreview();
++   }
++
++   function handleOpacitySliderNavigation(evt) {
++      console.log('[Settings] Opacity Nav Key:', evt.keyCode);
++      evt.preventDefault(); // Consume all keys in this mode
++
++      var step = 5;
++
++      switch (evt.keyCode) {
++         case KeyCodes.LEFT:
++            opacitySliderState.value = Math.max(0, opacitySliderState.value - step);
++            updateOpacitySliderVisuals();
++            break;
++         case KeyCodes.RIGHT:
++            opacitySliderState.value = Math.min(100, opacitySliderState.value + step);
++            updateOpacitySliderVisuals();
++            break;
++         case KeyCodes.UP:
++            // Optional: larger jump or same
++            opacitySliderState.value = Math.min(100, opacitySliderState.value + step);
++            updateOpacitySliderVisuals();
++            break;
++         case KeyCodes.DOWN:
++            opacitySliderState.value = Math.max(0, opacitySliderState.value - step);
++            updateOpacitySliderVisuals();
++            break;
++         case KeyCodes.ENTER:
++         case KeyCodes.BACKSPACE:
++         case KeyCodes.ESCAPE:
++            exitOpacitySliderMode();
+             break;
+       }
+    }
+ 
++   function exitOpacitySliderMode() {
++      opacitySliderState.active = false;
++      focusManager.inOpacitySliderMode = false;
++
++      // Persist
++      settings.subtitleOpacity = opacitySliderState.value;
++      saveSettings();
++      updateSettingValues(); // Updates the main text display
++
++      var settingItem = document.querySelector('[data-setting="subtitleOpacity"]');
++      if (settingItem) {
++         settingItem.classList.remove("slider-active");
++         var valueDisplay = settingItem.querySelector(".setting-value");
++         var sliderContainer = settingItem.querySelector(".slider-container");
++         if (valueDisplay) valueDisplay.style.display = "block";
++         if (sliderContainer) sliderContainer.style.display = "none";
++      }
++      console.log('[Settings] Exited Opacity Slider Mode');
++   }
++
+    // ==================== Jellyseerr Functions ====================
+ 
+    /**
+@@ -4108,70 +4455,7 @@ var SettingsController = (function () {
+     * Update subtitle preview text based on current settings
+     * @private
+     */
+-   function updateSubtitlePreview() {
+-      var container = document.getElementById("subtitlePreviewContainer");
+-      var text = document.getElementById("subtitlePreviewText");
+-      if (!container || !text) return;
+-
+-      // Apply font size
+-      var sizes = {
+-         'smaller': '2.2em',
+-         'small': '2.8em',
+-         'medium': '3.5em',
+-         'large': '4.5em',
+-         'extralarge': '5.5em'
+-      };
+-      text.style.fontSize =
+-         sizes[settings.subtitleSize || "medium"] || sizes["medium"];
+-
+-      // Apply color
+-      text.style.color = settings.subtitleColor || "#ffffff";
+-
+-      // Apply background/shadow
+-      var bg = settings.subtitleBackground || "drop-shadow";
+-      if (bg === "drop-shadow") {
+-         text.style.textShadow =
+-            "0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)";
+-         text.style.background = "none";
+-      } else if (bg === "background") {
+-         text.style.textShadow = "none";
+-         text.style.background = "rgba(0, 0, 0, 0.7)";
+-      } else {
+-         text.style.textShadow = "none";
+-         text.style.background = "none";
+-      }
+-
+-      // Apply position
+ 
+-      // Apply position
+-      var pos = settings.subtitlePosition || "bottom";
+-
+-      // Ensure container allows absolute positioning
+-      container.style.position = 'relative';
+-      container.style.display = 'block'; // Reset flex
+-
+-      // Reset all positioning
+-      text.style.position = 'absolute';
+-      text.style.margin = '0';
+-      text.style.top = 'auto';
+-      text.style.bottom = 'auto';
+-      text.style.left = '0';
+-      text.style.right = '0';
+-      text.style.transform = 'none';
+-
+-      if (pos === 'top') {
+-         text.style.top = '10%';
+-      } else if (pos === 'bottom') {
+-         text.style.bottom = '10%';
+-      } else if (pos === 'bottom-low') {
+-         text.style.bottom = '2%';
+-      } else if (pos === 'bottom-high') {
+-         text.style.bottom = '20%';
+-      } else if (pos === 'middle') {
+-         text.style.top = '50%';
+-         text.style.transform = 'translateY(-50%)';
+-      }
+-   }
+ 
+    return {
+       init: init,
+diff --git a/js/subtitle-manager.js b/js/subtitle-manager.js
+index dc95cc7..8b6b655 100644
+--- a/js/subtitle-manager.js
++++ b/js/subtitle-manager.js
+@@ -15,15 +15,32 @@ var SubtitleManager = (function () {
+             this.activeCue = null;
+             this.settings = {};
+             this.isEnabled = false;
++            this.offset = 0; // Offset in seconds
+ 
+             this.init();
+         }
+ 
++        /**
++         * Set subtitle offset
++         * @param {number} offsetSeconds - Offset in seconds (+ delays subtitles, - advances them)
++         */
++        setOffset(offsetSeconds) {
++            this.offset = parseFloat(offsetSeconds) || 0;
++            // Force update current display
++            // We can't easily get current video time here without reference, but next update loop will catch it
++        }
++
+         init() {
+             // Create overlay elements
+             if (!this.overlay) {
+                 this.overlay = document.createElement('div');
+                 this.overlay.className = 'videoSubtitles';
++                this.overlay.style.position = 'absolute';
++                this.overlay.style.top = '0';
++                this.overlay.style.left = '0';
++                this.overlay.style.width = '100%';
++                this.overlay.style.height = '100%';
++                this.overlay.style.pointerEvents = 'none'; // Click-through
+                 this.overlay.style.display = 'none'; // Hidden by default
+ 
+                 this.innerOverlay = document.createElement('div');
+@@ -159,11 +176,13 @@ var SubtitleManager = (function () {
+                     const stored = window.storage.getUserPreference('jellyfin_settings', null);
+                     if (stored) {
+                         const parsed = JSON.parse(stored);
+-                        // Merge stored settings with defaults
++                        // Load all subtitle-related settings
+                         if (parsed.subtitleSize) this.settings.subtitleSize = parsed.subtitleSize;
+                         if (parsed.subtitleColor) this.settings.subtitleColor = parsed.subtitleColor;
+                         if (parsed.subtitlePosition) this.settings.subtitlePosition = parsed.subtitlePosition;
++                        if (parsed.subtitlePositionAbsolute !== undefined) this.settings.subtitlePositionAbsolute = parsed.subtitlePositionAbsolute;
+                         if (parsed.subtitleBackground) this.settings.subtitleBackground = parsed.subtitleBackground;
++                        if (parsed.subtitleOpacity !== undefined) this.settings.subtitleOpacity = parsed.subtitleOpacity;
+                         console.log('[SubtitleManager] Loaded settings:', this.settings);
+                     }
+                 }
+@@ -192,8 +211,22 @@ var SubtitleManager = (function () {
+         update(timeMs) {
+             if (!this.isEnabled || this.cues.length === 0) return;
+ 
++            // Apply offset (inverted logic: + offset delay means we look for earlier cues? No.)
++            // If offset is +5s (delayed), it means a cue at 10s should show when video is at 10s + 5s = 15s?
++            // Usually "Subtitle Offset" means:
++            // Positive (+): Subtitles appear LATER. (Video 10s -> Subtitle for 10s shows... later? Wait.)
++            // If audio is ahead of subtitle, we need to DELAY subtitle.
++            // If I want subtitle at 10s to show at 15s (5s delay), then when Video is 15s, we want to match Cue 10s.
++            // So: CueTime = VideoTime - Offset.
++            // Check: Video 15s, Offset 5s -> Look for 10s Cue. Correct.
++            // Negative (-): Subtitles appear EARLIER.
++            // If I want subtitle at 10s to show at 5s (-5s offset), then when Video is 5s, we want match Cue 10s.
++            // Check: Video 5s, Offset -5s -> Look for 10s Cue. (5 - (-5) = 10). Correct.
++
++            const adjustedTime = timeMs - (this.offset * 1000);
++
+             // Find valid cue
+-            const currentCue = this.cues.find(cue => timeMs >= cue.start && timeMs <= cue.end);
++            const currentCue = this.cues.find(cue => adjustedTime >= cue.start && adjustedTime <= cue.end);
+ 
+             if (currentCue) {
+                 if (this.activeCue !== currentCue) {
+@@ -235,8 +268,19 @@ var SubtitleManager = (function () {
+             };
+             s.fontSize = sizes[conf.subtitleSize || 'medium'] || sizes['medium'];
+ 
+-            // Color
+-            s.color = conf.subtitleColor || '#ffffff';
++            // Opacity & Color
++            var rawOpacity = conf.subtitleOpacity !== undefined ? conf.subtitleOpacity : 100;
++            var hexColor = conf.subtitleColor || '#ffffff';
++
++            // Convert Hex to RGBA for text opacity
++            var r = parseInt(hexColor.slice(1, 3), 16);
++            var g = parseInt(hexColor.slice(3, 5), 16);
++            var b = parseInt(hexColor.slice(5, 7), 16);
++
++            s.color = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + (rawOpacity / 100) + ')';
++
++            // Remove CSS opacity to prevent affecting shadow/background indiscriminately if separated
++            s.opacity = '';
+ 
+             // Vertical Position
+             const position = conf.subtitlePosition || 'bottom';
+@@ -251,6 +295,7 @@ var SubtitleManager = (function () {
+             overlayStyle.left = '0';
+             overlayStyle.right = '0';
+ 
++
+             // Use flexbox for positioning
+             overlayStyle.justifyContent = (position === 'top') ? 'flex-start' : 'flex-end';
+ 
+@@ -258,22 +303,50 @@ var SubtitleManager = (function () {
+             this.innerOverlay.style.marginTop = '0';
+             this.innerOverlay.style.marginBottom = '10%'; // Default bottom
+ 
++            // Clean styles before applying specific positioning
++            this.innerOverlay.style.position = 'relative';
++            this.innerOverlay.style.width = 'auto';
++            this.innerOverlay.style.left = 'auto';
++            this.innerOverlay.style.top = 'auto';
++            this.innerOverlay.style.bottom = 'auto';
++            this.innerOverlay.style.textAlign = ''; // inherit
++
+             if (position === 'top') {
+                 this.innerOverlay.style.marginTop = '10%';
+                 this.innerOverlay.style.marginBottom = '0';
+             } else if (position === 'bottom-low') {
+                 this.innerOverlay.style.marginBottom = '2%'; // Lower
++            } else if (position === 'bottom-extra-low') {
++                this.innerOverlay.style.marginBottom = '1%'; // Extra Lower
+             } else if (position === 'bottom-high') {
+                 this.innerOverlay.style.marginBottom = '20%'; // Higher
+             } else if (position === 'middle') {
+                 overlayStyle.justifyContent = 'center';
+                 this.innerOverlay.style.marginBottom = '0';
++            } else if (position === 'absolute') {
++                overlayStyle.justifyContent = 'flex-start'; // Align to top
++                var absTop = conf.subtitlePositionAbsolute !== undefined ? conf.subtitlePositionAbsolute : 90;
++
++                // Use absolute positioning relative to the container
++                this.innerOverlay.style.position = 'absolute';
++                this.innerOverlay.style.top = absTop + '%';
++                this.innerOverlay.style.bottom = 'auto'; // Explicitly unset
++                this.innerOverlay.style.left = '0';
++                this.innerOverlay.style.width = '100%';
++                this.innerOverlay.style.textAlign = 'center';
++                this.innerOverlay.style.marginBottom = '0';
++                this.innerOverlay.style.marginTop = '0';
++            } else {
++                // Reset position for other modes (already done above, but safe to keep logic consistent)
++                this.innerOverlay.style.position = 'relative';
++                this.innerOverlay.style.top = 'auto';
+             }
+ 
+             // Background / Shadow
+             const bg = conf.subtitleBackground || 'drop-shadow';
+             if (bg === 'drop-shadow') {
+-                s.textShadow = '0px 0px 8px rgba(0, 0, 0, 1), 0px 0px 4px rgba(0, 0, 0, 1)';
++                var shadowOpacity = rawOpacity / 100;
++                s.textShadow = '0px 0px 8px rgba(0, 0, 0, ' + shadowOpacity + '), 0px 0px 4px rgba(0, 0, 0, ' + shadowOpacity + ')';
+                 s.background = 'none';
+             } else if (bg === 'background') {
+                 s.textShadow = 'none';
+diff --git a/js/track-selector.js b/js/track-selector.js
+index 3bd90d6..44556e3 100644
+--- a/js/track-selector.js
++++ b/js/track-selector.js
+@@ -3,7 +3,7 @@
+  * Shared functionality for audio and subtitle track selection modals
+  */
+ 
+-var TrackSelector = (function() {
++var TrackSelector = (function () {
+     'use strict';
+ 
+     /**
+@@ -19,28 +19,28 @@ var TrackSelector = (function() {
+         container.innerHTML = '';
+         const focusableItems = [];
+ 
+-        audioStreams.forEach(function(stream, index) {
++        audioStreams.forEach(function (stream, index) {
+             const trackItem = document.createElement('div');
+             trackItem.className = 'track-item';
+             trackItem.tabIndex = 0;
+-            
++
+             const lang = stream.Language || 'Unknown';
+             const codec = stream.Codec ? stream.Codec.toUpperCase() : '';
+             const channels = stream.Channels ? stream.Channels + 'ch' : '';
+             const isDefault = stream.IsDefault ? ' [Default]' : '';
+-            
++
+             trackItem.innerHTML = '<span class="track-name">' + lang + '</span>' +
+-                                  '<span class="track-info">' + codec + ' ' + channels + isDefault + '</span>';
+-            
++                '<span class="track-info">' + codec + ' ' + channels + isDefault + '</span>';
++
+             if (index === currentIndex) {
+                 trackItem.classList.add('selected');
+             }
+-            
+-            trackItem.addEventListener('click', function(evt) {
++
++            trackItem.addEventListener('click', function (evt) {
+                 evt.stopPropagation();
+                 onSelect(index);
+             });
+-            
++
+             container.appendChild(trackItem);
+             focusableItems.push(trackItem);
+         });
+@@ -65,41 +65,41 @@ var TrackSelector = (function() {
+         noneItem.className = 'track-item';
+         noneItem.tabIndex = 0;
+         noneItem.innerHTML = '<span class="track-name">None</span>';
+-        
++
+         if (currentIndex === -1) {
+             noneItem.classList.add('selected');
+         }
+-        
+-        noneItem.addEventListener('click', function(evt) {
++
++        noneItem.addEventListener('click', function (evt) {
+             evt.stopPropagation();
+             onSelect(-1);
+         });
+-        
++
+         container.appendChild(noneItem);
+         focusableItems.push(noneItem);
+ 
+-        subtitleStreams.forEach(function(stream, index) {
++        subtitleStreams.forEach(function (stream, index) {
+             const trackItem = document.createElement('div');
+             trackItem.className = 'track-item';
+             trackItem.tabIndex = 0;
+-            
++
+             const lang = stream.Language || 'Unknown';
+             const codec = stream.Codec ? stream.Codec.toUpperCase() : '';
+             const forced = stream.IsForced ? ' [Forced]' : '';
+             const isDefault = stream.IsDefault ? ' [Default]' : '';
+-            
++
+             trackItem.innerHTML = '<span class="track-name">' + lang + '</span>' +
+-                                  '<span class="track-info">' + codec + forced + isDefault + '</span>';
+-            
++                '<span class="track-info">' + codec + forced + isDefault + '</span>';
++
+             if (index === currentIndex) {
+                 trackItem.classList.add('selected');
+             }
+-            
+-            trackItem.addEventListener('click', function(evt) {
++
++            trackItem.addEventListener('click', function (evt) {
+                 evt.stopPropagation();
+                 onSelect(index);
+             });
+-            
++
+             container.appendChild(trackItem);
+             focusableItems.push(trackItem);
+         });
+@@ -116,7 +116,7 @@ var TrackSelector = (function() {
+      * @returns {number} New focus index
+      */
+     function handleModalKeyDown(evt, focusableItems, currentFocusIndex, onClose) {
+-        
++
+         switch (evt.keyCode) {
+             case KeyCodes.UP:
+                 evt.preventDefault();
+@@ -147,7 +147,7 @@ var TrackSelector = (function() {
+                 evt.preventDefault();
+                 onClose();
+                 break;
+-            
++
+             default:
+         }
+ 
+diff --git a/login.html b/login.html
+index 9b34e16..0b8b23a 100644
+--- a/login.html
++++ b/login.html
+@@ -1,350 +1,223 @@
+ <!DOCTYPE html>
+ <html lang="en">
+-   <head>
+-      <meta charset="UTF-8" />
+-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-      <meta
+-         http-equiv="Content-Security-Policy"
+-         content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src *;"
+-      />
+-      <title>Moonfin for Tizen - Login</title>
+-      <link rel="stylesheet" href="css/legacy-compat.css" />
+-      <link rel="stylesheet" href="css/login.css" />
+-      <script src="js/app-version.js" charset="utf-8"></script>
+-      <script src="js/tizen-adapter.js" charset="utf-8"></script>
+-      <script src="js/polyfills.js" charset="utf-8"></script>
+-      <script src="js/storage.js" charset="utf-8"></script>
+-      <script src="js/server-logger.js" charset="utf-8"></script>
+-      <script src="js/multi-server.js" charset="utf-8"></script>
+-      <script src="js/accent-color.js" charset="utf-8"></script>
+-      <script src="js/ajax.js" charset="utf-8"></script>
+-      <script src="js/keycodes.js" charset="utf-8"></script>
+-      <script src="js/jellyfin-api.js" charset="utf-8"></script>
+-      <script src="js/login.js" charset="utf-8"></script>
+-   </head>
+-   <body>
+-      <div class="container">
+-         <div class="logo-section">
+-            <img src="assets/banner-dark.png" alt="Jellyfin" />
+-         </div>
+ 
+-         <div
+-            id="statusMessage"
+-            class="status-message"
+-            style="display: none"
+-         ></div>
+-         <div
+-            id="errorMessage"
+-            class="error-message"
+-            style="display: none"
+-         ></div>
++<head>
++   <meta charset="UTF-8" />
++   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++   <meta http-equiv="Content-Security-Policy"
++      content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src *;" />
++   <title>Moonfin for Tizen - Login</title>
++   <link rel="stylesheet" href="css/legacy-compat.css" />
++   <link rel="stylesheet" href="css/login.css" />
++   <script src="js/app-version.js" charset="utf-8"></script>
++   <script src="js/tizen-adapter.js" charset="utf-8"></script>
++   <script src="js/polyfills.js" charset="utf-8"></script>
++   <script src="js/storage.js" charset="utf-8"></script>
++   <script src="js/server-logger.js" charset="utf-8"></script>
++   <script src="js/multi-server.js" charset="utf-8"></script>
++   <script src="js/accent-color.js" charset="utf-8"></script>
++   <script src="js/ajax.js" charset="utf-8"></script>
++   <script src="js/keycodes.js" charset="utf-8"></script>
++   <script src="js/jellyfin-api.js" charset="utf-8"></script>
++   <script src="js/login.js" charset="utf-8"></script>
++</head>
++
++<body>
++   <div class="container">
++      <div class="logo-section">
++         <img src="assets/banner-dark.png" alt="Jellyfin" />
++      </div>
+ 
+-         <div class="content-wrapper">
+-            <!-- Saved Servers Section -->
+-            <div class="section" id="savedServersSection" style="display: none">
+-               <h2>Select Server</h2>
+-               <div class="user-row-container">
+-                  <div id="savedServerRow" class="user-row">
+-                     <!-- Populated by JavaScript -->
+-                  </div>
++      <div id="statusMessage" class="status-message" style="display: none"></div>
++      <div id="errorMessage" class="error-message" style="display: none"></div>
++
++      <div class="content-wrapper">
++         <!-- Saved Servers Section -->
++         <div class="section" id="savedServersSection" style="display: none">
++            <h2>Select Server</h2>
++            <div class="user-row-container">
++               <div id="savedServerRow" class="user-row">
++                  <!-- Populated by JavaScript -->
+                </div>
+-               <div
+-                  class="button-group"
+-                  style="justify-content: center; margin-top: 20px"
+-               >
+-                  <button
+-                     id="addNewServerBtn"
+-                     class="btn btn-secondary"
+-                     tabindex="0"
+-                  >
+-                     Add New Server
++            </div>
++            <div class="button-group" style="justify-content: center; margin-top: 20px">
++               <button id="addNewServerBtn" class="btn btn-secondary" tabindex="0">
++                  Add New Server
++               </button>
++            </div>
++         </div>
++
++         <div class="section" id="discoveredServersSection" style="display: none">
++            <h2>Discovered Servers</h2>
++            <ul id="serverList" class="server-list">
++               <!-- Populated by JavaScript -->
++            </ul>
++         </div>
++
++         <div class="section" id="manualServerSection">
++            <h2>Connect to Server</h2>
++            <div class="form-group">
++               <label for="serverUrl">Server Address</label>
++               <input type="text" id="serverUrl" placeholder="192.168.1.100 or jellyfin.example.com (port auto-added)"
++                  tabindex="0" class="input-field" />
++               <div class="button-group">
++                  <button id="connectBtn" class="btn btn-primary" tabindex="0">
++                     Connect
++                  </button>
++                  <button id="backToServerListBtn" class="btn btn-secondary" tabindex="0">
++                     Return to Server List
+                   </button>
+                </div>
+             </div>
++         </div>
+ 
+-            <div
+-               class="section"
+-               id="discoveredServersSection"
+-               style="display: none"
+-            >
+-               <h2>Discovered Servers</h2>
+-               <ul id="serverList" class="server-list">
++         <!-- User Selection (hidden until connected) -->
++         <div class="section" id="userSelection" style="display: none">
++            <div class="user-row-container">
++               <div id="userRow" class="user-row">
+                   <!-- Populated by JavaScript -->
+-               </ul>
++               </div>
++            </div>
++            <div class="button-group" style="justify-content: center; margin-top: 20px">
++               <button id="showManualLoginBtn" class="btn btn-secondary" tabindex="0">
++                  Manual Login
++               </button>
++               <button id="deleteServerBtn" class="btn btn-danger" tabindex="0">
++                  Delete Server
++               </button>
++               <button id="backToServerBtn" class="btn btn-secondary" tabindex="0">
++                  Back to Server Selection
++               </button>
+             </div>
++         </div>
+ 
+-            <div class="section" id="manualServerSection">
+-               <h2>Connect to Server</h2>
+-               <div class="form-group">
+-                  <label for="serverUrl">Server Address</label>
+-                  <input
+-                     type="text"
+-                     id="serverUrl"
+-                     placeholder="192.168.1.100 or jellyfin.example.com (port auto-added)"
+-                     tabindex="0"
+-                     class="input-field"
+-                  />
+-                  <div class="button-group">
+-                     <button
+-                        id="connectBtn"
+-                        class="btn btn-primary"
+-                        tabindex="0"
+-                     >
+-                        Connect
+-                     </button>
+-                     <button
+-                        id="backToServerListBtn"
+-                        class="btn btn-secondary"
+-                        tabindex="0"
+-                     >
+-                        Return to Server List
+-                     </button>
+-                  </div>
+-               </div>
++         <!-- Manual Login (hidden until Add Account clicked) -->
++         <div class="section" id="manualLoginSection" style="display: none">
++            <h2>Manual Login</h2>
++            <div class="login-method-buttons">
++               <button id="useManualPasswordBtn" class="btn btn-secondary" tabindex="0" style="display: none">
++                  Use Password
++               </button>
++               <button id="useManualQuickConnectBtn" class="btn btn-secondary" tabindex="0" style="display: none">
++                  Use Quick Connect
++               </button>
+             </div>
+ 
+-            <!-- User Selection (hidden until connected) -->
+-            <div class="section" id="userSelection" style="display: none">
+-               <div class="user-row-container">
+-                  <div id="userRow" class="user-row">
+-                     <!-- Populated by JavaScript -->
+-                  </div>
++            <!-- Password Form -->
++            <div id="manualPasswordForm" style="display: none">
++               <div class="form-group">
++                  <label for="manualUsername">Username</label>
++                  <input type="text" id="manualUsername" placeholder="Enter your username" tabindex="0"
++                     class="input-field" />
+                </div>
+-               <div
+-                  class="button-group"
+-                  style="justify-content: center; margin-top: 20px"
+-               >
+-                  <button
+-                     id="showManualLoginBtn"
+-                     class="btn btn-secondary"
+-                     tabindex="0"
+-                  >
+-                     Manual Login
+-                  </button>
+-                  <button
+-                     id="deleteServerBtn"
+-                     class="btn btn-danger"
+-                     tabindex="0"
+-                  >
+-                     Delete Server
+-                  </button>
+-                  <button
+-                     id="backToServerBtn"
+-                     class="btn btn-secondary"
+-                     tabindex="0"
+-                  >
+-                     Back to Server Selection
+-                  </button>
++               <div class="form-group">
++                  <label for="manualPassword">Password</label>
++                  <input type="password" id="manualPassword" placeholder="Enter your password (or leave blank if none)"
++                     tabindex="0" class="input-field" />
+                </div>
+-            </div>
+-
+-            <!-- Manual Login (hidden until Add Account clicked) -->
+-            <div class="section" id="manualLoginSection" style="display: none">
+-               <h2>Manual Login</h2>
+-               <div class="login-method-buttons">
+-                  <button
+-                     id="useManualPasswordBtn"
+-                     class="btn btn-secondary"
+-                     tabindex="0"
+-                     style="display: none"
+-                  >
+-                     Use Password
++               <div class="button-group">
++                  <button id="manualLoginBtn" class="btn btn-primary" tabindex="0">
++                     Login
+                   </button>
+-                  <button
+-                     id="useManualQuickConnectBtn"
+-                     class="btn btn-secondary"
+-                     tabindex="0"
+-                     style="display: none"
+-                  >
+-                     Use Quick Connect
++                  <button id="cancelManualLoginBtn" class="btn btn-secondary" tabindex="0">
++                     Back
+                   </button>
+                </div>
++            </div>
+ 
+-               <!-- Password Form -->
+-               <div id="manualPasswordForm" style="display: none">
+-                  <div class="form-group">
+-                     <label for="manualUsername">Username</label>
+-                     <input
+-                        type="text"
+-                        id="manualUsername"
+-                        placeholder="Enter your username"
+-                        tabindex="0"
+-                        class="input-field"
+-                     />
++            <!-- Quick Connect Form -->
++            <div id="manualQuickConnectForm" style="display: none">
++               <div class="quick-connect-instructions">
++                  <p>
++                     To sign in, open the Jellyfin app on your phone or
++                     computer and enter this code:
++                  </p>
++                  <div id="manualQuickConnectCode" class="quick-connect-code">
++                     ------
+                   </div>
+-                  <div class="form-group">
+-                     <label for="manualPassword">Password</label>
+-                     <input
+-                        type="password"
+-                        id="manualPassword"
+-                        placeholder="Enter your password (or leave blank if none)"
+-                        tabindex="0"
+-                        class="input-field"
+-                     />
+-                  </div>
+-                  <div class="button-group">
+-                     <button
+-                        id="manualLoginBtn"
+-                        class="btn btn-primary"
+-                        tabindex="0"
+-                     >
+-                        Login
+-                     </button>
+-                     <button
+-                        id="cancelManualLoginBtn"
+-                        class="btn btn-secondary"
+-                        tabindex="0"
+-                     >
+-                        Back
+-                     </button>
++                  <div id="manualQuickConnectStatus" class="quick-connect-status">
++                     Waiting for authentication...
+                   </div>
+                </div>
+-
+-               <!-- Quick Connect Form -->
+-               <div id="manualQuickConnectForm" style="display: none">
+-                  <div class="quick-connect-instructions">
+-                     <p>
+-                        To sign in, open the Jellyfin app on your phone or
+-                        computer and enter this code:
+-                     </p>
+-                     <div
+-                        id="manualQuickConnectCode"
+-                        class="quick-connect-code"
+-                     >
+-                        ------
+-                     </div>
+-                     <div
+-                        id="manualQuickConnectStatus"
+-                        class="quick-connect-status"
+-                     >
+-                        Waiting for authentication...
+-                     </div>
+-                  </div>
+-                  <div class="button-group">
+-                     <button
+-                        id="cancelManualQuickConnectBtn"
+-                        class="btn btn-secondary"
+-                        tabindex="0"
+-                     >
+-                        Back
+-                     </button>
+-                  </div>
++               <div class="button-group">
++                  <button id="cancelManualQuickConnectBtn" class="btn btn-secondary" tabindex="0">
++                     Back
++                  </button>
+                </div>
+             </div>
++         </div>
++
++         <!-- Login Form (hidden until user selected) -->
++         <div class="section" id="loginForm" style="display: none">
++            <div class="login-method-buttons">
++               <button id="useQuickConnectBtn" class="btn btn-secondary" tabindex="0" style="display: none">
++                  Use Quick Connect
++               </button>
++               <button id="usePasswordBtn" class="btn btn-secondary" tabindex="0" style="display: none">
++                  Use Password
++               </button>
++            </div>
+ 
+-            <!-- Login Form (hidden until user selected) -->
+-            <div class="section" id="loginForm" style="display: none">
+-               <div class="login-method-buttons">
+-                  <button
+-                     id="useQuickConnectBtn"
+-                     class="btn btn-secondary"
+-                     tabindex="0"
+-                     style="display: none"
+-                  >
+-                     Use Quick Connect
++            <!-- Password Login -->
++            <div id="passwordForm" style="display: none">
++               <h2>Enter Password</h2>
++               <div class="selected-user-info">
++                  <img id="selectedUserAvatar" class="selected-user-avatar" src="" alt="" />
++                  <span id="selectedUserName" class="selected-user-name"></span>
++               </div>
++               <div class="form-group">
++                  <input type="password" id="password" placeholder="Enter your password (or leave blank if none)"
++                     tabindex="0" class="input-field" />
++               </div>
++               <div class="button-group">
++                  <button id="loginBtn" class="btn btn-primary" tabindex="0">
++                     Login
+                   </button>
+-                  <button
+-                     id="usePasswordBtn"
+-                     class="btn btn-secondary"
+-                     tabindex="0"
+-                     style="display: none"
+-                  >
+-                     Use Password
++                  <button id="cancelLoginBtn" class="btn btn-secondary" tabindex="0">
++                     Back
+                   </button>
+                </div>
++            </div>
+ 
+-               <!-- Password Login -->
+-               <div id="passwordForm" style="display: none">
+-                  <h2>Enter Password</h2>
+-                  <div class="selected-user-info">
+-                     <img
+-                        id="selectedUserAvatar"
+-                        class="selected-user-avatar"
+-                        src=""
+-                        alt=""
+-                     />
+-                     <span
+-                        id="selectedUserName"
+-                        class="selected-user-name"
+-                     ></span>
+-                  </div>
+-                  <div class="form-group">
+-                     <input
+-                        type="password"
+-                        id="password"
+-                        placeholder="Enter your password (or leave blank if none)"
+-                        tabindex="0"
+-                        class="input-field"
+-                     />
+-                  </div>
+-                  <div class="button-group">
+-                     <button id="loginBtn" class="btn btn-primary" tabindex="0">
+-                        Login
+-                     </button>
+-                     <button
+-                        id="cancelLoginBtn"
+-                        class="btn btn-secondary"
+-                        tabindex="0"
+-                     >
+-                        Back
+-                     </button>
+-                  </div>
++            <!-- Quick Connect -->
++            <div id="quickConnectForm" style="display: none">
++               <h2>Quick Connect</h2>
++               <div class="selected-user-info">
++                  <img id="qcSelectedUserAvatar" class="selected-user-avatar" src="" alt="" />
++                  <span id="qcSelectedUserName" class="selected-user-name"></span>
+                </div>
+-
+-               <!-- Quick Connect -->
+-               <div id="quickConnectForm" style="display: none">
+-                  <h2>Quick Connect</h2>
+-                  <div class="selected-user-info">
+-                     <img
+-                        id="qcSelectedUserAvatar"
+-                        class="selected-user-avatar"
+-                        src=""
+-                        alt=""
+-                     />
+-                     <span
+-                        id="qcSelectedUserName"
+-                        class="selected-user-name"
+-                     ></span>
+-                  </div>
+-                  <div class="quick-connect-instructions">
+-                     <p>
+-                        To sign in, open the Jellyfin app on your phone or
+-                        computer and enter this code:
+-                     </p>
+-                     <div id="quickConnectCode" class="quick-connect-code">
+-                        ------
+-                     </div>
+-                     <div id="quickConnectStatus" class="quick-connect-status">
+-                        Waiting for authentication...
+-                     </div>
++               <div class="quick-connect-instructions">
++                  <p>
++                     To sign in, open the Jellyfin app on your phone or
++                     computer and enter this code:
++                  </p>
++                  <div id="quickConnectCode" class="quick-connect-code">
++                     ------
+                   </div>
+-                  <div class="button-group">
+-                     <button
+-                        id="cancelQuickConnectBtn"
+-                        class="btn btn-secondary"
+-                        tabindex="0"
+-                     >
+-                        Back
+-                     </button>
++                  <div id="quickConnectStatus" class="quick-connect-status">
++                     Waiting for authentication...
+                   </div>
+                </div>
++               <div class="button-group">
++                  <button id="cancelQuickConnectBtn" class="btn btn-secondary" tabindex="0">
++                     Back
++                  </button>
++               </div>
+             </div>
+          </div>
++      </div>
+ 
+-         <div class="helper-text">
+-            <p>
+-               Need help? Make sure your Jellyfin server is running and
+-               accessible on your network.
+-            </p>
+-            <p>Use the remote to navigate and press OK to select.</p>
+-         </div>
++      <div class="helper-text">
++         <p>
++            Need help? Make sure your Jellyfin server is running and
++            accessible on your network.
++         </p>
++         <p>Use the remote to navigate and press OK to select.</p>
+       </div>
++   </div>
+ 
+-      <!-- Confirmation Modal -->
+-      <div
+-         id="confirmationModal"
+-         class="modal"
+-         style="
++   <!-- Confirmation Modal -->
++   <div id="confirmationModal" class="modal" style="
+             display: none;
+             position: fixed;
+             top: 0;
+@@ -355,700 +228,681 @@
+             align-items: center;
+             justify-content: center;
+             z-index: 1000;
+-         "
+-      >
+-         <div
+-            style="
++         ">
++      <div style="
+                background: #1a1a1a;
+                padding: 50px 60px;
+                border-radius: 12px;
+                max-width: 700px;
+                border: 3px solid var(--accent-color);
+-               box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+-            "
+-         >
+-            <h2
+-               id="confirmTitle"
+-               style="
++            ">
++         <h2 id="confirmTitle" style="
+                   margin-top: 0;
+                   color: #fff;
+                   font-size: 32px;
+                   margin-bottom: 25px;
+                   font-weight: 600;
+-               "
+-            >
+-               Confirm Action
+-            </h2>
+-            <p
+-               id="confirmMessage"
+-               style="
++               ">
++            Confirm Action
++         </h2>
++         <p id="confirmMessage" style="
+                   color: rgba(255, 255, 255, 0.9);
+                   font-size: 22px;
+                   margin-bottom: 40px;
+                   line-height: 1.6;
+-               "
+-            ></p>
+-            <div style="display: flex; gap: 20px; justify-content: flex-end">
+-               <button
+-                  id="confirmCancel"
+-                  class="btn btn-secondary"
+-                  tabindex="0"
+-                  style="
++               "></p>
++         <div style="display: flex; gap: 20px; justify-content: flex-end">
++            <button id="confirmCancel" class="btn btn-secondary" tabindex="0" style="
+                      min-width: 160px;
+                      font-size: 20px;
+                      padding: 15px 30px;
+                      border: 3px solid transparent;
+-                  "
+-               >
+-                  Cancel
+-               </button>
+-               <button
+-                  id="confirmOk"
+-                  class="btn btn-danger"
+-                  tabindex="0"
+-                  style="
++                  ">
++               Cancel
++            </button>
++            <button id="confirmOk" class="btn btn-danger" tabindex="0" style="
+                      min-width: 160px;
+                      font-size: 20px;
+                      padding: 15px 30px;
+                      border: 3px solid transparent;
+-                  "
+-               >
+-                  Delete
+-               </button>
+-            </div>
++                  ">
++               Delete
++            </button>
+          </div>
+       </div>
+-
+-      <script>
+-         // Confirmation modal helper
+-         var confirmationState = {
+-            modal: null,
+-            callback: null,
+-            isOpen: false,
++   </div>
++
++   <script>
++      // Confirmation modal helper
++      var confirmationState = {
++         modal: null,
++         callback: null,
++         isOpen: false,
++      };
++
++      function showConfirmation(title, message, onConfirm) {
++         var modal = document.getElementById("confirmationModal");
++         var titleEl = document.getElementById("confirmTitle");
++         var messageEl = document.getElementById("confirmMessage");
++         var cancelBtn = document.getElementById("confirmCancel");
++         var okBtn = document.getElementById("confirmOk");
++
++         titleEl.textContent = title;
++         messageEl.textContent = message;
++         confirmationState.callback = onConfirm;
++         confirmationState.isOpen = true;
++
++         modal.style.display = "flex";
++
++         // Create handler functions with proper closure
++         var handleCancel = function () {
++            if (!confirmationState.isOpen) return;
++            confirmationState.isOpen = false;
++            modal.style.display = "none";
++            if (confirmationState.callback) {
++               confirmationState.callback(false);
++            }
+          };
+ 
+-         function showConfirmation(title, message, onConfirm) {
+-            var modal = document.getElementById("confirmationModal");
+-            var titleEl = document.getElementById("confirmTitle");
+-            var messageEl = document.getElementById("confirmMessage");
+-            var cancelBtn = document.getElementById("confirmCancel");
+-            var okBtn = document.getElementById("confirmOk");
+-
+-            titleEl.textContent = title;
+-            messageEl.textContent = message;
+-            confirmationState.callback = onConfirm;
+-            confirmationState.isOpen = true;
++         var handleOk = function () {
++            if (!confirmationState.isOpen) return;
++            confirmationState.isOpen = false;
++            modal.style.display = "none";
++            if (confirmationState.callback) {
++               confirmationState.callback(true);
++            }
++         };
+ 
+-            modal.style.display = "flex";
++         // Remove any previous event listeners
++         var newCancelBtn = cancelBtn.cloneNode(true);
++         cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
++         cancelBtn = newCancelBtn;
++         document
++            .getElementById("confirmCancel")
++            .addEventListener("click", handleCancel);
++
++         var newOkBtn = okBtn.cloneNode(true);
++         okBtn.parentNode.replaceChild(newOkBtn, okBtn);
++         okBtn = newOkBtn;
++         document
++            .getElementById("confirmOk")
++            .addEventListener("click", handleOk);
++
++         // Remove old keyboard handler
++         document.removeEventListener(
++            "keydown",
++            confirmationState.keyHandler
++         );
++
++         // Create new keyboard handler
++         confirmationState.keyHandler = function (e) {
++            if (!confirmationState.isOpen) return;
++
++            var currentCancelBtn = document.getElementById("confirmCancel");
++            var currentOkBtn = document.getElementById("confirmOk");
++
++            // BACK (Tizen: 10009), Backspace (8), or ESC (27)
++            if (
++               e.keyCode === KeyCodes.BACK ||
++               e.keyCode === 8 ||
++               e.keyCode === 27
++            ) {
++               e.preventDefault();
++               e.stopPropagation();
++               handleCancel();
++               return;
++            }
+ 
+-            // Create handler functions with proper closure
+-            var handleCancel = function () {
+-               if (!confirmationState.isOpen) return;
+-               confirmationState.isOpen = false;
+-               modal.style.display = "none";
+-               if (confirmationState.callback) {
+-                  confirmationState.callback(false);
++            // ENTER (13)
++            if (e.keyCode === 13) {
++               e.preventDefault();
++               e.stopPropagation();
++               if (document.activeElement === currentOkBtn) {
++                  handleOk();
++               } else if (document.activeElement === currentCancelBtn) {
++                  handleCancel();
++               } else {
++                  // If nothing focused, default to Cancel for safety
++                  handleCancel();
+                }
+-            };
++               return;
++            }
+ 
+-            var handleOk = function () {
+-               if (!confirmationState.isOpen) return;
+-               confirmationState.isOpen = false;
+-               modal.style.display = "none";
+-               if (confirmationState.callback) {
+-                  confirmationState.callback(true);
++            // LEFT (37) / RIGHT (39) to move between buttons
++            if (e.keyCode === 37 || e.keyCode === 39) {
++               e.preventDefault();
++               e.stopPropagation();
++               if (document.activeElement === currentOkBtn) {
++                  currentCancelBtn.focus();
++                  currentCancelBtn.style.borderColor = "var(--accent-color)";
++                  currentOkBtn.style.borderColor = "transparent";
++               } else {
++                  currentOkBtn.focus();
++                  currentOkBtn.style.borderColor = "var(--accent-color)";
++                  currentCancelBtn.style.borderColor = "transparent";
+                }
+-            };
++               return;
++            }
++         };
+ 
+-            // Remove any previous event listeners
+-            var newCancelBtn = cancelBtn.cloneNode(true);
+-            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+-            cancelBtn = newCancelBtn;
+-            document
+-               .getElementById("confirmCancel")
+-               .addEventListener("click", handleCancel);
++         document.addEventListener("keydown", confirmationState.keyHandler);
+ 
+-            var newOkBtn = okBtn.cloneNode(true);
+-            okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+-            okBtn = newOkBtn;
+-            document
+-               .getElementById("confirmOk")
+-               .addEventListener("click", handleOk);
++         // Focus the Cancel button by default (safer for destructive actions)
++         setTimeout(function () {
++            var cancelBtn = document.getElementById("confirmCancel");
++            cancelBtn.focus();
++            cancelBtn.style.borderColor = "var(--accent-color)";
++         }, 100);
++      }
++
++      function closeConfirmation() {
++         var modal = document.getElementById("confirmationModal");
++         confirmationState.isOpen = false;
++         modal.style.display = "none";
++         if (confirmationState.callback) {
++            confirmationState.callback(false);
++         }
++      }
++      // Handle input focus to scroll into view when keyboard appears
++      document.addEventListener("DOMContentLoaded", function () {
++         var inputs = document.querySelectorAll(".input-field");
++
++         inputs.forEach(function (input) {
++            input.addEventListener("focus", function () {
++               var self = this;
++               // Delay to allow keyboard to appear
++               setTimeout(function () {
++                  // Scroll the input into view
++                  self.scrollIntoView({
++                     behavior: "smooth",
++                     block: "center",
++                  });
++               }, 300);
++            });
++         });
++      });
+ 
+-            // Remove old keyboard handler
+-            document.removeEventListener(
+-               "keydown",
+-               confirmationState.keyHandler
+-            );
++      document.addEventListener("keydown", function (evt) {
++         evt = evt || window.event;
+ 
+-            // Create new keyboard handler
+-            confirmationState.keyHandler = function (e) {
+-               if (!confirmationState.isOpen) return;
++         if (evt.keyCode === KeyCodes.BACK) {
++            TizenPlatform.platformBack();
++            return;
++         }
+ 
+-               var currentCancelBtn = document.getElementById("confirmCancel");
+-               var currentOkBtn = document.getElementById("confirmOk");
++         var activeElement = document.activeElement;
+ 
+-               // BACK (Tizen: 10009), Backspace (8), or ESC (27)
+-               if (
+-                  e.keyCode === KeyCodes.BACK ||
+-                  e.keyCode === 8 ||
+-                  e.keyCode === 27
+-               ) {
+-                  e.preventDefault();
+-                  e.stopPropagation();
+-                  handleCancel();
+-                  return;
+-               }
++         // Handle user row horizontal navigation
++         if (
++            activeElement &&
++            activeElement.classList.contains("user-card")
++         ) {
++            var userCards = Array.from(
++               document.querySelectorAll(".user-card")
++            );
++            var currentIndex = userCards.indexOf(activeElement);
+ 
+-               // ENTER (13)
+-               if (e.keyCode === 13) {
+-                  e.preventDefault();
+-                  e.stopPropagation();
+-                  if (document.activeElement === currentOkBtn) {
+-                     handleOk();
+-                  } else if (document.activeElement === currentCancelBtn) {
+-                     handleCancel();
+-                  } else {
+-                     // If nothing focused, default to Cancel for safety
+-                     handleCancel();
+-                  }
+-                  return;
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (currentIndex > 0) {
++                  userCards[currentIndex - 1].focus();
+                }
+-
+-               // LEFT (37) / RIGHT (39) to move between buttons
+-               if (e.keyCode === 37 || e.keyCode === 39) {
+-                  e.preventDefault();
+-                  e.stopPropagation();
+-                  if (document.activeElement === currentOkBtn) {
+-                     currentCancelBtn.focus();
+-                     currentCancelBtn.style.borderColor = "var(--accent-color)";
+-                     currentOkBtn.style.borderColor = "transparent";
+-                  } else {
+-                     currentOkBtn.focus();
+-                     currentOkBtn.style.borderColor = "var(--accent-color)";
+-                     currentCancelBtn.style.borderColor = "transparent";
++               return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (currentIndex < userCards.length - 1) {
++                  userCards[currentIndex + 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 40) {
++               // Down arrow - go to buttons
++               evt.preventDefault();
++               var manualLoginBtn =
++                  document.getElementById("showManualLoginBtn");
++               if (manualLoginBtn && manualLoginBtn.offsetParent !== null) {
++                  manualLoginBtn.focus();
++               } else {
++                  var backBtn = document.getElementById("backToServerBtn");
++                  if (backBtn && backBtn.offsetParent !== null) {
++                     backBtn.focus();
+                   }
+-                  return;
+                }
+-            };
+-
+-            document.addEventListener("keydown", confirmationState.keyHandler);
+-
+-            // Focus the Cancel button by default (safer for destructive actions)
+-            setTimeout(function () {
+-               var cancelBtn = document.getElementById("confirmCancel");
+-               cancelBtn.focus();
+-               cancelBtn.style.borderColor = "var(--accent-color)";
+-            }, 100);
+-         }
+-
+-         function closeConfirmation() {
+-            var modal = document.getElementById("confirmationModal");
+-            confirmationState.isOpen = false;
+-            modal.style.display = "none";
+-            if (confirmationState.callback) {
+-               confirmationState.callback(false);
++               return;
+             }
+          }
+-         // Handle input focus to scroll into view when keyboard appears
+-         document.addEventListener("DOMContentLoaded", function () {
+-            var inputs = document.querySelectorAll(".input-field");
+ 
+-            inputs.forEach(function (input) {
+-               input.addEventListener("focus", function () {
+-                  var self = this;
+-                  // Delay to allow keyboard to appear
+-                  setTimeout(function () {
+-                     // Scroll the input into view
+-                     self.scrollIntoView({
+-                        behavior: "smooth",
+-                        block: "center",
+-                     });
+-                  }, 300);
+-               });
+-            });
++         // Handle bottom buttons navigation (Manual Login and Back to Server)
++         var bottomButtons = [
++            document.getElementById("showManualLoginBtn"),
++            document.getElementById("backToServerBtn"),
++         ].filter(function (btn) {
++            return btn && btn.offsetParent !== null;
+          });
+ 
+-         document.addEventListener("keydown", function (evt) {
+-            evt = evt || window.event;
+-
+-            if (evt.keyCode === KeyCodes.BACK) {
+-               TizenPlatform.platformBack();
++         var bottomButtonIndex = bottomButtons.indexOf(activeElement);
++         if (bottomButtonIndex !== -1) {
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (bottomButtonIndex > 0) {
++                  bottomButtons[bottomButtonIndex - 1].focus();
++               }
+                return;
+-            }
+-
+-            var activeElement = document.activeElement;
+-
+-            // Handle user row horizontal navigation
+-            if (
+-               activeElement &&
+-               activeElement.classList.contains("user-card")
+-            ) {
+-               var userCards = Array.from(
+-                  document.querySelectorAll(".user-card")
+-               );
+-               var currentIndex = userCards.indexOf(activeElement);
+-
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (currentIndex > 0) {
+-                     userCards[currentIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (currentIndex < userCards.length - 1) {
+-                     userCards[currentIndex + 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 40) {
+-                  // Down arrow - go to buttons
+-                  evt.preventDefault();
+-                  var manualLoginBtn =
+-                     document.getElementById("showManualLoginBtn");
+-                  if (manualLoginBtn && manualLoginBtn.offsetParent !== null) {
+-                     manualLoginBtn.focus();
+-                  } else {
+-                     var backBtn = document.getElementById("backToServerBtn");
+-                     if (backBtn && backBtn.offsetParent !== null) {
+-                        backBtn.focus();
+-                     }
+-                  }
+-                  return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (bottomButtonIndex < bottomButtons.length - 1) {
++                  bottomButtons[bottomButtonIndex + 1].focus();
+                }
+-            }
+-
+-            // Handle bottom buttons navigation (Manual Login and Back to Server)
+-            var bottomButtons = [
+-               document.getElementById("showManualLoginBtn"),
+-               document.getElementById("backToServerBtn"),
+-            ].filter(function (btn) {
+-               return btn && btn.offsetParent !== null;
+-            });
+-
+-            var bottomButtonIndex = bottomButtons.indexOf(activeElement);
+-            if (bottomButtonIndex !== -1) {
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (bottomButtonIndex > 0) {
+-                     bottomButtons[bottomButtonIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (bottomButtonIndex < bottomButtons.length - 1) {
+-                     bottomButtons[bottomButtonIndex + 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 38) {
+-                  // Up arrow - go to user row
+-                  evt.preventDefault();
+-                  var userCards = document.querySelectorAll(".user-card");
+-                  if (userCards.length > 0) {
+-                     userCards[0].focus();
+-                  }
+-                  // If no user cards, stay on button
+-                  return;
++               return;
++            } else if (evt.keyCode === 38) {
++               // Up arrow - go to user row
++               evt.preventDefault();
++               var userCards = document.querySelectorAll(".user-card");
++               if (userCards.length > 0) {
++                  userCards[0].focus();
+                }
++               // If no user cards, stay on button
++               return;
+             }
++         }
+ 
+-            // Handle password/Quick Connect method buttons (horizontal)
+-            var methodButtons = [
+-               document.getElementById("usePasswordBtn"),
+-               document.getElementById("useQuickConnectBtn"),
+-            ].filter(function (btn) {
+-               return btn && btn.offsetParent !== null;
+-            });
++         // Handle password/Quick Connect method buttons (horizontal)
++         var methodButtons = [
++            document.getElementById("usePasswordBtn"),
++            document.getElementById("useQuickConnectBtn"),
++         ].filter(function (btn) {
++            return btn && btn.offsetParent !== null;
++         });
+ 
+-            var methodButtonIndex = methodButtons.indexOf(activeElement);
+-            if (methodButtonIndex !== -1) {
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (methodButtonIndex > 0) {
+-                     methodButtons[methodButtonIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (methodButtonIndex < methodButtons.length - 1) {
+-                     methodButtons[methodButtonIndex + 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 40) {
+-                  // Down arrow - go to form below
+-                  evt.preventDefault();
+-                  var passwordInput = document.getElementById("password");
+-                  if (passwordInput && passwordInput.offsetParent !== null) {
+-                     passwordInput.focus();
+-                  }
+-                  return;
++         var methodButtonIndex = methodButtons.indexOf(activeElement);
++         if (methodButtonIndex !== -1) {
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (methodButtonIndex > 0) {
++                  methodButtons[methodButtonIndex - 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (methodButtonIndex < methodButtons.length - 1) {
++                  methodButtons[methodButtonIndex + 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 40) {
++               // Down arrow - go to form below
++               evt.preventDefault();
++               var passwordInput = document.getElementById("password");
++               if (passwordInput && passwordInput.offsetParent !== null) {
++                  passwordInput.focus();
+                }
++               return;
+             }
++         }
+ 
+-            // Handle manual login method buttons (horizontal)
+-            var manualMethodButtons = [
+-               document.getElementById("useManualPasswordBtn"),
+-               document.getElementById("useManualQuickConnectBtn"),
+-            ].filter(function (btn) {
+-               return btn && btn.offsetParent !== null;
+-            });
++         // Handle manual login method buttons (horizontal)
++         var manualMethodButtons = [
++            document.getElementById("useManualPasswordBtn"),
++            document.getElementById("useManualQuickConnectBtn"),
++         ].filter(function (btn) {
++            return btn && btn.offsetParent !== null;
++         });
+ 
+-            var manualMethodButtonIndex =
+-               manualMethodButtons.indexOf(activeElement);
+-            if (manualMethodButtonIndex !== -1) {
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (manualMethodButtonIndex > 0) {
+-                     manualMethodButtons[manualMethodButtonIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (
+-                     manualMethodButtonIndex <
+-                     manualMethodButtons.length - 1
+-                  ) {
+-                     manualMethodButtons[manualMethodButtonIndex + 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 40) {
+-                  // Down arrow - go to form below
+-                  evt.preventDefault();
+-                  var manualUsernameInput =
+-                     document.getElementById("manualUsername");
+-                  if (
+-                     manualUsernameInput &&
+-                     manualUsernameInput.offsetParent !== null
+-                  ) {
+-                     manualUsernameInput.focus();
+-                  }
+-                  return;
++         var manualMethodButtonIndex =
++            manualMethodButtons.indexOf(activeElement);
++         if (manualMethodButtonIndex !== -1) {
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (manualMethodButtonIndex > 0) {
++                  manualMethodButtons[manualMethodButtonIndex - 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (
++                  manualMethodButtonIndex <
++                  manualMethodButtons.length - 1
++               ) {
++                  manualMethodButtons[manualMethodButtonIndex + 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 40) {
++               // Down arrow - go to form below
++               evt.preventDefault();
++               var manualUsernameInput =
++                  document.getElementById("manualUsername");
++               if (
++                  manualUsernameInput &&
++                  manualUsernameInput.offsetParent !== null
++               ) {
++                  manualUsernameInput.focus();
+                }
++               return;
+             }
++         }
+ 
+-            // Handle manual login form fields (vertical navigation)
+-            if (activeElement && activeElement.id === "manualUsername") {
+-               if (evt.keyCode === 40) {
+-                  // Down arrow
+-                  evt.preventDefault();
+-                  var manualPassword =
+-                     document.getElementById("manualPassword");
+-                  if (manualPassword && manualPassword.offsetParent !== null) {
+-                     manualPassword.focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 38) {
+-                  // Up arrow
+-                  evt.preventDefault();
+-                  var useManualPasswordBtn = document.getElementById(
+-                     "useManualPasswordBtn"
+-                  );
+-                  var useManualQuickConnectBtn = document.getElementById(
+-                     "useManualQuickConnectBtn"
+-                  );
+-                  var showManualLoginBtn =
+-                     document.getElementById("showManualLoginBtn");
+-                  if (
+-                     useManualQuickConnectBtn &&
+-                     useManualQuickConnectBtn.offsetParent !== null
+-                  ) {
+-                     useManualQuickConnectBtn.focus();
+-                  } else if (
+-                     useManualPasswordBtn &&
+-                     useManualPasswordBtn.offsetParent !== null
+-                  ) {
+-                     useManualPasswordBtn.focus();
+-                  } else if (
+-                     showManualLoginBtn &&
+-                     showManualLoginBtn.offsetParent !== null
+-                  ) {
+-                     showManualLoginBtn.focus();
+-                  }
+-                  return;
++         // Handle manual login form fields (vertical navigation)
++         if (activeElement && activeElement.id === "manualUsername") {
++            if (evt.keyCode === 40) {
++               // Down arrow
++               evt.preventDefault();
++               var manualPassword =
++                  document.getElementById("manualPassword");
++               if (manualPassword && manualPassword.offsetParent !== null) {
++                  manualPassword.focus();
+                }
++               return;
++            } else if (evt.keyCode === 38) {
++               // Up arrow
++               evt.preventDefault();
++               var useManualPasswordBtn = document.getElementById(
++                  "useManualPasswordBtn"
++               );
++               var useManualQuickConnectBtn = document.getElementById(
++                  "useManualQuickConnectBtn"
++               );
++               var showManualLoginBtn =
++                  document.getElementById("showManualLoginBtn");
++               if (
++                  useManualQuickConnectBtn &&
++                  useManualQuickConnectBtn.offsetParent !== null
++               ) {
++                  useManualQuickConnectBtn.focus();
++               } else if (
++                  useManualPasswordBtn &&
++                  useManualPasswordBtn.offsetParent !== null
++               ) {
++                  useManualPasswordBtn.focus();
++               } else if (
++                  showManualLoginBtn &&
++                  showManualLoginBtn.offsetParent !== null
++               ) {
++                  showManualLoginBtn.focus();
++               }
++               return;
+             }
++         }
+ 
+-            if (activeElement && activeElement.id === "manualPassword") {
+-               if (evt.keyCode === 40) {
+-                  // Down arrow
+-                  evt.preventDefault();
+-                  var manualLoginBtn =
+-                     document.getElementById("manualLoginBtn");
+-                  if (manualLoginBtn && manualLoginBtn.offsetParent !== null) {
+-                     manualLoginBtn.focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 38) {
+-                  // Up arrow
+-                  evt.preventDefault();
+-                  var manualUsername =
+-                     document.getElementById("manualUsername");
+-                  if (manualUsername && manualUsername.offsetParent !== null) {
+-                     manualUsername.focus();
+-                  }
+-                  return;
++         if (activeElement && activeElement.id === "manualPassword") {
++            if (evt.keyCode === 40) {
++               // Down arrow
++               evt.preventDefault();
++               var manualLoginBtn =
++                  document.getElementById("manualLoginBtn");
++               if (manualLoginBtn && manualLoginBtn.offsetParent !== null) {
++                  manualLoginBtn.focus();
+                }
++               return;
++            } else if (evt.keyCode === 38) {
++               // Up arrow
++               evt.preventDefault();
++               var manualUsername =
++                  document.getElementById("manualUsername");
++               if (manualUsername && manualUsername.offsetParent !== null) {
++                  manualUsername.focus();
++               }
++               return;
+             }
++         }
+ 
+-            // Handle manual login buttons (horizontal)
+-            var manualLoginButtons = [
+-               document.getElementById("manualLoginBtn"),
+-               document.getElementById("cancelManualLoginBtn"),
+-            ].filter(function (btn) {
+-               return btn && btn.offsetParent !== null;
+-            });
++         // Handle manual login buttons (horizontal)
++         var manualLoginButtons = [
++            document.getElementById("manualLoginBtn"),
++            document.getElementById("cancelManualLoginBtn"),
++         ].filter(function (btn) {
++            return btn && btn.offsetParent !== null;
++         });
+ 
+-            var manualLoginButtonIndex =
+-               manualLoginButtons.indexOf(activeElement);
+-            if (manualLoginButtonIndex !== -1) {
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (manualLoginButtonIndex > 0) {
+-                     manualLoginButtons[manualLoginButtonIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (manualLoginButtonIndex < manualLoginButtons.length - 1) {
+-                     manualLoginButtons[manualLoginButtonIndex + 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 38) {
+-                  // Up arrow - go to password field
+-                  evt.preventDefault();
+-                  var manualPassword =
+-                     document.getElementById("manualPassword");
+-                  if (manualPassword && manualPassword.offsetParent !== null) {
+-                     manualPassword.focus();
+-                  }
+-                  return;
++         var manualLoginButtonIndex =
++            manualLoginButtons.indexOf(activeElement);
++         if (manualLoginButtonIndex !== -1) {
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (manualLoginButtonIndex > 0) {
++                  manualLoginButtons[manualLoginButtonIndex - 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (manualLoginButtonIndex < manualLoginButtons.length - 1) {
++                  manualLoginButtons[manualLoginButtonIndex + 1].focus();
+                }
++               return;
++            } else if (evt.keyCode === 38) {
++               // Up arrow - go to password field
++               evt.preventDefault();
++               var manualPassword =
++                  document.getElementById("manualPassword");
++               if (manualPassword && manualPassword.offsetParent !== null) {
++                  manualPassword.focus();
++               }
++               return;
+             }
++         }
+ 
+-            // Handle manual Quick Connect back button (should navigate up to method buttons)
+-            if (
+-               activeElement &&
+-               activeElement.id === "cancelManualQuickConnectBtn"
+-            ) {
+-               if (evt.keyCode === 38) {
+-                  // Up arrow
+-                  evt.preventDefault();
+-                  var useManualPasswordBtn = document.getElementById(
+-                     "useManualPasswordBtn"
+-                  );
+-                  var useManualQuickConnectBtn = document.getElementById(
+-                     "useManualQuickConnectBtn"
+-                  );
+-                  if (
+-                     useManualPasswordBtn &&
+-                     useManualPasswordBtn.offsetParent !== null
+-                  ) {
+-                     useManualPasswordBtn.focus();
+-                  } else if (
+-                     useManualQuickConnectBtn &&
+-                     useManualQuickConnectBtn.offsetParent !== null
+-                  ) {
+-                     useManualQuickConnectBtn.focus();
+-                  }
+-                  return;
++         // Handle manual Quick Connect back button (should navigate up to method buttons)
++         if (
++            activeElement &&
++            activeElement.id === "cancelManualQuickConnectBtn"
++         ) {
++            if (evt.keyCode === 38) {
++               // Up arrow
++               evt.preventDefault();
++               var useManualPasswordBtn = document.getElementById(
++                  "useManualPasswordBtn"
++               );
++               var useManualQuickConnectBtn = document.getElementById(
++                  "useManualQuickConnectBtn"
++               );
++               if (
++                  useManualPasswordBtn &&
++                  useManualPasswordBtn.offsetParent !== null
++               ) {
++                  useManualPasswordBtn.focus();
++               } else if (
++                  useManualQuickConnectBtn &&
++                  useManualQuickConnectBtn.offsetParent !== null
++               ) {
++                  useManualQuickConnectBtn.focus();
+                }
++               return;
+             }
++         }
+ 
+-            // Handle server URL input field
+-            if (activeElement && activeElement.id === "serverUrl") {
+-               if (evt.keyCode === 40) {
+-                  // Down arrow - go to Connect button
+-                  evt.preventDefault();
+-                  var connectBtn = document.getElementById("connectBtn");
+-                  if (connectBtn && connectBtn.offsetParent !== null) {
+-                     connectBtn.focus();
+-                  }
+-                  return;
++         // Handle server URL input field
++         if (activeElement && activeElement.id === "serverUrl") {
++            if (evt.keyCode === 40) {
++               // Down arrow - go to Connect button
++               evt.preventDefault();
++               var connectBtn = document.getElementById("connectBtn");
++               if (connectBtn && connectBtn.offsetParent !== null) {
++                  connectBtn.focus();
+                }
++               return;
+             }
++         }
+ 
+-            // Handle server connection buttons (horizontal)
+-            var serverButtons = [
+-               document.getElementById("connectBtn"),
+-               document.getElementById("discoverBtn"),
+-            ].filter(function (btn) {
+-               return btn && btn.offsetParent !== null;
+-            });
++         // Handle server connection buttons (horizontal)
++         var serverButtons = [
++            document.getElementById("connectBtn"),
++            document.getElementById("discoverBtn"),
++         ].filter(function (btn) {
++            return btn && btn.offsetParent !== null;
++         });
+ 
+-            var serverButtonIndex = serverButtons.indexOf(activeElement);
+-            if (serverButtonIndex !== -1) {
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (serverButtonIndex > 0) {
+-                     serverButtons[serverButtonIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (serverButtonIndex < serverButtons.length - 1) {
+-                     serverButtons[serverButtonIndex + 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 38) {
+-                  // Up arrow - go back to input
+-                  evt.preventDefault();
+-                  var serverUrl = document.getElementById("serverUrl");
+-                  if (serverUrl && serverUrl.offsetParent !== null) {
+-                     serverUrl.focus();
+-                  }
+-                  return;
++         var serverButtonIndex = serverButtons.indexOf(activeElement);
++         if (serverButtonIndex !== -1) {
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (serverButtonIndex > 0) {
++                  serverButtons[serverButtonIndex - 1].focus();
+                }
++               return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (serverButtonIndex < serverButtons.length - 1) {
++                  serverButtons[serverButtonIndex + 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 38) {
++               // Up arrow - go back to input
++               evt.preventDefault();
++               var serverUrl = document.getElementById("serverUrl");
++               if (serverUrl && serverUrl.offsetParent !== null) {
++                  serverUrl.focus();
++               }
++               return;
+             }
++         }
+ 
+-            // Handle password form buttons (horizontal)
+-            var passwordButtons = [
+-               document.getElementById("loginBtn"),
+-               document.getElementById("cancelLoginBtn"),
+-            ].filter(function (btn) {
+-               return btn && btn.offsetParent !== null;
+-            });
++         // Handle password form buttons (horizontal)
++         var passwordButtons = [
++            document.getElementById("loginBtn"),
++            document.getElementById("cancelLoginBtn"),
++         ].filter(function (btn) {
++            return btn && btn.offsetParent !== null;
++         });
+ 
+-            var passwordButtonIndex = passwordButtons.indexOf(activeElement);
+-            if (passwordButtonIndex !== -1) {
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (passwordButtonIndex > 0) {
+-                     passwordButtons[passwordButtonIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (passwordButtonIndex < passwordButtons.length - 1) {
+-                     passwordButtons[passwordButtonIndex + 1].focus();
+-                  }
+-                  return;
++         var passwordButtonIndex = passwordButtons.indexOf(activeElement);
++         if (passwordButtonIndex !== -1) {
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (passwordButtonIndex > 0) {
++                  passwordButtons[passwordButtonIndex - 1].focus();
+                }
+-            }
+-
+-            // Handle password form input field
+-            if (activeElement && activeElement.id === "password") {
+-               if (evt.keyCode === 40) {
+-                  // Down arrow
+-                  evt.preventDefault();
+-                  var loginBtn = document.getElementById("loginBtn");
+-                  if (loginBtn && loginBtn.offsetParent !== null) {
+-                     loginBtn.focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 38) {
+-                  // Up arrow
+-                  evt.preventDefault();
+-                  var usePasswordBtn =
+-                     document.getElementById("usePasswordBtn");
+-                  var useQuickConnectBtn =
+-                     document.getElementById("useQuickConnectBtn");
+-                  if (
+-                     useQuickConnectBtn &&
+-                     useQuickConnectBtn.offsetParent !== null
+-                  ) {
+-                     useQuickConnectBtn.focus();
+-                  } else if (
+-                     usePasswordBtn &&
+-                     usePasswordBtn.offsetParent !== null
+-                  ) {
+-                     usePasswordBtn.focus();
+-                  }
+-                  return;
++               return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (passwordButtonIndex < passwordButtons.length - 1) {
++                  passwordButtons[passwordButtonIndex + 1].focus();
+                }
++               return;
+             }
++         }
+ 
+-            // Handle password button navigation for vertical movement
+-            var passwordButtonIndex = passwordButtons.indexOf(activeElement);
+-            if (passwordButtonIndex !== -1) {
+-               if (evt.keyCode === 37) {
+-                  // Left arrow
+-                  evt.preventDefault();
+-                  if (passwordButtonIndex > 0) {
+-                     passwordButtons[passwordButtonIndex - 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 39) {
+-                  // Right arrow
+-                  evt.preventDefault();
+-                  if (passwordButtonIndex < passwordButtons.length - 1) {
+-                     passwordButtons[passwordButtonIndex + 1].focus();
+-                  }
+-                  return;
+-               } else if (evt.keyCode === 38) {
+-                  // Up arrow - go to password field
+-                  evt.preventDefault();
+-                  var passwordInput = document.getElementById("password");
+-                  if (passwordInput && passwordInput.offsetParent !== null) {
+-                     passwordInput.focus();
+-                  }
+-                  return;
++         // Handle password form input field
++         if (activeElement && activeElement.id === "password") {
++            if (evt.keyCode === 40) {
++               // Down arrow
++               evt.preventDefault();
++               var loginBtn = document.getElementById("loginBtn");
++               if (loginBtn && loginBtn.offsetParent !== null) {
++                  loginBtn.focus();
+                }
++               return;
++            } else if (evt.keyCode === 38) {
++               // Up arrow
++               evt.preventDefault();
++               var usePasswordBtn =
++                  document.getElementById("usePasswordBtn");
++               var useQuickConnectBtn =
++                  document.getElementById("useQuickConnectBtn");
++               if (
++                  useQuickConnectBtn &&
++                  useQuickConnectBtn.offsetParent !== null
++               ) {
++                  useQuickConnectBtn.focus();
++               } else if (
++                  usePasswordBtn &&
++                  usePasswordBtn.offsetParent !== null
++               ) {
++                  usePasswordBtn.focus();
++               }
++               return;
+             }
++         }
+ 
+-            // Handle Quick Connect cancel button (should navigate up to method buttons)
+-            if (activeElement && activeElement.id === "cancelQuickConnectBtn") {
+-               if (evt.keyCode === 38) {
+-                  // Up arrow
+-                  evt.preventDefault();
+-                  var usePasswordBtn =
+-                     document.getElementById("usePasswordBtn");
+-                  var useQuickConnectBtn =
+-                     document.getElementById("useQuickConnectBtn");
+-                  if (usePasswordBtn && usePasswordBtn.offsetParent !== null) {
+-                     usePasswordBtn.focus();
+-                  } else if (
+-                     useQuickConnectBtn &&
+-                     useQuickConnectBtn.offsetParent !== null
+-                  ) {
+-                     useQuickConnectBtn.focus();
+-                  }
+-                  return;
++         // Handle password button navigation for vertical movement
++         var passwordButtonIndex = passwordButtons.indexOf(activeElement);
++         if (passwordButtonIndex !== -1) {
++            if (evt.keyCode === 37) {
++               // Left arrow
++               evt.preventDefault();
++               if (passwordButtonIndex > 0) {
++                  passwordButtons[passwordButtonIndex - 1].focus();
+                }
++               return;
++            } else if (evt.keyCode === 39) {
++               // Right arrow
++               evt.preventDefault();
++               if (passwordButtonIndex < passwordButtons.length - 1) {
++                  passwordButtons[passwordButtonIndex + 1].focus();
++               }
++               return;
++            } else if (evt.keyCode === 38) {
++               // Up arrow - go to password field
++               evt.preventDefault();
++               var passwordInput = document.getElementById("password");
++               if (passwordInput && passwordInput.offsetParent !== null) {
++                  passwordInput.focus();
++               }
++               return;
+             }
++         }
+ 
+-            // General vertical navigation for other elements
+-            var focusableElements =
+-               'input:not([disabled]):not([type="password"]), button:not([disabled]), .server-item, .user-card';
+-            var focusable = Array.from(
+-               document.querySelectorAll(focusableElements)
+-            ).filter(function (el) {
+-               return (
+-                  el.offsetWidth > 0 &&
+-                  el.offsetHeight > 0 &&
+-                  el.offsetParent !== null
+-               );
+-            });
+-
+-            var currentIndex = focusable.indexOf(activeElement);
+-
++         // Handle Quick Connect cancel button (should navigate up to method buttons)
++         if (activeElement && activeElement.id === "cancelQuickConnectBtn") {
+             if (evt.keyCode === 38) {
+                // Up arrow
+                evt.preventDefault();
+-               if (currentIndex > 0) {
+-                  focusable[currentIndex - 1].focus();
+-               }
+-            } else if (evt.keyCode === 40) {
+-               // Down arrow
+-               evt.preventDefault();
+-               if (currentIndex < focusable.length - 1) {
+-                  focusable[currentIndex + 1].focus();
++               var usePasswordBtn =
++                  document.getElementById("usePasswordBtn");
++               var useQuickConnectBtn =
++                  document.getElementById("useQuickConnectBtn");
++               if (usePasswordBtn && usePasswordBtn.offsetParent !== null) {
++                  usePasswordBtn.focus();
++               } else if (
++                  useQuickConnectBtn &&
++                  useQuickConnectBtn.offsetParent !== null
++               ) {
++                  useQuickConnectBtn.focus();
+                }
++               return;
+             }
++         }
++
++         // General vertical navigation for other elements
++         var focusableElements =
++            'input:not([disabled]):not([type="password"]), button:not([disabled]), .server-item, .user-card';
++         var focusable = Array.from(
++            document.querySelectorAll(focusableElements)
++         ).filter(function (el) {
++            return (
++               el.offsetWidth > 0 &&
++               el.offsetHeight > 0 &&
++               el.offsetParent !== null
++            );
+          });
+-      </script>
+-   </body>
+-</html>
++
++         var currentIndex = focusable.indexOf(activeElement);
++
++         if (evt.keyCode === 38) {
++            // Up arrow
++            evt.preventDefault();
++            if (currentIndex > 0) {
++               focusable[currentIndex - 1].focus();
++            }
++         } else if (evt.keyCode === 40) {
++            // Down arrow
++            evt.preventDefault();
++            if (currentIndex < focusable.length - 1) {
++               focusable[currentIndex + 1].focus();
++            }
++         }
++      });
++   </script>
++</body>
++
++</html>
+\ No newline at end of file
+diff --git a/player.html b/player.html
+index ebccb97..fd4f7be 100644
+--- a/player.html
++++ b/player.html
+@@ -147,7 +147,16 @@
+    <!-- Subtitle Track Selection Modal -->
+    <div id="subtitleModal" class="track-modal">
+       <div class="modal-content">
+-         <h2 class="modal-title">Select Subtitle</h2>
++         <div class="modal-header">
++            <h2 class="modal-title">Select Subtitle</h2>
++            <button id="subtitleOffsetBtn" class="modal-header-btn" tabindex="0" title="Subtitle Offset"
++               style="margin-right: 10px;">
++               <img src="assets/icons/clock.png" alt="Offset" class="modal-header-icon" />
++            </button>
++            <button id="subtitleSettingsBtn" class="modal-header-btn" tabindex="0" title="Subtitle Settings">
++               <img src="assets/icons/options.png" alt="Settings" class="modal-header-icon" />
++            </button>
++         </div>
+          <div id="subtitleTrackList" class="track-list"></div>
+       </div>
+    </div>
+@@ -207,6 +216,81 @@
+       <p>Loading...</p>
+    </div>
+ 
++   <!-- Subtitle Settings Overlay (In-Player) -->
++   <div id="subtitleSettingsOverlay" class="track-modal" style="display: none;">
++      <div class="modal-content subtitle-settings-modal">
++         <h2 class="modal-title">Subtitle Settings</h2>
++         <div class="subtitle-settings-list">
++            <div class="subtitle-setting-item" data-setting="size" tabindex="0">
++               <span class="setting-label">Size</span>
++               <span id="playerSubSize" class="setting-value">Medium</span>
++            </div>
++            <div class="subtitle-setting-item" data-setting="color" tabindex="0">
++               <span class="setting-label">Color</span>
++               <span id="playerSubColor" class="setting-value">White</span>
++            </div>
++            <div class="subtitle-setting-item subtitle-setting-slider" data-setting="opacity" tabindex="0">
++               <span class="setting-label">Opacity</span>
++               <div class="player-slider-container">
++                  <div class="player-slider-track">
++                     <div id="playerOpacitySliderFill" class="player-slider-fill"></div>
++                  </div>
++                  <span id="playerSubOpacity" class="setting-value">100%</span>
++               </div>
++            </div>
++            <div class="subtitle-setting-item" data-setting="position" tabindex="0">
++               <span class="setting-label">Position</span>
++               <span id="playerSubPosition" class="setting-value">Bottom</span>
++            </div>
++            <div class="subtitle-setting-item subtitle-setting-slider" data-setting="absolutePosition" tabindex="0"
++               id="playerAbsolutePositionItem" style="display: none;">
++               <span class="setting-label">Absolute Position</span>
++               <div class="player-slider-container">
++                  <div class="player-slider-track">
++                     <div id="playerAbsoluteSliderFill" class="player-slider-fill"></div>
++                  </div>
++                  <span id="playerSubAbsolutePosition" class="setting-value">90%</span>
++               </div>
++            </div>
++            <div class="subtitle-setting-item" data-setting="background" tabindex="0">
++               <span class="setting-label">Background</span>
++               <span id="playerSubBackground" class="setting-value">Drop Shadow</span>
++            </div>
++         </div>
++         <p class="modal-hint">Press BACK to save and return</p>
++      </div>
++   </div>
++
++   <!-- Subtitle Offset Overlay -->
++   <div id="subtitleOffsetOverlay" class="track-modal" style="display: none;">
++      <div class="modal-content subtitle-offset-modal">
++         <div class="modal-header">
++            <h2 class="modal-title">Subtitle Offset</h2>
++            <button id="closeSubtitleOffsetBtn" class="modal-header-btn" tabindex="0">
++               <img src="assets/icons/close.png" alt="Close" class="modal-header-icon" />
++            </button>
++         </div>
++         <div class="subtitle-offset-content">
++            <div class="offset-value-display">
++               <span id="subtitleOffsetValue">0.0s</span>
++            </div>
++            <div class="player-slider-container offset-slider-container">
++               <div class="player-slider-track">
++                  <!-- Center marker for 0s -->
++                  <div class="slider-center-marker"></div>
++                  <div id="subtitleOffsetSliderFill" class="player-slider-fill"></div>
++               </div>
++            </div>
++            <div class="offset-labels">
++               <span>-30s</span>
++               <span>0s</span>
++               <span>+30s</span>
++            </div>
++         </div>
++         <p class="modal-hint">Left/Right to adjust • Back to save</p>
++      </div>
++   </div>
++
+    <!-- Debug Overlay -->
+    <div id="debugLog" class="debug-log" style="display: none;"></div>
+ 
+diff --git a/settings.html b/settings.html
+index 01f263c..dcd51bb 100644
+--- a/settings.html
++++ b/settings.html
+@@ -278,6 +278,22 @@
+                   <div class="setting-value" id="subtitleColorValue">White</div>
+                </div>
+ 
++               <div class="setting-item" data-setting="subtitleOpacity" tabindex="0">
++                  <div class="setting-label">
++                     <div class="setting-title">Text Opacity</div>
++                     <div class="setting-description">
++                        Opacity of the subtitle text
++                     </div>
++                  </div>
++                  <div class="setting-value" id="subtitleOpacityValue">100%</div>
++                  <div class="slider-container" style="display: none;">
++                     <div class="slider-track">
++                        <div class="slider-fill"></div>
++                     </div>
++                     <div class="slider-value-display"></div>
++                  </div>
++               </div>
++
+                <div class="setting-item" data-setting="subtitlePosition" tabindex="0">
+                   <div class="setting-label">
+                      <div class="setting-title">Vertical Position</div>
+@@ -288,6 +304,23 @@
+                   <div class="setting-value" id="subtitlePositionValue">Bottom</div>
+                </div>
+ 
++               <div class="setting-item" data-setting="subtitlePositionAbsolute" id="subtitlePositionAbsoluteItem"
++                  tabindex="0" style="display: none;">
++                  <div class="setting-label">
++                     <div class="setting-title">Absolute Position</div>
++                     <div class="setting-description">
++                        Vertical position from top (0-100%)
++                     </div>
++                  </div>
++                  <div class="setting-value" id="subtitlePositionAbsoluteValue">90%</div>
++                  <div class="slider-container" style="display: none;">
++                     <div class="slider-track">
++                        <div class="slider-fill"></div>
++                     </div>
++                     <div class="slider-value-display"></div>
++                  </div>
++               </div>
++
+                <div class="setting-item" data-setting="subtitleBackground" tabindex="0">
+                   <div class="setting-label">
+                      <div class="setting-title">Background</div>

@@ -1,4 +1,4 @@
-/* global webapis, tizen, localStorage */
+/* global webapis, tizen */
 /**
  * Device Profile Service - Detects Samsung Tizen TV hardware capabilities
  *
@@ -584,18 +584,18 @@ export const getJellyfinDeviceProfile = async () => {
 	// Embed: Only for image-based subs — triggers burn-in (transcoding) when selected.
 	const subtitleProfiles = [
 		// External method — server extracts and delivers subtitle tracks via API
-		{Format: 'srt', Method: 'External'},
-		{Format: 'subrip', Method: 'External'},
-		{Format: 'vtt', Method: 'External'},
-		{Format: 'ass', Method: 'External'},
-		{Format: 'ssa', Method: 'External'},
-		{Format: 'smi', Method: 'External'},
-		{Format: 'ttml', Method: 'External'},
-		{Format: 'sub', Method: 'External'},
+		{ Format: 'srt', Method: 'External' },
+		{ Format: 'subrip', Method: 'External' },
+		{ Format: 'vtt', Method: 'External' },
+		{ Format: 'ass', Method: 'External' },
+		{ Format: 'ssa', Method: 'External' },
+		{ Format: 'smi', Method: 'External' },
+		{ Format: 'ttml', Method: 'External' },
+		{ Format: 'sub', Method: 'External' },
 		// Image-based: burn-in only (client cannot render these)
-		{Format: 'pgs', Method: 'Embed'},
-		{Format: 'dvdsub', Method: 'Embed'},
-		{Format: 'dvbsub', Method: 'Embed'}
+		{ Format: 'pgs', Method: 'Embed' },
+		{ Format: 'dvdsub', Method: 'Embed' },
+		{ Format: 'dvbsub', Method: 'Embed' }
 	];
 
 	const responseProfiles = [

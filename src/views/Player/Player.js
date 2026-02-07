@@ -1,14 +1,16 @@
-import {useState, useEffect, useCallback, useRef, useMemo} from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Spottable from '@enact/spotlight/Spottable';
 import SpotlightContainerDecorator from '@enact/spotlight/SpotlightContainerDecorator';
 import Spotlight from '@enact/spotlight';
 import Button from '@enact/sandstone/Button';
 import Scroller from '@enact/sandstone/Scroller';
 import * as playback from '../../services/playback';
-import {initTizenAPI, registerAppStateObserver, keepScreenOn, cleanupVideoElement} from '../../services/tizenVideo';
-import {useSettings} from '../../context/SettingsContext';
-import {TIZEN_KEYS, isBackKey, isPlayPauseKey} from '../../utils/tizenKeys';
+import { initTizenAPI, registerAppStateObserver, keepScreenOn, cleanupVideoElement } from '../../services/tizenVideo';
+import { useSettings } from '../../context/SettingsContext';
+import { TIZEN_KEYS, isBackKey, isPlayPauseKey } from '../../utils/tizenKeys';
 import TrickplayPreview from '../../components/TrickplayPreview';
+import SubtitleOffsetOverlay from './SubtitleOffsetOverlay';
+import SubtitleSettingsOverlay from './SubtitleSettingsOverlay';
 
 import css from './Player.module.less';
 
@@ -48,14 +50,14 @@ const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 // Quality presets (bitrate in bps)
 const QUALITY_PRESETS = [
-	{label: 'Auto', value: null},
-	{label: '4K (60 Mbps)', value: 60000000, minRes: 3840},
-	{label: '1080p (20 Mbps)', value: 20000000, minRes: 1920},
-	{label: '1080p (10 Mbps)', value: 10000000, minRes: 1920},
-	{label: '720p (8 Mbps)', value: 8000000, minRes: 1280},
-	{label: '720p (4 Mbps)', value: 4000000, minRes: 1280},
-	{label: '480p (2 Mbps)', value: 2000000, minRes: 854},
-	{label: '360p (1 Mbps)', value: 1000000, minRes: 640}
+	{ label: 'Auto', value: null },
+	{ label: '4K (60 Mbps)', value: 60000000, minRes: 3840 },
+	{ label: '1080p (20 Mbps)', value: 20000000, minRes: 1920 },
+	{ label: '1080p (10 Mbps)', value: 10000000, minRes: 1920 },
+	{ label: '720p (8 Mbps)', value: 8000000, minRes: 1280 },
+	{ label: '720p (4 Mbps)', value: 4000000, minRes: 1280 },
+	{ label: '480p (2 Mbps)', value: 2000000, minRes: 854 },
+	{ label: '360p (1 Mbps)', value: 1000000, minRes: 640 }
 ];
 
 const CONTROLS_HIDE_DELAY = 5000;
@@ -63,84 +65,84 @@ const CONTROLS_HIDE_DELAY = 5000;
 // SVG Icon components
 const IconPlay = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z"/>
+		<path d="M320-200v-560l440 280-440 280Zm80-280Zm0 134 210-134-210-134v268Z" />
 	</svg>
 );
 
 const IconPause = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z"/>
+		<path d="M520-200v-560h240v560H520Zm-320 0v-560h240v560H200Zm400-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z" />
 	</svg>
 );
 
 const IconRewind = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M860-240 500-480l360-240v480Zm-400 0L100-480l360-240v480Zm-80-240Zm400 0Zm-400 90v-180l-136 90 136 90Zm400 0v-180l-136 90 136 90Z"/>
+		<path d="M860-240 500-480l360-240v480Zm-400 0L100-480l360-240v480Zm-80-240Zm400 0Zm-400 90v-180l-136 90 136 90Zm400 0v-180l-136 90 136 90Z" />
 	</svg>
 );
 
 const IconForward = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M100-240v-480l360 240-360 240Zm400 0v-480l360 240-360 240ZM180-480Zm400 0Zm-400 90 136-90-136-90v180Zm400 0 136-90-136-90v180Z"/>
+		<path d="M100-240v-480l360 240-360 240Zm400 0v-480l360 240-360 240ZM180-480Zm400 0Zm-400 90 136-90-136-90v180Zm400 0 136-90-136-90v180Z" />
 	</svg>
 );
 
 const IconSubtitle = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M200-160q-33 0-56.5-23.5T120-240v-480q0-33 23.5-56.5T200-800h560q33 0 56.5 23.5T840-720v480q0 33-23.5 56.5T760-160H200Zm0-80h560v-480H200v480Zm80-120h120q17 0 28.5-11.5T440-400v-40h-60v20h-80v-120h80v20h60v-40q0-17-11.5-28.5T400-600H280q-17 0-28.5 11.5T240-560v160q0 17 11.5 28.5T280-360Zm280 0h120q17 0 28.5-11.5T720-400v-40h-60v20h-80v-120h80v20h60v-40q0-17-11.5-28.5T680-600H560q-17 0-28.5 11.5T520-560v160q0 17 11.5 28.5T560-360ZM200-240v-480 480Z"/>
+		<path d="M200-160q-33 0-56.5-23.5T120-240v-480q0-33 23.5-56.5T200-800h560q33 0 56.5 23.5T840-720v480q0 33-23.5 56.5T760-160H200Zm0-80h560v-480H200v480Zm80-120h120q17 0 28.5-11.5T440-400v-40h-60v20h-80v-120h80v20h60v-40q0-17-11.5-28.5T400-600H280q-17 0-28.5 11.5T240-560v160q0 17 11.5 28.5T280-360Zm280 0h120q17 0 28.5-11.5T720-400v-40h-60v20h-80v-120h80v20h60v-40q0-17-11.5-28.5T680-600H560q-17 0-28.5 11.5T520-560v160q0 17 11.5 28.5T560-360ZM200-240v-480 480Z" />
 	</svg>
 );
 
 const IconPlayMode = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M170-228q-38-44-61-98T80-440h82q6 44 22 83.5t42 72.5l-56 56ZM80-520q8-60 30-114t60-98l56 56q-26 33-42 72.5T162-520H80ZM438-82q-60-6-113.5-29T226-170l56-58q35 26 73.5 43t82.5 23v80ZM284-732l-58-58q45-36 98.5-59T440-878v80q-45 6-84 23t-72 43Zm96 432v-360l280 180-280 180ZM520-82v-80q121-17 200.5-107T800-480q0-121-79.5-211T520-798v-80q154 17 257 130t103 268q0 155-103 268T520-82Z"/>
+		<path d="M170-228q-38-44-61-98T80-440h82q6 44 22 83.5t42 72.5l-56 56ZM80-520q8-60 30-114t60-98l56 56q-26 33-42 72.5T162-520H80ZM438-82q-60-6-113.5-29T226-170l56-58q35 26 73.5 43t82.5 23v80ZM284-732l-58-58q45-36 98.5-59T440-878v80q-45 6-84 23t-72 43Zm96 432v-360l280 180-280 180ZM520-82v-80q121-17 200.5-107T800-480q0-121-79.5-211T520-798v-80q154 17 257 130t103 268q0 155-103 268T520-82Z" />
 	</svg>
 );
 
 const IconAudio = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M400-120q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T480-418v-422h240v160H560v400q0 66-47 113t-113 47Z"/>
+		<path d="M400-120q-66 0-113-47t-47-113q0-66 47-113t113-47q23 0 42.5 5.5T480-418v-422h240v160H560v400q0 66-47 113t-113 47Z" />
 	</svg>
 );
 
 const IconChapters = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="m160-800 80 160h120l-80-160h80l80 160h120l-80-160h80l80 160h120l-80-160h120q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800Zm0 240v320h640v-320H160Zm0 0v320-320Z"/>
+		<path d="m160-800 80 160h120l-80-160h80l80 160h120l-80-160h80l80 160h120l-80-160h120q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800Zm0 240v320h640v-320H160Zm0 0v320-320Z" />
 	</svg>
 );
 
 const IconPrevious = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M220-240v-480h80v480h-80Zm520 0L380-480l360-240v480Zm-80-240Zm0 90v-180l-136 90 136 90Z"/>
+		<path d="M220-240v-480h80v480h-80Zm520 0L380-480l360-240v480Zm-80-240Zm0 90v-180l-136 90 136 90Z" />
 	</svg>
 );
 
 const IconNext = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Zm80-240Zm0 90 136-90-136-90v180Z"/>
+		<path d="M660-240v-480h80v480h-80Zm-440 0v-480l360 240-360 240Zm80-240Zm0 90 136-90-136-90v180Z" />
 	</svg>
 );
 
 const IconSpeed = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M418-340q24 24 62 23.5t56-27.5l224-336-336 224q-27 18-28.5 55t22.5 61Zm62-460q59 0 113.5 16.5T696-734l-76 48q-33-17-68.5-25.5T480-720q-133 0-226.5 93.5T160-400q0 42 11.5 83t32.5 77h552q23-38 33.5-79t10.5-85q0-36-8.5-70T766-540l48-76q30 47 48 100.5T880-400q0 90-34.5 167T752-120H208q-59-59-93.5-136T80-400q0-83 31.5-156T197-669q54-54 127-85.5T480-786Zm0 386Z"/>
+		<path d="M418-340q24 24 62 23.5t56-27.5l224-336-336 224q-27 18-28.5 55t22.5 61Zm62-460q59 0 113.5 16.5T696-734l-76 48q-33-17-68.5-25.5T480-720q-133 0-226.5 93.5T160-400q0 42 11.5 83t32.5 77h552q23-38 33.5-79t10.5-85q0-36-8.5-70T766-540l48-76q30 47 48 100.5T880-400q0 90-34.5 167T752-120H208q-59-59-93.5-136T80-400q0-83 31.5-156T197-669q54-54 127-85.5T480-786Zm0 386Z" />
 	</svg>
 );
 
 const IconQuality = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M170-228q-38-44-61-98T80-440h82q6 44 22 83.5t42 72.5l-56 56ZM80-520q8-60 30-114t60-98l56 56q-26 33-42 72.5T162-520H80ZM438-82q-60-6-113.5-29T226-170l56-58q35 26 73.5 43t82.5 23v80ZM284-732l-58-58q45-36 98.5-59T440-878v80q-45 6-84 23t-72 43Zm96 432v-360l280 180-280 180ZM520-82v-80q121-17 200.5-107T800-480q0-121-79.5-211T520-798v-80q154 17 257 130t103 268q0 155-103 268T520-82Z"/>
+		<path d="M170-228q-38-44-61-98T80-440h82q6 44 22 83.5t42 72.5l-56 56ZM80-520q8-60 30-114t60-98l56 56q-26 33-42 72.5T162-520H80ZM438-82q-60-6-113.5-29T226-170l56-58q35 26 73.5 43t82.5 23v80ZM284-732l-58-58q45-36 98.5-59T440-878v80q-45 6-84 23t-72 43Zm96 432v-360l280 180-280 180ZM520-82v-80q121-17 200.5-107T800-480q0-121-79.5-211T520-798v-80q154 17 257 130t103 268q0 155-103 268T520-82Z" />
 	</svg>
 );
 
 const IconInfo = () => (
 	<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-		<path d="M160-120v-720h80v80h80v-80h320v80h80v-80h80v720h-80v-80h-80v80H320v-80h-80v80h-80Zm80-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm400 320h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80ZM400-200h160v-560H400v560Zm0-560h160-160Z"/>
+		<path d="M160-120v-720h80v80h80v-80h320v80h80v-80h80v720h-80v-80h-80v80H320v-80h-80v80h-80Zm80-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm400 320h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80ZM400-200h160v-560H400v560Zm0-560h160-160Z" />
 	</svg>
 );
 
-const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSubtitleIndex}) => {
-	const {settings} = useSettings();
+const Player = ({ item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSubtitleIndex }) => {
+	const { settings } = useSettings();
 
 	const [mediaUrl, setMediaUrl] = useState(null);
 	const [mimeType, setMimeType] = useState('video/mp4');
@@ -160,6 +162,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 	const [selectedSubtitleIndex, setSelectedSubtitleIndex] = useState(-1);
 	const [subtitleUrl, setSubtitleUrl] = useState(null);
 	const [subtitleTrackEvents, setSubtitleTrackEvents] = useState(null);
+	const [subtitleOffset, setSubtitleOffset] = useState(0);
 	const [currentSubtitleText, setCurrentSubtitleText] = useState(null);
 	const [controlsVisible, setControlsVisible] = useState(false);
 	const [activeModal, setActiveModal] = useState(null);
@@ -187,20 +190,20 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 	const controlsTimeoutRef = useRef(null);
 
 	const topButtons = useMemo(() => [
-		{id: 'playPause', icon: isPaused ? <IconPlay /> : <IconPause />, label: isPaused ? 'Play' : 'Pause', action: 'playPause'},
-		{id: 'rewind', icon: <IconRewind />, label: 'Rewind', action: 'rewind'},
-		{id: 'forward', icon: <IconForward />, label: 'Forward', action: 'forward'},
-		{id: 'audio', icon: <IconAudio />, label: 'Audio', action: 'audio', disabled: audioStreams.length === 0},
-		{id: 'subtitle', icon: <IconSubtitle />, label: 'Subtitles', action: 'subtitle', disabled: subtitleStreams.length === 0}
+		{ id: 'playPause', icon: isPaused ? <IconPlay /> : <IconPause />, label: isPaused ? 'Play' : 'Pause', action: 'playPause' },
+		{ id: 'rewind', icon: <IconRewind />, label: 'Rewind', action: 'rewind' },
+		{ id: 'forward', icon: <IconForward />, label: 'Forward', action: 'forward' },
+		{ id: 'audio', icon: <IconAudio />, label: 'Audio', action: 'audio', disabled: audioStreams.length === 0 },
+		{ id: 'subtitle', icon: <IconSubtitle />, label: 'Subtitles', action: 'subtitle', disabled: subtitleStreams.length === 0 }
 	], [isPaused, audioStreams.length, subtitleStreams.length]);
 
 	const bottomButtons = useMemo(() => [
-		{id: 'chapters', icon: <IconChapters />, label: 'Chapters', action: 'chapter', disabled: chapters.length === 0},
-		{id: 'previous', icon: <IconPrevious />, label: 'Previous', action: 'previous', disabled: true},
-		{id: 'next', icon: <IconNext />, label: 'Next', action: 'next', disabled: !nextEpisode},
-		{id: 'speed', icon: <IconSpeed />, label: 'Speed', action: 'speed'},
-		{id: 'quality', icon: <IconQuality />, label: 'Quality', action: 'quality'},
-		{id: 'info', icon: <IconInfo />, label: 'Info', action: 'info'}
+		{ id: 'chapters', icon: <IconChapters />, label: 'Chapters', action: 'chapter', disabled: chapters.length === 0 },
+		{ id: 'previous', icon: <IconPrevious />, label: 'Previous', action: 'previous', disabled: true },
+		{ id: 'next', icon: <IconNext />, label: 'Next', action: 'next', disabled: !nextEpisode },
+		{ id: 'speed', icon: <IconSpeed />, label: 'Speed', action: 'speed' },
+		{ id: 'quality', icon: <IconQuality />, label: 'Quality', action: 'quality' },
+		{ id: 'info', icon: <IconInfo />, label: 'Info', action: 'info' }
 	], [chapters.length, nextEpisode]);
 
 	useEffect(() => {
@@ -486,9 +489,13 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 
 			// Update custom subtitle text - match current position to subtitle events
 			if (subtitleTrackEvents && subtitleTrackEvents.length > 0) {
+				// Apply offset: lookupTime = currentTime - offset
+				// If offset is positive (delay), we look at earlier time in the subtitle track
+				const lookupTicks = ticks - (subtitleOffset * 10000000);
+
 				let foundSubtitle = null;
 				for (const event of subtitleTrackEvents) {
-					if (ticks >= event.StartPositionTicks && ticks <= event.EndPositionTicks) {
+					if (lookupTicks >= event.StartPositionTicks && lookupTicks <= event.EndPositionTicks) {
 						foundSubtitle = event.Text;
 						break;
 					}
@@ -498,7 +505,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 
 			// Check for intro skip
 			if (mediaSegments && settings.skipIntro) {
-				const {introStart, introEnd, creditsStart} = mediaSegments;
+				const { introStart, introEnd, creditsStart } = mediaSegments;
 
 				if (introStart && introEnd) {
 					const inIntro = ticks >= introStart && ticks < introEnd;
@@ -524,7 +531,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 				}
 			}
 		}
-	}, [mediaSegments, settings.skipIntro, settings.skipCredits, settings.autoPlay, nextEpisode, showSkipCredits, showNextEpisode, startNextEpisodeCountdown, handlePlayNextEpisode, subtitleTrackEvents]);
+	}, [mediaSegments, settings.skipIntro, settings.skipCredits, settings.autoPlay, nextEpisode, showSkipCredits, showNextEpisode, startNextEpisodeCountdown, handlePlayNextEpisode, subtitleTrackEvents, subtitleOffset]);
 
 	const handleWaiting = useCallback(() => {
 		setIsBuffering(true);
@@ -738,6 +745,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 	// Progress bar keyboard control
 	const handleProgressKeyDown = useCallback((e) => {
 		if (!videoRef.current) return;
+		showControls(); // Reset OSD timer
 		const step = settings.seekStep;
 
 		if (e.key === 'ArrowLeft' || e.keyCode === 37) {
@@ -761,7 +769,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 			setFocusRow('bottom');
 			setIsSeeking(false);
 		}
-	}, [duration, settings.seekStep]);
+	}, [duration, settings.seekStep, showControls]);
 
 	const handleProgressBlur = useCallback(() => {
 		setIsSeeking(false);
@@ -793,6 +801,10 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 		}
 	}, [handleButtonAction]);
 
+	const handleSubtitleOffsetChange = useCallback((newOffset) => {
+		setSubtitleOffset(newOffset);
+	}, []);
+
 	// Prevent propagation handler for modals
 	const stopPropagation = useCallback((e) => {
 		e.stopPropagation();
@@ -808,6 +820,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 				// Play key
 				e.preventDefault();
 				e.stopPropagation();
+				showControls(); // Show OSD
 				if (videoRef.current && videoRef.current.paused) {
 					videoRef.current.play();
 				}
@@ -817,9 +830,18 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 				// Pause key
 				e.preventDefault();
 				e.stopPropagation();
+				showControls(); // Show OSD
 				if (videoRef.current && !videoRef.current.paused) {
 					videoRef.current.pause();
 				}
+				return;
+			}
+			if (e.keyCode === TIZEN_KEYS.PLAY_PAUSE) {
+				// Play/Pause key
+				e.preventDefault();
+				e.stopPropagation();
+				showControls(); // Show OSD
+				handlePlayPause();
 				return;
 			}
 			if (e.keyCode === TIZEN_KEYS.FAST_FORWARD) {
@@ -891,6 +913,8 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 
 			// Up/Down arrow navigation between rows when controls are visible
 			if (controlsVisible && !activeModal) {
+				showControls(); // Reset timer on navigation
+
 				if (key === 'ArrowUp' || e.keyCode === 38) {
 					e.preventDefault();
 					setFocusRow(prev => {
@@ -912,7 +936,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 			}
 
 			// Play/Pause with Enter when controls not focused
-			if ((key === 'Enter' || e.keyCode === 13) && !controlsVisible) {
+			if ((key === 'Enter' || e.keyCode === 13) && !controlsVisible && !activeModal) {
 				handlePlayPause();
 				return;
 			}
@@ -929,7 +953,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 	// Focus appropriate element when focusRow changes
 	useEffect(() => {
 		if (!controlsVisible) return;
-		
+
 		// Small delay to ensure elements are rendered
 		const timer = setTimeout(() => {
 			if (focusRow === 'progress') {
@@ -938,7 +962,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 				Spotlight.focus('bottom-row-default');
 			}
 		}, 50);
-		
+
 		return () => clearTimeout(timer);
 	}, [focusRow, controlsVisible]);
 
@@ -990,13 +1014,19 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 				<div
 					className={css.subtitleOverlay}
 					style={{
-						bottom: `${settings.subtitlePosition === 'bottom' ? 10 : settings.subtitlePosition === 'lower' ? 15 : settings.subtitlePosition === 'middle' ? 25 : 35}%`
+						bottom: settings.subtitlePosition === 'absolute'
+							? `${100 - settings.subtitlePositionAbsolute}%`
+							: `${settings.subtitlePosition === 'bottom' ? 10 : settings.subtitlePosition === 'lower' ? 15 : settings.subtitlePosition === 'middle' ? 25 : 35}%`,
+						opacity: (settings.subtitleOpacity || 100) / 100
 					}}
 				>
 					<div
 						className={css.subtitleText}
 						style={{
-							fontSize: `${settings.subtitleSize === 'small' ? 28 : settings.subtitleSize === 'medium' ? 36 : settings.subtitleSize === 'large' ? 44 : 52}px`
+							fontSize: `${settings.subtitleSize === 'small' ? 28 : settings.subtitleSize === 'medium' ? 36 : settings.subtitleSize === 'large' ? 44 : 52}px`,
+							backgroundColor: `${settings.subtitleBackgroundColor || '#000000'}${Math.round(((settings.subtitleBackground !== undefined ? settings.subtitleBackground : 75) / 100) * 255).toString(16).padStart(2, '0')}`,
+							color: settings.subtitleColor || '#ffffff',
+							textShadow: `0 0 ${settings.subtitleShadowBlur || 0.1}em ${settings.subtitleShadowColor || '#000000'}${Math.round(((settings.subtitleShadowOpacity !== undefined ? settings.subtitleShadowOpacity : 50) / 100) * 255).toString(16).padStart(2, '0')}`
 						}}
 						dangerouslySetInnerHTML={{
 							__html: currentSubtitleText
@@ -1099,15 +1129,15 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 							spotlightDisabled={focusRow !== 'progress'}
 							spotlightId="progress-bar"
 						>
-							<div className={css.progressFill} style={{width: `${progressPercent}%`}} />
-							<div className={css.seekIndicator} style={{left: `${progressPercent}%`}} />
+							<div className={css.progressFill} style={{ width: `${progressPercent}%` }} />
+							<div className={css.seekIndicator} style={{ left: `${progressPercent}%` }} />
 							{isSeeking && (
 								<TrickplayPreview
 									itemId={item.Id}
 									mediaSourceId={mediaSourceId}
 									positionTicks={seekPosition}
 									visible
-									style={{left: `${progressPercent}%`}}
+									style={{ left: `${progressPercent}%` }}
 								/>
 							)}
 						</SpottableDiv>
@@ -1173,6 +1203,17 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 								data-index={-1}
 								data-selected={selectedSubtitleIndex === -1 ? 'true' : undefined}
 								onClick={handleSelectSubtitle}
+								onKeyDown={(e) => {
+									if (e.keyCode === 39) { // Right -> Appearance
+										e.preventDefault();
+										e.stopPropagation();
+										Spotlight.focus('btn-subtitle-appearance');
+									} else if (e.keyCode === 37) { // Left -> Offset
+										e.preventDefault();
+										e.stopPropagation();
+										Spotlight.focus('btn-subtitle-offset');
+									}
+								}}
 							>
 								<span className={css.trackName}>Off</span>
 							</SpottableButton>
@@ -1183,13 +1224,28 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 									data-index={stream.index}
 									data-selected={stream.index === selectedSubtitleIndex ? 'true' : undefined}
 									onClick={handleSelectSubtitle}
+									onKeyDown={(e) => {
+										if (e.keyCode === 39) { // Right -> Appearance
+											e.preventDefault();
+											e.stopPropagation();
+											Spotlight.focus('btn-subtitle-appearance');
+										} else if (e.keyCode === 37) { // Left -> Offset
+											e.preventDefault();
+											e.stopPropagation();
+											Spotlight.focus('btn-subtitle-offset');
+										}
+									}}
 								>
 									<span className={css.trackName}>{stream.displayTitle}</span>
 									{stream.isForced && <span className={css.trackInfo}>Forced</span>}
 								</SpottableButton>
 							))}
 						</div>
-						<p className={css.modalFooter}>Press BACK to close</p>
+						<p className={css.modalFooter}>
+							<SpottableButton spotlightId="btn-subtitle-offset" className={css.actionBtn} onClick={() => openModal('subtitleOffset')}>Offset</SpottableButton>
+							<SpottableButton spotlightId="btn-subtitle-appearance" className={css.actionBtn} onClick={() => openModal('subtitleSettings')} style={{ marginLeft: 15 }}>Appearance</SpottableButton>
+						</p>
+						<p className={css.modalFooter} style={{ marginTop: 5, fontSize: 14, opacity: 0.5 }}>Press BACK to close</p>
 					</ModalContainer>
 				</div>
 			)}
@@ -1250,7 +1306,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 								const chapterTime = chapter.startPositionTicks / 10000000;
 								const isCurrent = currentTime >= chapterTime &&
 									(chapters.indexOf(chapter) === chapters.length - 1 ||
-									 currentTime < chapters[chapters.indexOf(chapter) + 1].startPositionTicks / 10000000);
+										currentTime < chapters[chapters.indexOf(chapter) + 1].startPositionTicks / 10000000);
 								return (
 									<SpottableButton
 										key={chapter.index}
@@ -1454,6 +1510,7 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 										</div>
 										<div className={css.infoRow}>
 											<span className={css.infoLabel}>Type</span>
+											{/* Subtitle Rendering */}
 											<span className={css.infoValue}>
 												{subtitleStream.IsExternal ? 'External' : 'Embedded'}
 											</span>
@@ -1466,7 +1523,21 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 					</div>
 				);
 			})()}
-		</div>
+
+			{/* Subtitle Offset Modal */}
+			<SubtitleOffsetOverlay
+				visible={activeModal === 'subtitleOffset'}
+				currentOffset={subtitleOffset}
+				onClose={closeModal}
+				onOffsetChange={handleSubtitleOffsetChange}
+			/>
+
+			{/* Subtitle Settings Modal */}
+			<SubtitleSettingsOverlay
+				visible={activeModal === 'subtitleSettings'}
+				onClose={closeModal}
+			/>
+		</div >
 	);
 };
 
