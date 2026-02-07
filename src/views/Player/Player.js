@@ -799,6 +799,49 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 		const handleKeyDown = (e) => {
 			const key = e.key || e.keyCode;
 
+			// Media playback keys (Tizen remote)
+			if (e.keyCode === TIZEN_KEYS.PLAY) {
+				// Play key
+				e.preventDefault();
+				e.stopPropagation();
+				if (videoRef.current && videoRef.current.paused) {
+					videoRef.current.play();
+				}
+				return;
+			}
+			if (e.keyCode === TIZEN_KEYS.PAUSE) {
+				// Pause key
+				e.preventDefault();
+				e.stopPropagation();
+				if (videoRef.current && !videoRef.current.paused) {
+					videoRef.current.pause();
+				}
+				return;
+			}
+			if (e.keyCode === TIZEN_KEYS.FAST_FORWARD) {
+				// Fast-forward key
+				e.preventDefault();
+				e.stopPropagation();
+				handleForward();
+				showControls();
+				return;
+			}
+			if (e.keyCode === TIZEN_KEYS.REWIND) {
+				// Rewind key
+				e.preventDefault();
+				e.stopPropagation();
+				handleRewind();
+				showControls();
+				return;
+			}
+			if (e.keyCode === TIZEN_KEYS.STOP) {
+				// Stop key
+				e.preventDefault();
+				e.stopPropagation();
+				handleBack();
+				return;
+			}
+
 			// Back button
 			if (isBackKey(e) || key === 'GoBack' || key === 'Backspace') {
 				e.preventDefault();
@@ -811,30 +854,6 @@ const Player = ({item, onEnded, onBack, onPlayNext, initialAudioIndex, initialSu
 					hideControls();
 					return;
 				}
-				handleBack();
-				return;
-			}
-
-			// Media keys (Tizen remote)
-			if (isPlayPauseKey(e)) {
-				e.preventDefault();
-				handlePlayPause();
-				return;
-			}
-			if (e.keyCode === TIZEN_KEYS.REWIND) {
-				e.preventDefault();
-				handleRewind();
-				showControls();
-				return;
-			}
-			if (e.keyCode === TIZEN_KEYS.FAST_FORWARD) {
-				e.preventDefault();
-				handleForward();
-				showControls();
-				return;
-			}
-			if (e.keyCode === TIZEN_KEYS.STOP) {
-				e.preventDefault();
 				handleBack();
 				return;
 			}
